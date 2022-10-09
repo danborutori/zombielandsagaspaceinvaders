@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <script src="script/main.js"></script>
+    </head>
+    <body style="background-color: black;">
+        <center>
+            <canvas id="mainCanvas" width="170" height="170" style="width: 580; height: 580; image-rendering: pixelated;"></canvas>
+        </center>
+
+        <script>
+            const main = new zlsSpaceInvader.Main()
+            console.log("init...")
+            main.init(mainCanvas).then( main=>{
+                console.log("init completed")
+                console.log("run")
+                main.run()
+            })
+        </script>
+    </body>
+</html>
