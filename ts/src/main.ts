@@ -194,6 +194,10 @@ namespace zlsSpaceInvader {
                 this.gameObjectManager.add( continueScreen)
 
             }else{
+                playerFlight.paused = true
+                for( let e of this.enemies ) e.paused = true
+                this.enemyCooperator.paused = true
+                
                 this.showHighestScore( scoreAndCredit )
             }
         }

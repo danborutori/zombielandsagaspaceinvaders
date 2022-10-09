@@ -22,7 +22,7 @@ namespace zlsSpaceInvader {
 
             if( this.cooldown<=0 ){
                 const lifeEnemyRatio = this.enemies.reduce((a,b)=>a+(b.manager?1:0),0)/(this.enemies.length-1)
-                const interval = 0.01//+0.49*lifeEnemyRatio
+                const interval = 0.01+0.49*lifeEnemyRatio
                 const enemyMoveSpeed = 3+(1-lifeEnemyRatio)*6
                 const enemyYMoveSpeed = 7+(1-lifeEnemyRatio)*7
 
