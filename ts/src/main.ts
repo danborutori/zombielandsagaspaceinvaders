@@ -5,13 +5,15 @@ namespace zlsSpaceInvader {
         private gameObjectManager = new GameObjectManager
         private ctx: CanvasRenderingContext2D | null = null
 
-        private enemies: EnemyFlight[] = []
         private stage: Stage = {
             left: 0,
             right: 0,
             up: 0,
             bottom : 0
         }
+        private enemies: EnemyFlight[] = []
+        private enemyCooperator: EnemyCooperator = new EnemyCooperator(this.stage,[],()=>{})
+        private wave = 1
 
         constructor(){}
 
@@ -52,8 +54,7 @@ namespace zlsSpaceInvader {
                 this.showContinue(
                     scoreAndCredit,
                     playerFlight,
-                    franchouchou,
-                    enemyCooperator
+                    franchouchou
                 )
             }
 
@@ -67,6 +68,32 @@ namespace zlsSpaceInvader {
             )
             playerFlight.pos.y = this.stage.bottom-35
             this.gameObjectManager.add(playerFlight)
+
+            this.resetEnemies( playerFlight, scoreAndCredit )
+
+            const franchouchou = new Franchouchou( this.stage, this.gameObjectManager)
+
+            this.gameObjectManager.add( scoreAndCredit )
+
+            playerFlight.paused = true
+            for( let e of this.enemies ) e.paused = true
+            this.enemyCooperator.paused = true
+            const startScreen = new StartScreen(()=>{
+                playerFlight.paused = false
+                for( let e of this.enemies ) e.paused = false
+                this.enemyCooperator.paused = false
+            })
+            this.gameObjectManager.add( startScreen )
+        }
+
+        private resetEnemies(
+            playerFlight: PlayerFlight,
+            scoreAndCredit: ScoreAndCredit
+        ){
+            //clear old enemies
+            for( let e of this.enemies ) e.manager && e.manager.remove(e)
+            this.enemies.length = 0
+            this.enemyCooperator.manager && this.enemyCooperator.manager.remove(this.enemyCooperator)
 
             const enemyColumn = 9
             const enemySpacing = 14
@@ -107,12 +134,29 @@ namespace zlsSpaceInvader {
             this.gameObjectManager.add( p )
             this.enemies.push(p)
 
-            const enemyCooperator = new EnemyCooperator(this.stage, this.enemies)
-            this.gameObjectManager.add( enemyCooperator )
+            const waveEnd = ()=>{
+                this.resetEnemies( playerFlight, scoreAndCredit)
+                playerFlight.paused = true
+                for( let e of this.enemies ) e.paused = true
+                this.enemyCooperator.paused = true
+    
+                const waveScreen = new WaveScreen(
+                    ++this.wave,
+                    ()=>{
+                        playerFlight.paused = false
+                        for( let e of this.enemies ) e.paused = false
+                        this.enemyCooperator.paused = false
+                    }
+                )    
+                this.gameObjectManager.add(waveScreen)
+            }
 
-            const franchouchou = new Franchouchou( this.stage, this.gameObjectManager)
-
-            this.gameObjectManager.add( scoreAndCredit )
+            this.enemyCooperator = new EnemyCooperator(
+                this.stage,
+                this.enemies,
+                waveEnd
+            )
+            this.gameObjectManager.add( this.enemyCooperator )
         }
 
         private enemyBackOff(){
@@ -124,14 +168,13 @@ namespace zlsSpaceInvader {
         private showContinue(
             scoreAndCredit: ScoreAndCredit,
             playerFlight: PlayerFlight,
-            franchouchou: Franchouchou,
-            enemyCooperator: EnemyCooperator
+            franchouchou: Franchouchou
         ){
             if( scoreAndCredit.credit>0 ){
 
                 playerFlight.paused = true
                 for( let e of this.enemies ) e.paused = true
-                enemyCooperator.paused = true
+                this.enemyCooperator.paused = true
 
                 const continueScreen =  new ContinueScreen(b=>{
                     if( b ){
@@ -139,7 +182,7 @@ namespace zlsSpaceInvader {
 
                         playerFlight.paused = false
                         for( let e of this.enemies ) e.paused = false
-                        enemyCooperator.paused = false
+                        this.enemyCooperator.paused = false
 
                         playerFlight.reset()
                         franchouchou.reset()

@@ -9,7 +9,8 @@ namespace zlsSpaceInvader {
 
         constructor(
             readonly stage: Stage,
-            private enemies: EnemyFlight[]
+            private enemies: EnemyFlight[],
+            readonly waveEnd: ()=>void
         ){
             super()
         }
@@ -70,7 +71,12 @@ namespace zlsSpaceInvader {
                 this.cooldown += interval
             }
 
-            // TODO: all enemy die or pass
+            const anyAlive = this.enemies.reduce( (a, b)=>{
+                return a || (b.manager!==undefined && b.pos.y<this.stage.bottom)
+            }, false)
+            if( !anyAlive ){
+                this.waveEnd()
+            }
         }
     }
 

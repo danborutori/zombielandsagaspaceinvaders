@@ -12,7 +12,7 @@ namespace zlsSpaceInvader {
 
         score = 0
         hiScore = parseInt(localStorage.getItem("hiscore") || "0")
-        credit = 99
+        credit = 10
 
         constructor( 
             readonly franchouchou: {
