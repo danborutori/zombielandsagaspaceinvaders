@@ -20,7 +20,11 @@ namespace zlsSpaceInvader {
         }
 
         private initGame(){
-            const scoreAndCredit = new ScoreAndCredit()
+            const scoreAndCredit = new ScoreAndCredit({
+                get remainingMember(){
+                    return franchouchou.remainingMember
+                }
+            })
 
             const stage = {
                 left: this.ctx?-this.ctx.canvas.width/2:0,
@@ -65,7 +69,7 @@ namespace zlsSpaceInvader {
 
             this.gameObjectManager.add( new EnemyCooperator(stage, enemies))
 
-            new Franchouchou( stage, this.gameObjectManager)
+            const franchouchou = new Franchouchou( stage, this.gameObjectManager)
 
             this.gameObjectManager.add( scoreAndCredit )
         }

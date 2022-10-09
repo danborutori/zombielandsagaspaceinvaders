@@ -10,6 +10,9 @@ namespace zlsSpaceInvader {
     ]
 
     export class Franchouchou {
+
+        remainingMember = 7
+
         constructor(
             stage: Stage,
             manager: GameObjectManager
