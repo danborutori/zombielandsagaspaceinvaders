@@ -5,9 +5,14 @@ namespace zlsSpaceInvader {
     export class PlayerFlight extends SpriteObject {
 
         private bulletCooldown = 0
+        readonly isPlayerFlight = true
+        next = false
 
-        constructor(
-            readonly stage: Stage
+        constructor(            
+            readonly stage: Stage,
+            readonly nextSprite: ()=>HTMLImageElement|null,
+            readonly enemyBackOff: ()=>void,
+            readonly allMemberRunOut: ()=>void
         ){
             super(Sprites.shared.images[1])
         }
@@ -32,6 +37,23 @@ namespace zlsSpaceInvader {
                 this.bulletCooldown = Constant.playerFireInterval
             }
 
+            if( this.next ){
+                const spr = this.nextSprite()
+                if( spr ){
+                    this.sprite = spr
+                    this.pos.x = 0
+                    this.enemyBackOff()
+                }else{
+                    this.allMemberRunOut()
+                }
+
+                this.next = false
+            }
+        }
+
+        reset(){
+            this.sprite = Sprites.shared.images[1]
+            this.pos.x = 0
         }
     }
 

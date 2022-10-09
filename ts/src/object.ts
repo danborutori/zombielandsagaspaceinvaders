@@ -4,6 +4,7 @@ namespace zlsSpaceInvader {
 
         readonly pos = new Vector2
         manager?: GameObjectManager
+        paused: boolean = false
 
         update( deltaTime: number ){}
 
@@ -49,7 +50,8 @@ namespace zlsSpaceInvader {
 
         update( deltaTime: number ){
             for( let o of Array.from(this.gameObjects) )
-                o.update(deltaTime)
+                if( !o.paused )
+                    o.update(deltaTime)
         }
 
         render( deltaTime: number, ctx: CanvasRenderingContext2D ){

@@ -12,7 +12,8 @@ namespace zlsSpaceInvader {
         constructor(
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
-            readonly score: number = 100
+            readonly score: number = 100,
+            readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
         ){
             super(sprite)
 
@@ -57,6 +58,13 @@ namespace zlsSpaceInvader {
                         }
                     }
                 }
+
+                const playerFlight = this.manager && this.manager.gameObjects.filter(o=>(o as PlayerFlight).isPlayerFlight)[0]
+                if( playerFlight &&
+                    this.pos.distance(playerFlight.pos)<9
+                ){
+                    this.onHitPlayer(this,playerFlight as PlayerFlight)
+                }
             }
         }
 
@@ -69,9 +77,15 @@ namespace zlsSpaceInvader {
     export class Zombie1 extends EnemyFlight {
 
         constructor(
-            scorer: ScoreAndCredit
+            scorer: ScoreAndCredit,
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
         ){
-            super( Sprites.shared.images["zombie1"], scorer, 100)
+            super(
+                Sprites.shared.images["zombie1"],
+                scorer,
+                100,
+                onHitPlayer
+            )
         }
 
     }
@@ -79,9 +93,15 @@ namespace zlsSpaceInvader {
     export class Zombie2 extends EnemyFlight {
 
         constructor(
-            scorer: ScoreAndCredit
+            scorer: ScoreAndCredit,
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
         ){
-            super( Sprites.shared.images["zombie2"], scorer, 100)
+            super(
+                Sprites.shared.images["zombie2"],
+                scorer,
+                100,
+                onHitPlayer
+            )
         }
 
     }
@@ -89,9 +109,15 @@ namespace zlsSpaceInvader {
     export class Hand extends EnemyFlight {
 
         constructor(
-            scorer: ScoreAndCredit
+            scorer: ScoreAndCredit,
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
         ){
-            super( Sprites.shared.images["hand"], scorer, 100)
+            super(
+                Sprites.shared.images["hand"],
+                scorer,
+                100,
+                onHitPlayer
+            )
         }
 
     }
@@ -99,9 +125,15 @@ namespace zlsSpaceInvader {
     export class Dog extends EnemyFlight {
 
         constructor(
-            scorer: ScoreAndCredit
+            scorer: ScoreAndCredit,
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
         ){
-            super( Sprites.shared.images["dog"], scorer, 100)
+            super(
+                Sprites.shared.images["dog"],
+                scorer,
+                100,
+                onHitPlayer
+            )
         }
 
     }
@@ -109,9 +141,15 @@ namespace zlsSpaceInvader {
     export class Producer extends EnemyFlight {
 
         constructor(
-            scorer: ScoreAndCredit
+            scorer: ScoreAndCredit,
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
         ){
-            super( Sprites.shared.images["p"], scorer, 1000)
+            super(
+                Sprites.shared.images["p"],
+                scorer,
+                1000,
+                onHitPlayer
+            )
         }
 
     }

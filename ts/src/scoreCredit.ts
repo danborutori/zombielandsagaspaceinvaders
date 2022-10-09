@@ -1,6 +1,6 @@
 namespace zlsSpaceInvader {
 
-    function addLeadingZero( n: number, length: number ){
+    export function addLeadingZero( n: number, length: number ){
         let s = `${n}`
         while( s.length<length ){
             s = "0"+s
@@ -28,7 +28,7 @@ namespace zlsSpaceInvader {
             const w = ctx.canvas.width
             const h = ctx.canvas.height
 
-            ctx.font = "7px Trebuchet MS"
+            ctx.font = Palette.font
             ctx.fillStyle = "white"
             ctx.fillText(`S C O R E   ${addLeadingZero(this.score,6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9) )
 

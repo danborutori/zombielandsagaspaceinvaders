@@ -6,6 +6,7 @@ namespace zlsSpaceInvader {
         left: boolean = false
         right: boolean = false
         fire: boolean = false
+        pressAnyKey: boolean = false
 
         constructor(){
             addEventListener("keydown", e=>{
@@ -13,14 +14,17 @@ namespace zlsSpaceInvader {
                 case "ArrowLeft":
                 case "KeyA":
                     this.left = true
+                    this.pressAnyKey = true
                     break
                 case "ArrowRight":
                 case "KeyD":
                     this.right = true
+                    this.pressAnyKey = true
                     break
                 case "ArrowUp":
                 case "KeyW":
                     this.fire = true
+                    this.pressAnyKey = true
                     break
                 }
             })

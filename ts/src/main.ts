@@ -5,6 +5,14 @@ namespace zlsSpaceInvader {
         private gameObjectManager = new GameObjectManager
         private ctx: CanvasRenderingContext2D | null = null
 
+        private enemies: EnemyFlight[] = []
+        private stage: Stage = {
+            left: 0,
+            right: 0,
+            up: 0,
+            bottom : 0
+        }
+
         constructor(){}
 
         async init( canvas: HTMLCanvasElement ){
@@ -26,17 +34,38 @@ namespace zlsSpaceInvader {
                 }
             })
 
-            const stage = {
-                left: this.ctx?-this.ctx.canvas.width/2:0,
-                right: this.ctx?this.ctx.canvas.width/2:0,
-                up: this.ctx?-this.ctx.canvas.height/2:0,
-                bottom: this.ctx?this.ctx.canvas.height/2:0,
+            if( this.ctx ){
+                this.stage.left = -this.ctx.canvas.width/2
+                this.stage.right = this.ctx.canvas.width/2
+                this.stage.up = -this.ctx.canvas.height/2
+                this.stage.bottom = this.ctx.canvas.height/2
             }
 
-            this.gameObjectManager.add( new StarNight(stage) )
+            this.gameObjectManager.add( new StarNight(this.stage) )
 
-            const playerFlight = new PlayerFlight(stage)
-            playerFlight.pos.y = stage.bottom-35
+            const enemyBackOff = ()=>{
+                for( let e of this.enemies ){
+                    e.pos.y += this.stage.up
+                }
+            }
+            const runOutOfMember = ()=>{
+                this.showContinue(
+                    scoreAndCredit,
+                    playerFlight,
+                    franchouchou,
+                    enemyCooperator
+                )
+            }
+
+            const playerFlight = new PlayerFlight(
+                this.stage,
+                ()=>{
+                    return franchouchou.nextSprite
+                },
+                enemyBackOff,
+                runOutOfMember
+            )
+            playerFlight.pos.y = this.stage.bottom-35
             this.gameObjectManager.add(playerFlight)
 
             const enemyColumn = 9
@@ -48,30 +77,88 @@ namespace zlsSpaceInvader {
                 Dog
             ]
             const enemyYOffset = -55
-            const enemies: EnemyFlight[] = []
-
+            
             for( let i=0; i<enemyColumn; i++ ){
 
                 for( let j=0; j<enemyRows.length; j++ ){
-                    const e = new enemyRows[j](scoreAndCredit)
+                    const e = new enemyRows[j](
+                        scoreAndCredit,
+                        (e, p)=>{
+                            p.next = true
+                            e.manager && e.manager.remove(e)
+                        }
+                    )
                     e.pos.x = (-enemyColumn/2+i+0.5)*enemySpacing
                     e.pos.y = j*enemySpacing+enemyYOffset
                     this.gameObjectManager.add( e )
-                    enemies.push(e)
+                    this.enemies.push(e)
                 }
 
             }
 
-            const p = new Producer(scoreAndCredit)
+            const p = new Producer(
+                scoreAndCredit,
+                (e, p)=>{
+                    p.next = true
+                    e.manager && e.manager.remove(e)
+                }
+            )
             p.pos.y = enemyYOffset-enemySpacing
             this.gameObjectManager.add( p )
-            enemies.push(p)
+            this.enemies.push(p)
 
-            this.gameObjectManager.add( new EnemyCooperator(stage, enemies))
+            const enemyCooperator = new EnemyCooperator(this.stage, this.enemies)
+            this.gameObjectManager.add( enemyCooperator )
 
-            const franchouchou = new Franchouchou( stage, this.gameObjectManager)
+            const franchouchou = new Franchouchou( this.stage, this.gameObjectManager)
 
             this.gameObjectManager.add( scoreAndCredit )
+        }
+
+        private enemyBackOff(){
+            for( let e of this.enemies ){
+                e.pos.y += this.stage.up
+            }
+        }
+
+        private showContinue(
+            scoreAndCredit: ScoreAndCredit,
+            playerFlight: PlayerFlight,
+            franchouchou: Franchouchou,
+            enemyCooperator: EnemyCooperator
+        ){
+            if( scoreAndCredit.credit>0 ){
+
+                playerFlight.paused = true
+                for( let e of this.enemies ) e.paused = true
+                enemyCooperator.paused = true
+
+                const continueScreen =  new ContinueScreen(b=>{
+                    if( b ){
+                        scoreAndCredit.credit--
+
+                        playerFlight.paused = false
+                        for( let e of this.enemies ) e.paused = false
+                        enemyCooperator.paused = false
+
+                        playerFlight.reset()
+                        franchouchou.reset()
+                        this.enemyBackOff()
+                    }else{
+                        this.showHighestScore( scoreAndCredit )
+                    }
+                })
+                this.gameObjectManager.add( continueScreen)
+
+            }else{
+                this.showHighestScore( scoreAndCredit )
+            }
+        }
+
+        private showHighestScore( scoreAndCredit: ScoreAndCredit ){
+            scoreAndCredit.hiScore = Math.max( scoreAndCredit.hiScore, scoreAndCredit.score )
+            const hiScoreScr = new HiScoreScreen( scoreAndCredit.hiScore )
+            this.gameObjectManager.add( hiScoreScr )
         }
 
         run(){
@@ -90,6 +177,7 @@ namespace zlsSpaceInvader {
         private update( deltaTime: number ){
 
             this.gameObjectManager.update(deltaTime)
+            Input.shared.pressAnyKey = false
 
             this.render( deltaTime )
         }
