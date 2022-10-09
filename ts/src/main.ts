@@ -41,7 +41,7 @@ namespace zlsSpaceInvader {
                 Hand,
                 Dog
             ]
-            const enemyYOffset = -65
+            const enemyYOffset = -55
             const enemies: EnemyFlight[] = []
 
             for( let i=0; i<enemyColumn; i++ ){
@@ -64,6 +64,8 @@ namespace zlsSpaceInvader {
             this.gameObjectManager.add( new EnemyCooperator(stage, enemies))
 
             new Franchouchou( stage, this.gameObjectManager)
+
+            this.gameObjectManager.add( new ScoreAndCredit() )
         }
 
         run(){
