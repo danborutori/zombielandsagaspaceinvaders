@@ -9,7 +9,11 @@ namespace zlsSpaceInvader {
         private flashingSprite: HTMLCanvasElement
         private hp = 3
 
-        constructor(sprite: HTMLImageElement){
+        constructor(
+            sprite: HTMLImageElement,
+            readonly scorer: ScoreAndCredit,
+            readonly score: number = 100
+        ){
             super(sprite)
 
             this.origSprite = sprite
@@ -48,7 +52,8 @@ namespace zlsSpaceInvader {
                             const ex = new Explosion
                             ex.pos.copy(this.pos)
                             this.manager.add(ex)
-                            this.manager.remove(this)                            
+                            this.manager.remove(this)
+                            this.scorer.score += this.score
                         }
                     }
                 }
@@ -63,40 +68,50 @@ namespace zlsSpaceInvader {
 
     export class Zombie1 extends EnemyFlight {
 
-        constructor(){
-            super( Sprites.shared.images["zombie1"])
+        constructor(
+            scorer: ScoreAndCredit
+        ){
+            super( Sprites.shared.images["zombie1"], scorer, 100)
         }
 
     }
 
     export class Zombie2 extends EnemyFlight {
 
-        constructor(){
-            super( Sprites.shared.images["zombie2"])
+        constructor(
+            scorer: ScoreAndCredit
+        ){
+            super( Sprites.shared.images["zombie2"], scorer, 100)
         }
 
     }
 
     export class Hand extends EnemyFlight {
 
-        constructor(){
-            super( Sprites.shared.images["hand"])
+        constructor(
+            scorer: ScoreAndCredit
+        ){
+            super( Sprites.shared.images["hand"], scorer, 100)
         }
 
     }
 
     export class Dog extends EnemyFlight {
 
-        constructor(){
-            super( Sprites.shared.images["dog"])
+        constructor(
+            scorer: ScoreAndCredit
+        ){
+            super( Sprites.shared.images["dog"], scorer, 100)
         }
 
     }
 
     export class Producer extends EnemyFlight {
 
-        constructor(){
-            super( Sprites.shared.images["p"])
+        constructor(
+            scorer: ScoreAndCredit
+        ){
+            super( Sprites.shared.images["p"], scorer, 1000)
         }
 
     }

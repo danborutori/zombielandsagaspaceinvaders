@@ -20,6 +20,8 @@ namespace zlsSpaceInvader {
         }
 
         private initGame(){
+            const scoreAndCredit = new ScoreAndCredit()
+
             const stage = {
                 left: this.ctx?-this.ctx.canvas.width/2:0,
                 right: this.ctx?this.ctx.canvas.width/2:0,
@@ -47,7 +49,7 @@ namespace zlsSpaceInvader {
             for( let i=0; i<enemyColumn; i++ ){
 
                 for( let j=0; j<enemyRows.length; j++ ){
-                    const e = new enemyRows[j]
+                    const e = new enemyRows[j](scoreAndCredit)
                     e.pos.x = (-enemyColumn/2+i+0.5)*enemySpacing
                     e.pos.y = j*enemySpacing+enemyYOffset
                     this.gameObjectManager.add( e )
@@ -56,7 +58,7 @@ namespace zlsSpaceInvader {
 
             }
 
-            const p = new Producer()
+            const p = new Producer(scoreAndCredit)
             p.pos.y = enemyYOffset-enemySpacing
             this.gameObjectManager.add( p )
             enemies.push(p)
@@ -65,7 +67,7 @@ namespace zlsSpaceInvader {
 
             new Franchouchou( stage, this.gameObjectManager)
 
-            this.gameObjectManager.add( new ScoreAndCredit() )
+            this.gameObjectManager.add( scoreAndCredit )
         }
 
         run(){
