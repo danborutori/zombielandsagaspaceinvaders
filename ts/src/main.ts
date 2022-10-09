@@ -30,7 +30,7 @@ namespace zlsSpaceInvader {
             this.gameObjectManager.add( new StarNight(stage) )
 
             const playerFlight = new PlayerFlight(stage)
-            playerFlight.pos.y = 60
+            playerFlight.pos.y = stage.bottom-35
             this.gameObjectManager.add(playerFlight)
 
             const enemyColumn = 9
@@ -62,6 +62,8 @@ namespace zlsSpaceInvader {
             enemies.push(p)
 
             this.gameObjectManager.add( new EnemyCooperator(stage, enemies))
+
+            new Franchouchou( stage, this.gameObjectManager)
         }
 
         run(){
