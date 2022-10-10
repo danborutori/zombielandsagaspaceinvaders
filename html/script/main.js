@@ -49,6 +49,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    var Constant = /** @class */ (function () {
+        function Constant() {
+        }
+        Constant.maxTimeStep = 1 / 15;
+        Constant.playerMoveSpeed = 200;
+        Constant.playerFireInterval = 0.1;
+        Constant.bulletSpeed = 200;
+        Constant.volume = 0.02;
+        return Constant;
+    }());
+    zlsSpaceInvader.Constant = Constant;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
     var Vector2 = /** @class */ (function () {
         function Vector2(x, y) {
             if (x === void 0) { x = 0; }
@@ -205,6 +219,18 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    var Audio = /** @class */ (function () {
+        function Audio() {
+        }
+        Audio.dom = document.createElement("audio");
+        return Audio;
+    }());
+    zlsSpaceInvader.Audio = Audio;
+    Audio.dom.volume = zlsSpaceInvader.Constant.volume;
+    Audio.dom.autoplay = true;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
     var Bullet = /** @class */ (function (_super) {
         __extends(Bullet, _super);
         function Bullet(stage) {
@@ -223,19 +249,6 @@ var zlsSpaceInvader;
         return Bullet;
     }(zlsSpaceInvader.SpriteObject));
     zlsSpaceInvader.Bullet = Bullet;
-})(zlsSpaceInvader || (zlsSpaceInvader = {}));
-var zlsSpaceInvader;
-(function (zlsSpaceInvader) {
-    var Constant = /** @class */ (function () {
-        function Constant() {
-        }
-        Constant.maxTimeStep = 1 / 15;
-        Constant.playerMoveSpeed = 200;
-        Constant.playerFireInterval = 0.1;
-        Constant.bulletSpeed = 200;
-        return Constant;
-    }());
-    zlsSpaceInvader.Constant = Constant;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -477,6 +490,7 @@ var zlsSpaceInvader;
         function Explosion() {
             var _this = _super.call(this, zlsSpaceInvader.Sprites.shared.images["explod"]) || this;
             _this.lifeTime = 0;
+            zlsSpaceInvader.Audio.dom.src = "/sound/invaderkilled.wav";
             return _this;
         }
         Explosion.prototype.update = function (deltaTime) {
@@ -881,6 +895,16 @@ var zlsSpaceInvader;
             var hiScoreScr = new zlsSpaceInvader.HiScoreScreen(scoreAndCredit.hiScore);
             this.gameObjectManager.add(hiScoreScr);
         };
+        Main.prototype.onMute = function (button) {
+            if (zlsSpaceInvader.Audio.dom.volume != 0) {
+                zlsSpaceInvader.Audio.dom.volume = 0;
+                button.value = "SOUND ON";
+            }
+            else {
+                zlsSpaceInvader.Audio.dom.volume = zlsSpaceInvader.Constant.volume;
+                button.value = "SOUND OFF";
+            }
+        };
         Main.prototype.run = function () {
             var _this = this;
             var prevTime = performance.now();
@@ -960,6 +984,7 @@ var zlsSpaceInvader;
                 b.pos.copy(this.pos);
                 this.manager.add(b);
                 this.bulletCooldown = zlsSpaceInvader.Constant.playerFireInterval;
+                zlsSpaceInvader.Audio.dom.src = "/sound/shoot.wav";
             }
             if (this.next) {
                 var spr = this.nextSprite();
@@ -971,6 +996,7 @@ var zlsSpaceInvader;
                 else {
                     this.allMemberRunOut();
                 }
+                zlsSpaceInvader.Audio.dom.src = "/sound/explosion.wav";
                 this.next = false;
             }
         };
