@@ -49,6 +49,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    var Vector2 = /** @class */ (function () {
+        function Vector2(x, y) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            this.x = x;
+            this.y = y;
+        }
+        Vector2.prototype.copy = function (v) {
+            this.x = v.x;
+            this.y = v.y;
+        };
+        Vector2.prototype.distance = function (v) {
+            var dx = this.x - v.x;
+            var dy = this.y - v.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+        Vector2.prototype.sub = function (v1, v2) {
+            this.x = v1.x - v2.x;
+            this.y = v1.y - v2.y;
+            return this;
+        };
+        Vector2.prototype.abs = function () {
+            this.x = Math.abs(this.x);
+            this.y = Math.abs(this.y);
+        };
+        return Vector2;
+    }());
+    zlsSpaceInvader.Vector2 = Vector2;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
     var GameObject = /** @class */ (function () {
         function GameObject() {
             this.pos = new zlsSpaceInvader.Vector2;
@@ -56,6 +87,9 @@ var zlsSpaceInvader;
         }
         GameObject.prototype.update = function (deltaTime) { };
         GameObject.prototype.render = function (deltaTime, ctx) { };
+        GameObject.prototype.removeFromManager = function () {
+            this.manager && this.manager.remove(this);
+        };
         return GameObject;
     }());
     zlsSpaceInvader.GameObject = GameObject;
@@ -80,7 +114,7 @@ var zlsSpaceInvader;
             this.gameObjects = [];
         }
         GameObjectManager.prototype.add = function (o) {
-            o.manager && o.manager.remove(o);
+            o.removeFromManager();
             this.gameObjects.push(o);
             o.manager = this;
         };
@@ -109,6 +143,68 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    var paths = {
+        0: "/images/0.png",
+        1: "/images/1.png",
+        2: "/images/2.png",
+        3: "/images/3.png",
+        4: "/images/4.png",
+        5: "/images/5.png",
+        6: "/images/6.png",
+        7: "/images/7.png",
+        dog: "/images/dog.png",
+        explod: "/images/explod.png",
+        hand: "/images/hand.png",
+        p: "/images/p.png",
+        zombie1: "/images/zombie1.png",
+        zombie2: "/images/zombie2.png",
+        bullet: "/images/bullet.png",
+        star: "/images/star.png",
+        font: "/images/font.png",
+    };
+    function loadImage(img, url) {
+        return new Promise(function (resolve, reject) {
+            img.src = url;
+            img.onload = function () { return resolve(); };
+            img.onerror = function (e) { return reject(e); };
+        });
+    }
+    var Sprites = /** @class */ (function () {
+        function Sprites() {
+            this.images = {
+                0: new Image,
+                1: new Image,
+                2: new Image,
+                3: new Image,
+                4: new Image,
+                5: new Image,
+                6: new Image,
+                7: new Image,
+                dog: new Image,
+                explod: new Image,
+                hand: new Image,
+                p: new Image,
+                zombie1: new Image,
+                zombie2: new Image,
+                bullet: new Image,
+                star: new Image,
+                font: new Image,
+            };
+        }
+        Sprites.prototype.load = function () {
+            var tasks = [];
+            for (var n in paths) {
+                tasks.push(loadImage(this.images[n], paths[n]));
+            }
+            return Promise.all(tasks);
+        };
+        Sprites.shared = new Sprites;
+        return Sprites;
+    }());
+    zlsSpaceInvader.Sprites = Sprites;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
     var Bullet = /** @class */ (function (_super) {
         __extends(Bullet, _super);
         function Bullet(stage) {
@@ -121,7 +217,7 @@ var zlsSpaceInvader;
             _super.prototype.update.call(this, deltaTime);
             this.pos.y -= zlsSpaceInvader.Constant.bulletSpeed * deltaTime;
             if (this.pos.y <= this.stage.up) {
-                this.manager && this.manager.remove(this);
+                this.removeFromManager();
             }
         };
         return Bullet;
@@ -156,14 +252,14 @@ var zlsSpaceInvader;
             _super.prototype.update.call(this, deltaTime);
             if (zlsSpaceInvader.Input.shared.pressAnyKey && this.countDown < 9) {
                 this.continueFunc(true);
-                this.manager && this.manager.remove(this);
+                this.removeFromManager();
             }
             else {
                 this.countCoolDown -= deltaTime;
                 if (this.countCoolDown <= 0) {
                     if (this.countDown <= 0) {
                         this.continueFunc(false);
-                        this.manager && this.manager.remove(this);
+                        this.removeFromManager();
                     }
                     else {
                         this.countDown -= 1;
@@ -174,10 +270,8 @@ var zlsSpaceInvader;
         };
         ContinueScreen.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
-            var txt = "C O N T I N U E ?   " + this.countDown;
-            ctx.font = zlsSpaceInvader.Palette.font;
-            ctx.fillStyle = "white";
-            ctx.fillText(txt, Math.floor(-ctx.measureText(txt).width / 2), 0);
+            var txt = "CONTINUE? " + this.countDown;
+            zlsSpaceInvader.TextDrawer.shared.drawText(txt, Math.floor(-zlsSpaceInvader.TextDrawer.shared.measure(txt) / 2), -2, ctx);
         };
         return ContinueScreen;
     }(zlsSpaceInvader.GameObject));
@@ -185,7 +279,7 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
-    var enemySize = 9;
+    var v = new zlsSpaceInvader.Vector2;
     var EnemyFlight = /** @class */ (function (_super) {
         __extends(EnemyFlight, _super);
         function EnemyFlight(sprite, scorer, score, onHitPlayer) {
@@ -225,23 +319,28 @@ var zlsSpaceInvader;
                 var bs = this.manager.gameObjects.filter(function (b) { return b.isBullet; });
                 for (var _i = 0, bs_1 = bs; _i < bs_1.length; _i++) {
                     var b = bs_1[_i];
-                    if (b.pos.distance(this.pos) < enemySize) {
+                    v.sub(this.pos, b.pos).abs();
+                    if (v.x < 5 &&
+                        v.y < 5.5) {
                         this.flashTime = 0.1;
-                        this.manager.remove(b);
+                        b.removeFromManager();
                         this.hp -= 1;
                         if (this.hp <= 0) {
                             var ex = new zlsSpaceInvader.Explosion;
                             ex.pos.copy(this.pos);
                             this.manager.add(ex);
-                            this.manager.remove(this);
+                            this.removeFromManager();
                             this.scorer.score += this.score;
                         }
                     }
                 }
                 var playerFlight = this.manager && this.manager.gameObjects.filter(function (o) { return o.isPlayerFlight; })[0];
-                if (playerFlight &&
-                    this.pos.distance(playerFlight.pos) < 9) {
-                    this.onHitPlayer(this, playerFlight);
+                if (playerFlight) {
+                    v.sub(this.pos, playerFlight.pos).abs();
+                    if (v.x < 9 &&
+                        v.y < 9) {
+                        this.onHitPlayer(this, playerFlight);
+                    }
                 }
             }
         };
@@ -384,12 +483,39 @@ var zlsSpaceInvader;
             _super.prototype.update.call(this, deltaTime);
             this.lifeTime += deltaTime;
             if (this.lifeTime > 0.1 && this.manager) {
-                this.manager.remove(this);
+                this.removeFromManager();
             }
         };
         return Explosion;
     }(zlsSpaceInvader.SpriteObject));
     zlsSpaceInvader.Explosion = Explosion;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var FloatingText = /** @class */ (function (_super) {
+        __extends(FloatingText, _super);
+        function FloatingText(text) {
+            var _this = _super.call(this) || this;
+            _this.text = text;
+            _this.time = 0;
+            return _this;
+        }
+        FloatingText.prototype.update = function (deltaTime) {
+            _super.prototype.update.call(this, deltaTime);
+            this.time += deltaTime;
+            if (this.time > 3) {
+                this.removeFromManager();
+            }
+        };
+        FloatingText.prototype.render = function (deltaTime, ctx) {
+            _super.prototype.render.call(this, deltaTime, ctx);
+            ctx.font = zlsSpaceInvader.Palette.font;
+            ctx.fillStyle = "white";
+            ctx.fillText(this.text, Math.floor(this.pos.x - ctx.measureText(this.text).width / 2), Math.floor(this.pos.y));
+        };
+        return FloatingText;
+    }(zlsSpaceInvader.GameObject));
+    zlsSpaceInvader.FloatingText = FloatingText;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -399,27 +525,35 @@ var zlsSpaceInvader;
         4,
         2,
         3,
-        0
+        0,
+        7
     ];
-    var Franchouchou = /** @class */ (function () {
+    var Franchouchou = /** @class */ (function (_super) {
+        __extends(Franchouchou, _super);
         function Franchouchou(stage, manager) {
-            this.manager = manager;
-            this.remainingMember = 7;
-            this.members = [];
+            var _this = _super.call(this) || this;
+            _this.stage = stage;
+            _this.manager = manager;
+            _this.remainingMember = 7;
+            _this.members = [];
+            _this.canCallMaiMai = true;
             for (var i = 0; i < memberList.length; i++) {
                 var m = new zlsSpaceInvader.SpriteObject(zlsSpaceInvader.Sprites.shared.images["" + memberList[i]]);
                 m.pos.x = stage.left + 15 + i * 11;
                 m.pos.y = stage.bottom - 18;
-                manager.add(m);
-                this.members.push(m);
+                _this.members.push(m);
+                if (i <= _this.remainingMember - 2) {
+                    manager.add(m);
+                }
             }
+            return _this;
         }
         Object.defineProperty(Franchouchou.prototype, "nextSprite", {
             get: function () {
                 this.remainingMember--;
                 if (this.remainingMember - 1 >= 0) {
                     var m = this.members[this.remainingMember - 1];
-                    m.manager && m.manager.remove(m);
+                    m.removeFromManager();
                     return zlsSpaceInvader.Sprites.shared.images["" + memberList[this.remainingMember - 1]];
                 }
                 return null;
@@ -427,17 +561,28 @@ var zlsSpaceInvader;
             enumerable: true,
             configurable: true
         });
+        Franchouchou.prototype.update = function (deltaTime) {
+            _super.prototype.update.call(this, deltaTime);
+            if (this.remainingMember == 7 &&
+                zlsSpaceInvader.Input.shared.maimai &&
+                this.canCallMaiMai) {
+                this.remainingMember = 8;
+                this.manager.add(this.members[6]);
+                this.canCallMaiMai = false;
+            }
+        };
         Franchouchou.prototype.reset = function () {
             this.remainingMember = 7;
-            for (var _i = 0, _a = this.members; _i < _a.length; _i++) {
-                var m = _a[_i];
-                if (!m.manager) {
+            this.canCallMaiMai = true;
+            for (var i = 0; i < this.members.length; i++) {
+                var m = this.members[i];
+                if (i <= this.remainingMember - 2) {
                     this.manager.add(m);
                 }
             }
         };
         return Franchouchou;
-    }());
+    }(zlsSpaceInvader.GameObject));
     zlsSpaceInvader.Franchouchou = Franchouchou;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
@@ -459,10 +604,8 @@ var zlsSpaceInvader;
         };
         HiScoreScreen.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
-            var txt = "H I - S C O R E   " + zlsSpaceInvader.addLeadingZero(this.score, 6);
-            ctx.font = zlsSpaceInvader.Palette.font;
-            ctx.fillStyle = "white";
-            ctx.fillText(txt, Math.floor(-ctx.measureText(txt).width / 2), 0);
+            var txt = "HI-SCORE " + zlsSpaceInvader.addLeadingZero(this.score, 6);
+            zlsSpaceInvader.TextDrawer.shared.drawText(txt, Math.floor(-zlsSpaceInvader.TextDrawer.shared.measure(txt) / 2), -2, ctx);
         };
         return HiScoreScreen;
     }(zlsSpaceInvader.GameObject));
@@ -470,6 +613,18 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    var maimaiKeySequence = [
+        "ArrowUp",
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown"
+    ];
     var Input = /** @class */ (function () {
         function Input() {
             var _this = this;
@@ -477,6 +632,8 @@ var zlsSpaceInvader;
             this.right = false;
             this.fire = false;
             this.pressAnyKey = false;
+            this.maimaiIndex = 0;
+            this.maimai = false;
             addEventListener("keydown", function (e) {
                 switch (e.code) {
                     case "ArrowLeft":
@@ -494,6 +651,16 @@ var zlsSpaceInvader;
                         _this.fire = true;
                         _this.pressAnyKey = true;
                         break;
+                }
+                if (e.code == maimaiKeySequence[_this.maimaiIndex]) {
+                    _this.maimaiIndex++;
+                    if (_this.maimaiIndex == maimaiKeySequence.length) {
+                        _this.maimai = true;
+                        _this.maimaiIndex = 0;
+                    }
+                }
+                else {
+                    _this.maimaiIndex = 0;
                 }
             });
             addEventListener("keyup", function (e) {
@@ -513,6 +680,10 @@ var zlsSpaceInvader;
                 }
             });
         }
+        Input.prototype.update = function () {
+            this.pressAnyKey = false;
+            this.maimai = false;
+        };
         Input.shared = new Input();
         return Input;
     }());
@@ -555,16 +726,16 @@ var zlsSpaceInvader;
         };
         Main.prototype.initGame = function () {
             var _this = this;
-            var scoreAndCredit = new zlsSpaceInvader.ScoreAndCredit({
+            var scoreAndCredit = new zlsSpaceInvader.ScoreAndCredit(this.stage, {
                 get remainingMember() {
                     return franchouchou.remainingMember;
                 }
             });
             if (this.ctx) {
-                this.stage.left = -this.ctx.canvas.width / 2;
-                this.stage.right = this.ctx.canvas.width / 2;
-                this.stage.up = -this.ctx.canvas.height / 2;
-                this.stage.bottom = this.ctx.canvas.height / 2;
+                this.stage.left = -this.ctx.canvas.width / 4;
+                this.stage.right = this.ctx.canvas.width / 4;
+                this.stage.up = -this.ctx.canvas.height / 4;
+                this.stage.bottom = this.ctx.canvas.height / 4;
             }
             this.gameObjectManager.add(new zlsSpaceInvader.StarNight(this.stage));
             var enemyBackOff = function () {
@@ -583,6 +754,7 @@ var zlsSpaceInvader;
             this.gameObjectManager.add(playerFlight);
             this.resetEnemies(playerFlight, scoreAndCredit);
             var franchouchou = new zlsSpaceInvader.Franchouchou(this.stage, this.gameObjectManager);
+            this.gameObjectManager.add(franchouchou);
             this.gameObjectManager.add(scoreAndCredit);
             playerFlight.paused = true;
             for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
@@ -605,10 +777,10 @@ var zlsSpaceInvader;
             //clear old enemies
             for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
                 var e = _a[_i];
-                e.manager && e.manager.remove(e);
+                e.removeFromManager();
             }
             this.enemies.length = 0;
-            this.enemyCooperator.manager && this.enemyCooperator.manager.remove(this.enemyCooperator);
+            this.enemyCooperator.removeFromManager();
             var enemyColumn = 9;
             var enemySpacing = 14;
             var enemyRows = [
@@ -622,7 +794,6 @@ var zlsSpaceInvader;
                 for (var j = 0; j < enemyRows.length; j++) {
                     var e = new enemyRows[j](scoreAndCredit, function (e, p) {
                         p.next = true;
-                        e.manager && e.manager.remove(e);
                     });
                     e.pos.x = (-enemyColumn / 2 + i + 0.5) * enemySpacing;
                     e.pos.y = j * enemySpacing + enemyYOffset;
@@ -631,8 +802,11 @@ var zlsSpaceInvader;
                 }
             }
             var p = new zlsSpaceInvader.Producer(scoreAndCredit, function (e, p) {
-                p.next = true;
-                e.manager && e.manager.remove(e);
+                var jai = new zlsSpaceInvader.FloatingText("ジャイ");
+                jai.pos.copy(p.pos);
+                _this.gameObjectManager.add(jai);
+                scoreAndCredit.score += 10000;
+                e.removeFromManager();
             });
             p.pos.y = enemyYOffset - enemySpacing;
             this.gameObjectManager.add(p);
@@ -719,9 +893,9 @@ var zlsSpaceInvader;
             }, 10);
         };
         Main.prototype.update = function (deltaTime) {
-            this.gameObjectManager.update(deltaTime);
-            zlsSpaceInvader.Input.shared.pressAnyKey = false;
             this.render(deltaTime);
+            this.gameObjectManager.update(deltaTime);
+            zlsSpaceInvader.Input.shared.update();
         };
         Main.prototype.render = function (deltaTime) {
             var _this = this;
@@ -734,6 +908,7 @@ var zlsSpaceInvader;
                     _this.ctx.fillRect(0, 0, w, h);
                     _this.ctx.save();
                     _this.ctx.translate(w / 2, h / 2);
+                    _this.ctx.scale(2, 2);
                     _this.gameObjectManager.render(deltaTime, _this.ctx);
                     _this.ctx.restore();
                 }
@@ -743,28 +918,6 @@ var zlsSpaceInvader;
         return Main;
     }());
     zlsSpaceInvader.Main = Main;
-})(zlsSpaceInvader || (zlsSpaceInvader = {}));
-var zlsSpaceInvader;
-(function (zlsSpaceInvader) {
-    var Vector2 = /** @class */ (function () {
-        function Vector2(x, y) {
-            if (x === void 0) { x = 0; }
-            if (y === void 0) { y = 0; }
-            this.x = x;
-            this.y = y;
-        }
-        Vector2.prototype.copy = function (v) {
-            this.x = v.x;
-            this.y = v.y;
-        };
-        Vector2.prototype.distance = function (v) {
-            var dx = this.x - v.x;
-            var dy = this.y - v.y;
-            return Math.sqrt(dx * dx + dy * dy);
-        };
-        return Vector2;
-    }());
-    zlsSpaceInvader.Vector2 = Vector2;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -836,95 +989,46 @@ var zlsSpaceInvader;
         while (s.length < length) {
             s = "0" + s;
         }
-        return s.split("").join(" ");
+        return s;
     }
     zlsSpaceInvader.addLeadingZero = addLeadingZero;
+    var hiScoreItemKey = "hiscore";
     var ScoreAndCredit = /** @class */ (function (_super) {
         __extends(ScoreAndCredit, _super);
-        function ScoreAndCredit(franchouchou) {
+        function ScoreAndCredit(stage, franchouchou) {
             var _this = _super.call(this) || this;
+            _this.stage = stage;
             _this.franchouchou = franchouchou;
             _this.score = 0;
-            _this.hiScore = parseInt(localStorage.getItem("hiscore") || "0");
+            _this._hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0");
             _this.credit = 10;
             return _this;
         }
+        Object.defineProperty(ScoreAndCredit.prototype, "hiScore", {
+            get: function () {
+                return this._hiScore;
+            },
+            set: function (n) {
+                this._hiScore = n;
+                localStorage.setItem(hiScoreItemKey, "" + n);
+            },
+            enumerable: true,
+            configurable: true
+        });
         ScoreAndCredit.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
-            var w = ctx.canvas.width;
-            var h = ctx.canvas.height;
-            ctx.font = zlsSpaceInvader.Palette.font;
-            ctx.fillStyle = "white";
-            ctx.fillText("S C O R E   " + addLeadingZero(this.score, 6), Math.floor(-w / 2 + 4), Math.floor(-h / 2 + 9));
-            var hiScoreTxt = "H I - S C O R E   " + addLeadingZero(this.hiScore, 6);
-            ctx.fillText(hiScoreTxt, Math.floor(w / 2 - 4 - ctx.measureText(hiScoreTxt).width), Math.floor(-h / 2 + 9));
-            var creditTxt = "C R E D I T   " + addLeadingZero(Math.min(this.credit, 99), 2);
-            ctx.fillText(creditTxt, Math.floor(w / 2 - 4 - ctx.measureText(creditTxt).width), Math.floor(h / 2 - 6));
-            ctx.fillText("" + this.franchouchou.remainingMember, Math.floor(-w / 2 + 4), Math.floor(h / 2 - 6));
+            var w = this.stage.right - this.stage.left;
+            var h = this.stage.bottom - this.stage.up;
+            zlsSpaceInvader.TextDrawer.shared.drawText("SCORE " + addLeadingZero(this.score, 6), Math.floor(-w / 2 + 4), Math.floor(-h / 2 + 9), ctx);
+            var hiScoreTxt = "HI-SCORE " + addLeadingZero(this.hiScore, 6);
+            zlsSpaceInvader.TextDrawer.shared.drawText(hiScoreTxt, Math.floor(w / 2 - 2 - zlsSpaceInvader.TextDrawer.shared.measure(hiScoreTxt)), Math.floor(-h / 2 + 9), ctx);
+            var creditTxt = "CREDIT " + addLeadingZero(Math.min(this.credit, 99), 2);
+            zlsSpaceInvader.TextDrawer.shared.drawText(creditTxt, Math.floor(w / 2 - 2 - ctx.measureText(creditTxt).width), Math.floor(h / 2 - 10), ctx);
+            zlsSpaceInvader.TextDrawer.shared.drawText("" + this.franchouchou.remainingMember, Math.floor(-w / 2 + 4), Math.floor(h / 2 - 10), ctx);
         };
         return ScoreAndCredit;
     }(zlsSpaceInvader.GameObject));
     zlsSpaceInvader.ScoreAndCredit = ScoreAndCredit;
-})(zlsSpaceInvader || (zlsSpaceInvader = {}));
-var zlsSpaceInvader;
-(function (zlsSpaceInvader) {
-    var paths = {
-        0: "/images/0.png",
-        1: "/images/1.png",
-        2: "/images/2.png",
-        3: "/images/3.png",
-        4: "/images/4.png",
-        5: "/images/5.png",
-        6: "/images/6.png",
-        7: "/images/7.png",
-        dog: "/images/dog.png",
-        explod: "/images/explod.png",
-        hand: "/images/hand.png",
-        p: "/images/p.png",
-        zombie1: "/images/zombie1.png",
-        zombie2: "/images/zombie2.png",
-        bullet: "/images/bullet.png",
-        star: "/images/star.png",
-    };
-    function loadImage(img, url) {
-        return new Promise(function (resolve, reject) {
-            img.src = url;
-            img.onload = function () { return resolve(); };
-            img.onerror = function (e) { return reject(e); };
-        });
-    }
-    var Sprites = /** @class */ (function () {
-        function Sprites() {
-            this.images = {
-                0: new Image,
-                1: new Image,
-                2: new Image,
-                3: new Image,
-                4: new Image,
-                5: new Image,
-                6: new Image,
-                7: new Image,
-                dog: new Image,
-                explod: new Image,
-                hand: new Image,
-                p: new Image,
-                zombie1: new Image,
-                zombie2: new Image,
-                bullet: new Image,
-                star: new Image,
-            };
-        }
-        Sprites.prototype.load = function () {
-            var tasks = [];
-            for (var n in paths) {
-                tasks.push(loadImage(this.images[n], paths[n]));
-            }
-            return Promise.all(tasks);
-        };
-        Sprites.shared = new Sprites;
-        return Sprites;
-    }());
-    zlsSpaceInvader.Sprites = Sprites;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -982,19 +1086,77 @@ var zlsSpaceInvader;
             this.time += deltaTime;
             if (zlsSpaceInvader.Input.shared.pressAnyKey && this.time >= 1) {
                 this.onStart();
-                this.manager && this.manager.remove(this);
+                this.removeFromManager();
             }
         };
         StartScreen.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
-            var txt = "P R E S S   A N Y   K E Y   T O   S T A R T";
-            ctx.font = zlsSpaceInvader.Palette.font;
-            ctx.fillStyle = "white";
-            ctx.fillText(txt, Math.floor(-ctx.measureText(txt).width / 2), 30);
+            var txt = "PRESS ANY KEY TO START";
+            zlsSpaceInvader.TextDrawer.shared.drawText(txt, Math.floor(-zlsSpaceInvader.TextDrawer.shared.measure(txt) / 2), 30, ctx);
         };
         return StartScreen;
     }(zlsSpaceInvader.GameObject));
     zlsSpaceInvader.StartScreen = StartScreen;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var w = 12;
+    var h = 7;
+    var characterSpacing = 10;
+    var characters = {};
+    for (var i = 0; i < 10; i++) {
+        characters["" + i] = {
+            x: 26 + i * w,
+            y: 46
+        };
+    }
+    var letters1 = "ABCDEFGHIJKLMNO";
+    var letters2 = "PQRSTUVWXYZ";
+    for (var i = 0; i < letters1.length; i++) {
+        characters[letters1[i]] = {
+            x: 38 + i * w,
+            y: 55
+        };
+    }
+    for (var i = 0; i < letters2.length; i++) {
+        characters[letters2[i]] = {
+            x: 26 + i * w,
+            y: 64
+        };
+    }
+    characters["-"] = {
+        x: 182,
+        y: 37
+    };
+    characters["?"] = {
+        x: 206,
+        y: 46
+    };
+    var TextDrawer = /** @class */ (function () {
+        function TextDrawer() {
+            this.fontSheet = zlsSpaceInvader.Sprites.shared.images["font"];
+        }
+        TextDrawer.prototype.measure = function (text) {
+            return text.length * characterSpacing * 0.5;
+        };
+        TextDrawer.prototype.drawText = function (text, x, y, ctx) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(0.5, 0.5);
+            for (var _i = 0, text_1 = text; _i < text_1.length; _i++) {
+                var c = text_1[_i];
+                var m = characters[c];
+                if (m) {
+                    ctx.drawImage(this.fontSheet, m.x, m.y, w, h, 0, 0, w, h);
+                }
+                ctx.translate(characterSpacing, 0);
+            }
+            ctx.restore();
+        };
+        TextDrawer.shared = new TextDrawer();
+        return TextDrawer;
+    }());
+    zlsSpaceInvader.TextDrawer = TextDrawer;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -1012,15 +1174,13 @@ var zlsSpaceInvader;
             this.time += deltaTime;
             if (this.time >= 3) {
                 this.onEnd();
-                this.manager && this.manager.remove(this);
+                this.removeFromManager();
             }
         };
         WaveScreen.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
-            var txt = "W A V E   " + zlsSpaceInvader.addLeadingZero(this.wave, 2);
-            ctx.font = zlsSpaceInvader.Palette.font;
-            ctx.fillStyle = "white";
-            ctx.fillText(txt, Math.floor(-ctx.measureText(txt).width / 2), 30);
+            var txt = "WAVE " + zlsSpaceInvader.addLeadingZero(this.wave, 2);
+            zlsSpaceInvader.TextDrawer.shared.drawText(txt, Math.floor(-zlsSpaceInvader.TextDrawer.shared.measure(txt) / 2), 30, ctx);
         };
         return WaveScreen;
     }(zlsSpaceInvader.GameObject));
