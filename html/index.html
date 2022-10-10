@@ -57,7 +57,7 @@
                         </table>
                     </td>
                 </tr>
-                <tr>
+                <tr id="onScreenController">
                     <td colspan="3" style="color: white; font-family: Trebuchet MS; text-align: center;">
                         <br/>
                         <input id="leftButton" type="button" value="-LEFT-" style="font-size: 70; padding-top: 20; padding-bottom: 20;"/>
@@ -74,13 +74,18 @@
     </body>
 
     <script>
+        const mobileCheck = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        if(!mobileCheck){
+            onScreenController.remove()
+        }else{
+            zlsSpaceInvader.Input.shared.init(leftButton, rightButton, fireButton)
+        }
+
         const main = new zlsSpaceInvader.Main()
         main.init(mainCanvas).then( main=>{
             loadingLabel.style.display = "none"
             main.run()
         })
-
-        zlsSpaceInvader.Input.shared.init(leftButton, rightButton, fireButton)
 
         audioButton.onclick = e=>{
             main.onMute(audioButton)
