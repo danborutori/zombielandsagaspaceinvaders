@@ -710,6 +710,98 @@ var zlsSpaceInvader;
                 }
             });
         }
+        Input.prototype.init = function (leftButton, rightButton, fireButton) {
+            var _this = this;
+            var updateButton = function () {
+                _this.left = (leftTouch || leftPointer);
+                _this.right = (rightTouch || rightPointer);
+                _this.fire = (fireTouch || firePointer);
+            };
+            var leftTouch = false;
+            var leftPointer = false;
+            var rightTouch = false;
+            var rightPointer = false;
+            var fireTouch = false;
+            var firePointer = false;
+            leftButton.addEventListener("touchstart", function (e) {
+                leftTouch = true;
+                _this.pressAnyKey = true;
+                updateButton();
+            });
+            leftButton.addEventListener("pointerdown", function (e) {
+                leftPointer = true;
+                _this.pressAnyKey = true;
+                updateButton();
+            });
+            rightButton.addEventListener("touchstart", function (e) {
+                rightTouch = true;
+                _this.pressAnyKey = true;
+                updateButton();
+            });
+            rightButton.addEventListener("pointerdown", function (e) {
+                rightPointer = true;
+                _this.pressAnyKey = true;
+                updateButton();
+            });
+            fireButton.addEventListener("touchstart", function (e) {
+                fireTouch = true;
+                _this.pressAnyKey = true;
+                updateButton();
+            });
+            fireButton.addEventListener("pointerdown", function (e) {
+                firePointer = true;
+                _this.pressAnyKey = true;
+                updateButton();
+            });
+            leftButton.addEventListener("touchend", function (e) {
+                leftTouch = false;
+                updateButton();
+            });
+            leftButton.addEventListener("touchcancel", function (e) {
+                leftTouch = false;
+                updateButton();
+            });
+            leftButton.addEventListener("pointerup", function (e) {
+                leftPointer = false;
+                updateButton();
+            });
+            leftButton.addEventListener("pointerout", function (e) {
+                leftPointer = false;
+                updateButton();
+            });
+            rightButton.addEventListener("touchend", function (e) {
+                rightTouch = false;
+                updateButton();
+            });
+            rightButton.addEventListener("touchcancel", function (e) {
+                rightTouch = false;
+                updateButton();
+            });
+            rightButton.addEventListener("pointerup", function (e) {
+                rightPointer = false;
+                updateButton();
+            });
+            rightButton.addEventListener("pointerout", function (e) {
+                rightPointer = false;
+                updateButton();
+            });
+            fireButton.addEventListener("touchend", function (e) {
+                fireTouch = false;
+                updateButton();
+            });
+            fireButton.addEventListener("touchcancel", function (e) {
+                fireTouch = false;
+                updateButton();
+            });
+            fireButton.addEventListener("pointerup", function (e) {
+                firePointer = false;
+                updateButton();
+            });
+            fireButton.addEventListener("pointerout", function (e) {
+                firePointer = false;
+                updateButton();
+            });
+        };
         Input.prototype.update = function () {
             this.pressAnyKey = false;
             this.maimai = false;
@@ -910,7 +1002,6 @@ var zlsSpaceInvader;
             }
         };
         Main.prototype.showHighestScore = function (scoreAndCredit) {
-            scoreAndCredit.hiScore = Math.max(scoreAndCredit.hiScore, scoreAndCredit.score);
             var hiScoreScr = new zlsSpaceInvader.HiScoreScreen(scoreAndCredit.hiScore);
             this.gameObjectManager.add(hiScoreScr);
         };
@@ -1044,18 +1135,28 @@ var zlsSpaceInvader;
             var _this = _super.call(this) || this;
             _this.stage = stage;
             _this.franchouchou = franchouchou;
-            _this.score = 0;
+            _this._score = 0;
             _this._hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0");
             _this.credit = 10;
             return _this;
         }
+        Object.defineProperty(ScoreAndCredit.prototype, "score", {
+            get: function () {
+                return this._score;
+            },
+            set: function (n) {
+                this._score = n;
+                if (n > this._hiScore) {
+                    this._hiScore = n;
+                    localStorage.setItem(hiScoreItemKey, "" + n);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(ScoreAndCredit.prototype, "hiScore", {
             get: function () {
                 return this._hiScore;
-            },
-            set: function (n) {
-                this._hiScore = n;
-                localStorage.setItem(hiScoreItemKey, "" + n);
             },
             enumerable: true,
             configurable: true
