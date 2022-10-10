@@ -216,6 +216,16 @@ namespace zlsSpaceInvader {
             this.gameObjectManager.add( hiScoreScr )
         }
 
+        onMute( button: HTMLInputElement ){
+            if(Audio.dom.volume!=0 ){
+                Audio.dom.volume = 0
+                button.value = "SOUND ON"
+            }else{
+                Audio.dom.volume = Constant.volume
+                button.value = "SOUND OFF"
+            }
+        }
+
         run(){
             let prevTime = performance.now()
             setInterval(()=>{

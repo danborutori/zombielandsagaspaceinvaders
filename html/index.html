@@ -26,6 +26,11 @@
                     </td>
                     <td style="vertical-align: top;">
                         <table style="color: white; font-family: Trebuchet MS;">
+                            <tr>
+                                <td colspan="2">
+                                    <input id="audioButton" type="button" value="SOUND OFF" />
+                                </td>
+                            </tr>
                             <tr><th colspan="2">How to Play:</th></tr>
                             <tr>
                                 <td>Move</td>
@@ -46,6 +51,10 @@
             main.init(mainCanvas).then( main=>{
                 main.run()
             })
+
+            audioButton.onclick = e=>{
+                main.onMute(audioButton)
+            }
         </script>
     </body>
 </html>

@@ -4,7 +4,7 @@ namespace zlsSpaceInvader {
         static dom = document.createElement("audio")
     }
 
-    Audio.dom.volume = 0.02
+    Audio.dom.volume = Constant.volume
     Audio.dom.autoplay = true
 
 }
