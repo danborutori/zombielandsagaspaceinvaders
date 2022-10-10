@@ -12,14 +12,20 @@ namespace zlsSpaceInvader {
 
     export class ScoreAndCredit extends GameObject {
 
-        score = 0
+        private _score = 0
+        get score(){
+            return this._score
+        }
+        set score( n: number ){
+            this._score = n
+            if( n>this._hiScore ){
+                this._hiScore = n
+                localStorage.setItem(hiScoreItemKey,`${n}`)    
+            }
+        }
         private _hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0")
         get hiScore(){
             return this._hiScore
-        }
-        set hiScore( n: number ){
-            this._hiScore = n
-            localStorage.setItem(hiScoreItemKey,`${n}`)
         }
         credit = 10
 

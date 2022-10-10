@@ -214,7 +214,6 @@ namespace zlsSpaceInvader {
         }
 
         private showHighestScore( scoreAndCredit: ScoreAndCredit ){
-            scoreAndCredit.hiScore = Math.max( scoreAndCredit.hiScore, scoreAndCredit.score )
             const hiScoreScr = new HiScoreScreen( scoreAndCredit.hiScore )
             this.gameObjectManager.add( hiScoreScr )
         }
