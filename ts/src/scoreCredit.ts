@@ -8,10 +8,19 @@ namespace zlsSpaceInvader {
         return s
     }
 
+    const hiScoreItemKey = "hiscore"
+
     export class ScoreAndCredit extends GameObject {
 
         score = 0
-        hiScore = parseInt(localStorage.getItem("hiscore") || "0")
+        private _hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0")
+        get hiScore(){
+            return this._hiScore
+        }
+        set hiScore( n: number ){
+            this._hiScore = n
+            localStorage.setItem(hiScoreItemKey,`${n}`)
+        }
         credit = 10
 
         constructor( 

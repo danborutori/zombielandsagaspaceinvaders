@@ -52,7 +52,6 @@ namespace zlsSpaceInvader {
 
         drawText( text: string, x: number, y: number, ctx: CanvasRenderingContext2D ){
             ctx.save()
-            ctx.imageSmoothingEnabled = true
             ctx.translate(x, y)
             ctx.scale(0.5,0.5)
             for( let c of text ){
