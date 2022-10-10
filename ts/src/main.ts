@@ -222,11 +222,10 @@ namespace zlsSpaceInvader {
         }
 
         private update( deltaTime: number ){
+            this.render( deltaTime )
 
             this.gameObjectManager.update(deltaTime)
             Input.shared.pressAnyKey = false
-
-            this.render( deltaTime )
         }
 
         private render( deltaTime: number ){
