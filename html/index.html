@@ -33,7 +33,10 @@
                         </table>
                     </td>
                     <td>
-                        <canvas id="mainCanvas" width="360" height="360" style="width: 720; height: 720; image-rendering: pixelated;"></canvas><br/>
+                        <div style="position: relative;">
+                            <canvas id="mainCanvas" width="360" height="360" style="width: 720; height: 720; image-rendering: pixelated;"></canvas>
+                            <div id="loadingLabel" style="position: absolute; top: 360; left: 360; transform: translate(-50%, -50%); color: white; font-family: Trebuchet MS;">LOADING</div>
+                        </div>
                     </td>
                     <td style="vertical-align: top;">
                         <table style="color: white; font-family: Trebuchet MS;">
@@ -63,6 +66,7 @@
         <script>
             const main = new zlsSpaceInvader.Main()
             main.init(mainCanvas).then( main=>{
+                loadingLabel.style.display = "none"
                 main.run()
             })
 
