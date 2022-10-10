@@ -158,23 +158,23 @@ var zlsSpaceInvader;
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
     var paths = {
-        0: "/images/0.png",
-        1: "/images/1.png",
-        2: "/images/2.png",
-        3: "/images/3.png",
-        4: "/images/4.png",
-        5: "/images/5.png",
-        6: "/images/6.png",
-        7: "/images/7.png",
-        dog: "/images/dog.png",
-        explod: "/images/explod.png",
-        hand: "/images/hand.png",
-        p: "/images/p.png",
-        zombie1: "/images/zombie1.png",
-        zombie2: "/images/zombie2.png",
-        bullet: "/images/bullet.png",
-        star: "/images/star.png",
-        font: "/images/font.png",
+        0: "./images/0.png",
+        1: "./images/1.png",
+        2: "./images/2.png",
+        3: "./images/3.png",
+        4: "./images/4.png",
+        5: "./images/5.png",
+        6: "./images/6.png",
+        7: "./images/7.png",
+        dog: "./images/dog.png",
+        explod: "./images/explod.png",
+        hand: "./images/hand.png",
+        p: "./images/p.png",
+        zombie1: "./images/zombie1.png",
+        zombie2: "./images/zombie2.png",
+        bullet: "./images/bullet.png",
+        star: "./images/star.png",
+        font: "./images/font.png",
     };
     function loadImage(img, url) {
         return new Promise(function (resolve, reject) {
@@ -490,7 +490,7 @@ var zlsSpaceInvader;
         function Explosion() {
             var _this = _super.call(this, zlsSpaceInvader.Sprites.shared.images["explod"]) || this;
             _this.lifeTime = 0;
-            zlsSpaceInvader.Audio.dom.src = "/sound/invaderkilled.wav";
+            zlsSpaceInvader.Audio.dom.src = "./sound/invaderkilled.wav";
             return _this;
         }
         Explosion.prototype.update = function (deltaTime) {
@@ -984,7 +984,7 @@ var zlsSpaceInvader;
                 b.pos.copy(this.pos);
                 this.manager.add(b);
                 this.bulletCooldown = zlsSpaceInvader.Constant.playerFireInterval;
-                zlsSpaceInvader.Audio.dom.src = "/sound/shoot.wav";
+                zlsSpaceInvader.Audio.dom.src = "./sound/shoot.wav";
             }
             if (this.next) {
                 var spr = this.nextSprite();
@@ -996,7 +996,7 @@ var zlsSpaceInvader;
                 else {
                     this.allMemberRunOut();
                 }
-                zlsSpaceInvader.Audio.dom.src = "/sound/explosion.wav";
+                zlsSpaceInvader.Audio.dom.src = "./sound/explosion.wav";
                 this.next = false;
             }
         };

@@ -35,7 +35,7 @@ namespace zlsSpaceInvader {
                 b.pos.copy(this.pos)
                 this.manager.add(b)
                 this.bulletCooldown = Constant.playerFireInterval
-                Audio.dom.src = "/sound/shoot.wav"
+                Audio.dom.src = "./sound/shoot.wav"
             }
 
             if( this.next ){
@@ -47,7 +47,7 @@ namespace zlsSpaceInvader {
                 }else{
                     this.allMemberRunOut()
                 }
-                Audio.dom.src = "/sound/explosion.wav"
+                Audio.dom.src = "./sound/explosion.wav"
 
                 this.next = false
             }
