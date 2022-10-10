@@ -91,9 +91,9 @@ namespace zlsSpaceInvader {
             scoreAndCredit: ScoreAndCredit
         ){
             //clear old enemies
-            for( let e of this.enemies ) e.manager && e.manager.remove(e)
+            for( let e of this.enemies ) e.removeFromManager()
             this.enemies.length = 0
-            this.enemyCooperator.manager && this.enemyCooperator.manager.remove(this.enemyCooperator)
+            this.enemyCooperator.removeFromManager()
 
             const enemyColumn = 9
             const enemySpacing = 14
@@ -112,7 +112,6 @@ namespace zlsSpaceInvader {
                         scoreAndCredit,
                         (e, p)=>{
                             p.next = true
-                            e.manager && e.manager.remove(e)
                         }
                     )
                     e.pos.x = (-enemyColumn/2+i+0.5)*enemySpacing
@@ -126,8 +125,11 @@ namespace zlsSpaceInvader {
             const p = new Producer(
                 scoreAndCredit,
                 (e, p)=>{
-                    p.next = true
-                    e.manager && e.manager.remove(e)
+                    const jai = new FloatingText("ジャイ")
+                    jai.pos.copy(p.pos)
+                    this.gameObjectManager.add(jai)
+                    scoreAndCredit.score += 10000
+                    e.removeFromManager()
                 }
             )
             p.pos.y = enemyYOffset-enemySpacing

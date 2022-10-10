@@ -18,7 +18,7 @@ namespace zlsSpaceInvader {
 
             if( this.time>=3 ){
                 this.onEnd()
-                this.manager && this.manager.remove(this)
+                this.removeFromManager()
             }
         }
 

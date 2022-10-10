@@ -18,7 +18,7 @@ namespace zlsSpaceInvader {
             this.remainingMember--
             if( this.remainingMember-1>=0 ){
                 const m = this.members[this.remainingMember-1]
-                m.manager && m.manager.remove(m)
+                m.removeFromManager()
                 return Sprites.shared.images[`${memberList[this.remainingMember-1]}`]
             }
             return null

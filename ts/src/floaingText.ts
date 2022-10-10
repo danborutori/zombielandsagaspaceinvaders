@@ -1,22 +1,21 @@
 namespace zlsSpaceInvader {
 
-    export class StartScreen extends GameObject {
+    export class FloatingText extends GameObject {
 
         private time = 0
 
         constructor(
-            readonly onStart: ()=>void
+            readonly text: string
         ){
             super()
         }
 
-        update(deltaTime: number): void {
+        update( deltaTime: number ){
             super.update( deltaTime )
-            
+
             this.time += deltaTime
 
-            if( Input.shared.pressAnyKey && this.time>=1 ){
-                this.onStart()
+            if( this.time>3 ){
                 this.removeFromManager()
             }
         }
@@ -24,11 +23,15 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
-            const txt = `P R E S S   A N Y   K E Y   T O   S T A R T`
             ctx.font = Palette.font
             ctx.fillStyle = "white"
-            ctx.fillText( txt, Math.floor(-ctx.measureText(txt).width/2), 30)
+            ctx.fillText(
+                this.text,
+                Math.floor(this.pos.x-ctx.measureText(this.text).width/2),
+                Math.floor(this.pos.y)
+            )
         }
+
     }
 
 }

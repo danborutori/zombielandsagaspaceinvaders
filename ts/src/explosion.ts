@@ -14,7 +14,7 @@ namespace zlsSpaceInvader {
             this.lifeTime += deltaTime
 
             if( this.lifeTime>0.1 && this.manager ){
-                this.manager.remove(this)
+                this.removeFromManager()
             }
         }
 

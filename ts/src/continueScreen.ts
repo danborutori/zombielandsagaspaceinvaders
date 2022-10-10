@@ -17,14 +17,14 @@ namespace zlsSpaceInvader {
             if( Input.shared.pressAnyKey && this.countDown<9
             ){
                 this.continueFunc( true )
-                this.manager && this.manager.remove(this)
+                this.removeFromManager()
             }else{
                 this.countCoolDown -= deltaTime
                 if( this.countCoolDown<=0 )
                 {
                     if( this.countDown <= 0 ){
                         this.continueFunc(false)
-                        this.manager && this.manager.remove(this)
+                        this.removeFromManager()
                     }else{
                         this.countDown -= 1
                         this.countCoolDown += 1

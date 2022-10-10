@@ -47,13 +47,13 @@ namespace zlsSpaceInvader {
                 for( let b of bs ){
                     if( b.pos.distance( this.pos )<enemySize ){
                         this.flashTime = 0.1
-                        this.manager.remove(b)
+                        b.removeFromManager()
                         this.hp -= 1
                         if( this.hp<=0 ){
                             const ex = new Explosion
                             ex.pos.copy(this.pos)
                             this.manager.add(ex)
-                            this.manager.remove(this)
+                            this.removeFromManager()
                             this.scorer.score += this.score
                         }
                     }

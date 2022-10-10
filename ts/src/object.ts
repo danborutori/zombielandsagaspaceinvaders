@@ -9,6 +9,10 @@ namespace zlsSpaceInvader {
         update( deltaTime: number ){}
 
         render( deltaTime: number, ctx: CanvasRenderingContext2D ){}
+
+        removeFromManager(){
+            this.manager && this.manager.remove(this)
+        }
     }
 
     export class SpriteObject extends GameObject {
@@ -36,7 +40,7 @@ namespace zlsSpaceInvader {
         gameObjects: GameObject[] = []
 
         add( o: GameObject ){
-            o.manager && o.manager.remove(o)
+            o.removeFromManager()
             this.gameObjects.push(o)
             o.manager = this
         }
