@@ -34,7 +34,7 @@ npx lite-server
 ```
 
 ### Executing program
-Live Demo: https://rawcdn.githack.com/danborutori/zombielandsagaspaceinvaders/r1.1/html/index.html
+Live Demo: https://rawcdn.githack.com/danborutori/zombielandsagaspaceinvaders/r1.2/html/index.html
 
 ## Authors
 
