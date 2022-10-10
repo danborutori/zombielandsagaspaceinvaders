@@ -6,6 +6,8 @@ namespace zlsSpaceInvader {
 
         constructor(){
             super( Sprites.shared.images["explod"])
+
+            Audio.dom.src = "/sound/invaderkilled.wav"
         }
 
         update(deltaTime: number): void {

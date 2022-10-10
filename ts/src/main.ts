@@ -17,7 +17,9 @@ namespace zlsSpaceInvader {
 
         constructor(){}
 
-        async init( canvas: HTMLCanvasElement ){
+        async init(
+            canvas: HTMLCanvasElement,
+        ){
             this.ctx = canvas.getContext("2d")
             if( this.ctx ){
                 this.ctx.imageSmoothingEnabled = false
