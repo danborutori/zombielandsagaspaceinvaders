@@ -14,6 +14,7 @@ namespace zlsSpaceInvader {
 
         remainingMember = 7
         private members: SpriteObject[] = []
+        private canCallMaiMai = true
 
         get nextSprite(){
             this.remainingMember--
@@ -46,15 +47,18 @@ namespace zlsSpaceInvader {
 
             if(
                 this.remainingMember==7 &&
-                Input.shared.maimai
+                Input.shared.maimai &&
+                this.canCallMaiMai
             ){
                 this.remainingMember = 8
                 this.manager.add(this.members[6])
+                this.canCallMaiMai = false
             }
         }
 
         reset(){
             this.remainingMember = 7
+            this.canCallMaiMai = true
             for( let i=0; i<this.members.length; i++ ){
                 const m = this.members[i]
                 if( i<=this.remainingMember-2 ){
