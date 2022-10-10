@@ -72,6 +72,7 @@ namespace zlsSpaceInvader {
             this.resetEnemies( playerFlight, scoreAndCredit )
 
             const franchouchou = new Franchouchou( this.stage, this.gameObjectManager)
+            this.gameObjectManager.add( franchouchou )
 
             this.gameObjectManager.add( scoreAndCredit )
 
@@ -227,7 +228,7 @@ namespace zlsSpaceInvader {
             this.render( deltaTime )
 
             this.gameObjectManager.update(deltaTime)
-            Input.shared.pressAnyKey = false
+            Input.shared.update()
         }
 
         private render( deltaTime: number ){

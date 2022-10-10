@@ -6,13 +6,14 @@ namespace zlsSpaceInvader {
         4,
         2,
         3,
-        0
+        0,
+        7
     ]
 
-    export class Franchouchou {
+    export class Franchouchou extends GameObject {
 
         remainingMember = 7
-        private members: GameObject[] = []
+        private members: SpriteObject[] = []
 
         get nextSprite(){
             this.remainingMember--
@@ -25,22 +26,38 @@ namespace zlsSpaceInvader {
         }
 
         constructor(
-            stage: Stage,
+            readonly stage: Stage,
             readonly manager: GameObjectManager
         ){
+            super()
             for( let i=0; i<memberList.length; i++ ){
                 const m = new SpriteObject( Sprites.shared.images[`${memberList[i]}`] )
                 m.pos.x = stage.left+15+i*11
                 m.pos.y = stage.bottom-18
-                manager.add(m)
                 this.members.push(m)
+                if( i<=this.remainingMember-2 ){
+                    manager.add(m)
+                }
+            }
+        }
+
+        update( deltaTime: number ){
+            super.update( deltaTime )
+
+            if(
+                this.remainingMember==7 &&
+                Input.shared.maimai
+            ){
+                this.remainingMember = 8
+                this.manager.add(this.members[6])
             }
         }
 
         reset(){
             this.remainingMember = 7
-            for( let m of this.members ){
-                if(!m.manager){
+            for( let i=0; i<this.members.length; i++ ){
+                const m = this.members[i]
+                if( i<=this.remainingMember-2 ){
                     this.manager.add(m)
                 }
             }
