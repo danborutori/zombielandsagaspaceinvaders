@@ -34,7 +34,7 @@ npx lite-server
 ```
 
 ### Executing program
-Live Demo: https://rawcdn.githack.com/danborutori/zombielandsagaspaceinvaders/r1.0
+Live Demo: https://rawcdn.githack.com/danborutori/zombielandsagaspaceinvaders/r1.1/html/index.html
 
 ## Authors
 
@@ -47,7 +47,7 @@ ANMC
 
 ## Version History
 
-* 1.0
+* 1.1
     * Initial Release
 
 ## License
