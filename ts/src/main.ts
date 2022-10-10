@@ -25,7 +25,10 @@ namespace zlsSpaceInvader {
                 this.ctx.imageSmoothingEnabled = false
             }
 
-            await Sprites.shared.load()
+            await Promise.all([
+                Sprites.shared.load(),
+                Audio.preload()
+            ])
             this.initGame()
 
             return this

@@ -219,9 +219,25 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    function loadAudio(url) {
+        return new Promise(function (resolve, reject) {
+            var dom = document.createElement("audio");
+            dom.src = url;
+            dom.autoplay = false;
+            dom.oncanplay = function () { return resolve(); };
+            dom.onerror = function (e) { return reject(e); };
+        });
+    }
     var Audio = /** @class */ (function () {
         function Audio() {
         }
+        Audio.preload = function () {
+            return Promise.all([
+                "./sound/explosion.wav",
+                "./sound/invaderkilled.wav",
+                "./sound/shoot.wav"
+            ].map(function (url) { return loadAudio(url); }));
+        };
         Audio.dom = document.createElement("audio");
         return Audio;
     }());
@@ -729,7 +745,10 @@ var zlsSpaceInvader;
                             if (this.ctx) {
                                 this.ctx.imageSmoothingEnabled = false;
                             }
-                            return [4 /*yield*/, zlsSpaceInvader.Sprites.shared.load()];
+                            return [4 /*yield*/, Promise.all([
+                                    zlsSpaceInvader.Sprites.shared.load(),
+                                    zlsSpaceInvader.Audio.preload()
+                                ])];
                         case 1:
                             _a.sent();
                             this.initGame();
