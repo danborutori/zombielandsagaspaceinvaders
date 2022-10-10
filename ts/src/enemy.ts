@@ -1,6 +1,6 @@
 namespace zlsSpaceInvader {
 
-    const enemySize = 9
+    const v = new Vector2
 
     export class EnemyFlight extends SpriteObject {
 
@@ -45,7 +45,10 @@ namespace zlsSpaceInvader {
             if( this.manager ){
                 const bs = this.manager.gameObjects.filter(b=>(b as Bullet).isBullet)
                 for( let b of bs ){
-                    if( b.pos.distance( this.pos )<enemySize ){
+                    v.sub(this.pos, b.pos).abs()
+                    if( v.x<5 &&
+                        v.y<5.5
+                    ){
                         this.flashTime = 0.1
                         b.removeFromManager()
                         this.hp -= 1
@@ -60,10 +63,14 @@ namespace zlsSpaceInvader {
                 }
 
                 const playerFlight = this.manager && this.manager.gameObjects.filter(o=>(o as PlayerFlight).isPlayerFlight)[0]
-                if( playerFlight &&
-                    this.pos.distance(playerFlight.pos)<9
-                ){
-                    this.onHitPlayer(this,playerFlight as PlayerFlight)
+                if( playerFlight ){
+                    v.sub(this.pos, playerFlight.pos).abs()
+                    if( 
+                        v.x<9 &&
+                        v.y<9
+                    ){
+                        this.onHitPlayer(this,playerFlight as PlayerFlight)
+                    }
                 }
             }
         }

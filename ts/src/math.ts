@@ -21,6 +21,17 @@ namespace zlsSpaceInvader {
             const dy = this.y-v.y
             return Math.sqrt(dx*dx+dy*dy)
         }
+
+        sub( v1: Vector2Like, v2: Vector2Like ){
+            this.x = v1.x-v2.x
+            this.y = v1.y-v2.y
+            return this
+        }
+
+        abs(){
+            this.x = Math.abs(this.x)
+            this.y = Math.abs(this.y)
+        }
     }
 
 }
