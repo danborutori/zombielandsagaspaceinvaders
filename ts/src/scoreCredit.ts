@@ -5,7 +5,7 @@ namespace zlsSpaceInvader {
         while( s.length<length ){
             s = "0"+s
         }
-        return s.split("").join(" ")
+        return s
     }
 
     export class ScoreAndCredit extends GameObject {
@@ -28,17 +28,15 @@ namespace zlsSpaceInvader {
             const w = ctx.canvas.width
             const h = ctx.canvas.height
 
-            ctx.font = Palette.font
-            ctx.fillStyle = "white"
-            ctx.fillText(`S C O R E   ${addLeadingZero(this.score,6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9) )
+            TextDrawer.shared.drawText(`SCORE ${addLeadingZero(this.score,6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9), ctx )
 
-            const hiScoreTxt = `H I - S C O R E   ${addLeadingZero(this.hiScore,6)}`
-            ctx.fillText(hiScoreTxt, Math.floor(w/2-4-ctx.measureText(hiScoreTxt).width), Math.floor(-h/2+9) )
+            const hiScoreTxt = `HI-SCORE ${addLeadingZero(this.hiScore,6)}`
+            TextDrawer.shared.drawText(hiScoreTxt,Math.floor(w/2-2-TextDrawer.shared.measure(hiScoreTxt)), Math.floor(-h/2+9),ctx)
 
-            const creditTxt = `C R E D I T   ${addLeadingZero(Math.min(this.credit,99),2)}`
-            ctx.fillText(creditTxt, Math.floor(w/2-4-ctx.measureText(creditTxt).width), Math.floor(h/2-6) )
+            const creditTxt = `CREDIT ${addLeadingZero(Math.min(this.credit,99),2)}`
+            TextDrawer.shared.drawText(creditTxt, Math.floor(w/2-2-ctx.measureText(creditTxt).width), Math.floor(h/2-10), ctx )
 
-            ctx.fillText(`${this.franchouchou.remainingMember}`, Math.floor(-w/2+4), Math.floor(h/2-6) )
+            TextDrawer.shared.drawText(`${this.franchouchou.remainingMember}`, Math.floor(-w/2+4), Math.floor(h/2-10), ctx )
         }
 
     }

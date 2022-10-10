@@ -24,10 +24,8 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
-            const txt = `P R E S S   A N Y   K E Y   T O   S T A R T`
-            ctx.font = Palette.font
-            ctx.fillStyle = "white"
-            ctx.fillText( txt, Math.floor(-ctx.measureText(txt).width/2), 30)
+            const txt = `PRESS ANY KEY TO START`
+            TextDrawer.shared.drawText( txt, Math.floor(-TextDrawer.shared.measure(txt)/2), 30, ctx)
         }
     }
 

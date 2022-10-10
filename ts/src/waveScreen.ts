@@ -25,10 +25,8 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
-            const txt = `W A V E   ${addLeadingZero(this.wave, 2)}`
-            ctx.font = Palette.font
-            ctx.fillStyle = "white"
-            ctx.fillText( txt, Math.floor(-ctx.measureText(txt).width/2), 30)
+            const txt = `WAVE ${addLeadingZero(this.wave, 2)}`
+            TextDrawer.shared.drawText( txt, Math.floor(-TextDrawer.shared.measure(txt)/2), 30, ctx)
         }
     }
 

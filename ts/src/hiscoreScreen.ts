@@ -23,10 +23,8 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
-            const txt = `H I - S C O R E   ${addLeadingZero(this.score, 6)}`
-            ctx.font = Palette.font
-            ctx.fillStyle = "white"
-            ctx.fillText( txt, Math.floor(-ctx.measureText(txt).width/2), 0)
+            const txt = `HI-SCORE ${addLeadingZero(this.score, 6)}`
+            TextDrawer.shared.drawText( txt, Math.floor(-TextDrawer.shared.measure(txt)/2), -2, ctx)
         }
     }
 

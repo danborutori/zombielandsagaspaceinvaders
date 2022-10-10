@@ -17,6 +17,7 @@ namespace zlsSpaceInvader {
         zombie2: "/images/zombie2.png",
         bullet: "/images/bullet.png",
         star: "/images/star.png",
+        font: "/images/font.png",
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -47,6 +48,7 @@ namespace zlsSpaceInvader {
             zombie2: new Image,
             bullet: new Image,
             star: new Image,
+            font: new Image,
         }
 
         load(){
