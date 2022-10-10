@@ -30,17 +30,20 @@ namespace zlsSpaceInvader {
         }
 
         private initGame(){
-            const scoreAndCredit = new ScoreAndCredit({
-                get remainingMember(){
-                    return franchouchou.remainingMember
+            const scoreAndCredit = new ScoreAndCredit(
+                this.stage,
+                {
+                    get remainingMember(){
+                        return franchouchou.remainingMember
+                    }
                 }
-            })
+            )
 
             if( this.ctx ){
-                this.stage.left = -this.ctx.canvas.width/2
-                this.stage.right = this.ctx.canvas.width/2
-                this.stage.up = -this.ctx.canvas.height/2
-                this.stage.bottom = this.ctx.canvas.height/2
+                this.stage.left = -this.ctx.canvas.width/4
+                this.stage.right = this.ctx.canvas.width/4
+                this.stage.up = -this.ctx.canvas.height/4
+                this.stage.bottom = this.ctx.canvas.height/4
             }
 
             this.gameObjectManager.add( new StarNight(this.stage) )
@@ -243,6 +246,7 @@ namespace zlsSpaceInvader {
 
                     this.ctx.save()
                     this.ctx.translate(w/2, h/2)
+                    this.ctx.scale(2,2)
 
                     this.gameObjectManager.render( deltaTime, this.ctx )
 

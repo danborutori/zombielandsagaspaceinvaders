@@ -15,6 +15,7 @@ namespace zlsSpaceInvader {
         credit = 10
 
         constructor( 
+            readonly stage: Stage,
             readonly franchouchou: {
                 remainingMember: number
             }
@@ -25,8 +26,8 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render(deltaTime,ctx)
 
-            const w = ctx.canvas.width
-            const h = ctx.canvas.height
+            const w = this.stage.right-this.stage.left
+            const h = this.stage.bottom-this.stage.up
 
             TextDrawer.shared.drawText(`SCORE ${addLeadingZero(this.score,6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9), ctx )
 
