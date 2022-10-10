@@ -47,6 +47,8 @@ ANMC
 
 ## Version History
 
+* 1.2
+    * add on screen button
 * 1.1
     * Initial Release
 
