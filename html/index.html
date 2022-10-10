@@ -1,7 +1,8 @@
 <html>
     <header>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <meta charset="ISO-8859-1">
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <meta charset="ISO-8859-1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
 
         <meta property="og:title" content="ゾンビランドサガスペースインベーダーズ" />
         <meta property="og:description" content="サガを救いために" />
@@ -14,7 +15,7 @@
         <title>ゾンビランドサガスペースインベーダーズ</title>
         <script src="script/main.js"></script>
     </header>
-    <body style="background-color: black;">
+    <body style="background-color: black; user-select: none;">
         <center>
             <table>
                 <tr>
@@ -58,21 +59,33 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3" style="color: white; font-family: Trebuchet MS; text-align: center;">v1.1</td>
+                    <td colspan="3" style="color: white; font-family: Trebuchet MS; text-align: center;">
+                        <br/>
+                        <input id="leftButton" type="button" value="LEFT" style="font-size: 70;"/>
+                        <input id="rightButton" type="button" value="RIGHT" style="font-size: 70;"/>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input id="fireButton" type="button" value="FIRE" style="font-size: 70;"/>
+                    </td>
                 </tr>
+                <tr>
+                    <td colspan="3" style="color: white; font-family: Trebuchet MS; text-align: center;">v1.1</td>
+                </tr>                
             </table>
         </center>
-
-        <script>
-            const main = new zlsSpaceInvader.Main()
-            main.init(mainCanvas).then( main=>{
-                loadingLabel.style.display = "none"
-                main.run()
-            })
-
-            audioButton.onclick = e=>{
-                main.onMute(audioButton)
-            }
-        </script>
     </body>
+
+    <script>
+        const main = new zlsSpaceInvader.Main()
+        main.init(mainCanvas).then( main=>{
+            loadingLabel.style.display = "none"
+            main.run()
+        })
+
+        zlsSpaceInvader.Input.shared.init(leftButton, rightButton, fireButton)
+
+        audioButton.onclick = e=>{
+            main.onMute(audioButton)
+        }
+
+    </script>
 </html>
