@@ -51,7 +51,7 @@ namespace zlsSpaceInvader {
             TextDrawer.shared.drawText(hiScoreTxt,Math.floor(w/2-2-TextDrawer.shared.measure(hiScoreTxt)), Math.floor(-h/2+9),ctx)
 
             const creditTxt = `CREDIT ${addLeadingZero(Math.min(this.credit,99),2)}`
-            TextDrawer.shared.drawText(creditTxt, Math.floor(w/2-2-ctx.measureText(creditTxt).width), Math.floor(h/2-10), ctx )
+            TextDrawer.shared.drawText(creditTxt, Math.floor(w/2-2-TextDrawer.shared.measure(creditTxt)), Math.floor(h/2-10), ctx )
 
             TextDrawer.shared.drawText(`${this.franchouchou.remainingMember}`, Math.floor(-w/2+4), Math.floor(h/2-10), ctx )
         }
