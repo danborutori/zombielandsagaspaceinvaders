@@ -15,14 +15,14 @@ namespace zlsSpaceInvader {
             super()
 
             const w = stage.right-stage.left
-            const h = stage.bottom-stage.up
+            const h = stage.bottom-stage.top
 
             this.stars = new Array( Math.floor(w*h*starDensity) )
             for( let i=0; i<this.stars.length; i++ ){
                 this.stars[i] = {
                     pos: new Vector2(
                         stage.left+Math.random()*w,
-                        stage.up+Math.random()*h
+                        stage.top+Math.random()*h
                     ),
                     speed: 10+Math.random()*10
                 }
@@ -32,7 +32,7 @@ namespace zlsSpaceInvader {
         update(deltaTime: number): void {
             super.update(deltaTime)
 
-            const h = this.stage.bottom-this.stage.up
+            const h = this.stage.bottom-this.stage.top
 
             for( let s of this.stars ){
                 s.pos.y += s.speed*deltaTime

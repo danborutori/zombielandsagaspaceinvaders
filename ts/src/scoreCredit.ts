@@ -42,7 +42,7 @@ namespace zlsSpaceInvader {
             super.render(deltaTime,ctx)
 
             const w = this.stage.right-this.stage.left
-            const h = this.stage.bottom-this.stage.up
+            const h = this.stage.bottom-this.stage.top
 
             TextDrawer.shared.drawText(`SCORE ${addLeadingZero(this.score,6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9), ctx )
 

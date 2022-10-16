@@ -8,7 +8,9 @@ namespace zlsSpaceInvader {
         private origSprite: HTMLImageElement
         private flashingSprite: HTMLCanvasElement
         private hp = 3
-        vel = new Vector2
+        readonly vel = new Vector2
+        private flyOff?: EnemyFlyOff
+        rotate = 0
 
         constructor(
             sprite: HTMLImageElement,
@@ -29,10 +31,45 @@ namespace zlsSpaceInvader {
             ctx.drawImage( sprite, 0, 0 )
         }
 
+        startFlyOff( regroupPos: Vector2 ){
+            if( !this.flyOff ){
+                this.flyOff = new EnemyFlyOff(this, regroupPos )
+            }
+        }
+
+        get isFlyingOff(){
+            return this.flyOff!==undefined
+        }
+
+        endFlyOff(){
+            this.flyOff = undefined
+            this.rotate = 0
+            this.vel.set(0,0)
+        }
+
+        private wrapAround(){
+            const padding = 9
+            const w = this.scorer.stage.right-this.scorer.stage.left+padding*2
+            const h = this.scorer.stage.bottom-this.scorer.stage.top+padding*2
+
+            while( this.pos.x < this.scorer.stage.left-padding ){
+                this.pos.x += w
+            }
+            while( this.pos.x > this.scorer.stage.right+padding ){
+                this.pos.x -= w
+            }
+            while( this.pos.y > this.scorer.stage.bottom+padding ){
+                this.pos.y -= h
+                this.flyOff && this.flyOff.onWrapY()
+            }
+
+        }
+
         update(deltaTime: number): void {
             super.update(deltaTime)
 
-            this.pos.add( this.vel )
+            this.pos.addScaled( this.vel, deltaTime )
+            this.wrapAround()
 
             this.flashTime -= deltaTime
             if( this.flashTime<=0 ){
@@ -65,12 +102,15 @@ namespace zlsSpaceInvader {
                     }
                 }
 
-                const playerFlight = this.manager && this.manager.gameObjects.filter(o=>(o as PlayerFlight).isPlayerFlight)[0]
+                const playerFlight = this.manager && this.manager.gameObjects.filter(o=>(o as PlayerFlight).isPlayerFlight)[0] as PlayerFlight
                 if( playerFlight ){
+                    this.flyOff && this.flyOff.update( deltaTime, playerFlight )
+
                     v.sub(this.pos, playerFlight.pos).abs()
                     if( 
                         v.x<9 &&
-                        v.y<9
+                        v.y<9 &&
+                        playerFlight.invincibleTime<=0
                     ){
                         this.onHitPlayer(this,playerFlight as PlayerFlight)
                     }
@@ -80,7 +120,12 @@ namespace zlsSpaceInvader {
 
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
+            ctx.save()
+            ctx.translate(this.pos.x, this.pos.y)
+            ctx.rotate(this.rotate)
+            ctx.translate(-this.pos.x, -this.pos.y)
             super.render(deltaTime,ctx)
+            ctx.restore()
         }
     }
 

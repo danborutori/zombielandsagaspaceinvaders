@@ -1,17 +1,18 @@
 namespace zlsSpaceInvader {
 
     const padding = 4.5
+    const invincibleInterval = 1
 
     export class PlayerFlight extends SpriteObject {
 
         private bulletCooldown = 0
         readonly isPlayerFlight = true
         next = false
+        invincibleTime = 0
 
         constructor(            
             readonly stage: Stage,
             readonly nextSprite: ()=>HTMLImageElement|null,
-            readonly enemyBackOff: ()=>void,
             readonly allMemberRunOut: ()=>void
         ){
             super(Sprites.shared.images[1])
@@ -19,6 +20,8 @@ namespace zlsSpaceInvader {
 
         update(deltaTime: number): void {
             super.update(deltaTime)
+
+            this.invincibleTime -= deltaTime
 
             if( Input.shared.left )
                 this.pos.x -= Constant.playerMoveSpeed*deltaTime
@@ -43,7 +46,7 @@ namespace zlsSpaceInvader {
                 if( spr ){
                     this.sprite = spr
                     this.pos.x = 0
-                    this.enemyBackOff()
+                    this.invincibleTime = invincibleInterval
                 }else{
                     this.allMemberRunOut()
                 }

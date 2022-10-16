@@ -8,7 +8,7 @@ namespace zlsSpaceInvader {
         private stage: Stage = {
             left: 0,
             right: 0,
-            up: 0,
+            top: 0,
             bottom : 0
         }
         private enemies: EnemyFlight[] = []
@@ -47,17 +47,12 @@ namespace zlsSpaceInvader {
             if( this.ctx ){
                 this.stage.left = -this.ctx.canvas.width/4
                 this.stage.right = this.ctx.canvas.width/4
-                this.stage.up = -this.ctx.canvas.height/4
+                this.stage.top = -this.ctx.canvas.height/4
                 this.stage.bottom = this.ctx.canvas.height/4
             }
 
             this.gameObjectManager.add( new StarNight(this.stage) )
 
-            const enemyBackOff = ()=>{
-                for( let e of this.enemies ){
-                    e.pos.y += this.stage.up
-                }
-            }
             const runOutOfMember = ()=>{
                 this.showContinue(
                     scoreAndCredit,
@@ -71,7 +66,6 @@ namespace zlsSpaceInvader {
                 ()=>{
                     return franchouchou.nextSprite
                 },
-                enemyBackOff,
                 runOutOfMember
             )
             playerFlight.pos.y = this.stage.bottom-35
@@ -170,12 +164,6 @@ namespace zlsSpaceInvader {
             this.gameObjectManager.add( this.enemyCooperator )
         }
 
-        private enemyBackOff(){
-            for( let e of this.enemies ){
-                e.pos.y += this.stage.up
-            }
-        }
-
         private showContinue(
             scoreAndCredit: ScoreAndCredit,
             playerFlight: PlayerFlight,
@@ -197,7 +185,6 @@ namespace zlsSpaceInvader {
 
                         playerFlight.reset()
                         franchouchou.reset()
-                        this.enemyBackOff()
                     }else{
                         this.showHighestScore( scoreAndCredit )
                     }

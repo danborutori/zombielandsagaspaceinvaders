@@ -14,7 +14,7 @@ namespace zlsSpaceInvader {
             super.update(deltaTime)
 
             this.pos.y -= Constant.bulletSpeed*deltaTime
-            if( this.pos.y<=this.stage.up ){
+            if( this.pos.y<=this.stage.top ){
                 this.removeFromManager()
             }
         }
