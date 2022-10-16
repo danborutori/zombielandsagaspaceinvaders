@@ -218,13 +218,13 @@ namespace zlsSpaceInvader {
         run(){
             let prevTime = performance.now()
             setInterval(()=>{
-                const curTime = performance.now()
-                const deltaTime = Math.min(Constant.maxTimeStep,(curTime-prevTime)/1000)
-
-                if( this.allowUpdate )
+                if( this.allowUpdate ){
+                    const curTime = performance.now()
+                    const deltaTime = Math.min(Constant.maxTimeStep,(curTime-prevTime)/1000)
+    
                     this.update( deltaTime )
-
-                prevTime = curTime
+                    prevTime = curTime
+                }
             }, 10)
         }
 

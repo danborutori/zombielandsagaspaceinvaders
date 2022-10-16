@@ -1,7 +1,7 @@
 namespace zlsSpaceInvader {
 
     const padding = 4.5
-    const invincibleInterval = 1
+    const invincibleInterval = 3
 
     export class PlayerFlight extends SpriteObject {
 

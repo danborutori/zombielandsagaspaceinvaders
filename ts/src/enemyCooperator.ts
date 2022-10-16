@@ -35,8 +35,9 @@ namespace zlsSpaceInvader {
 
             if( this.cooldown<=0 ){
                 const lifeEnemyRatio = this.enemies.reduce((a,b)=>a+(b.enemy.manager?1:0),0)/(this.enemies.length-1)
-                const interval = 0.01+0.49*lifeEnemyRatio
-                const enemyMoveSpeed = 3+(1-lifeEnemyRatio)*6
+                const interval = (0.01+0.49*lifeEnemyRatio)/0.6
+                const enemyMoveSpeed = (3+(1-lifeEnemyRatio)*6)*0.6
+                const flyOffRate = 0.005+(1-lifeEnemyRatio)*0.1
 
                 let deltaX = 0
                 switch( this.moveDir ){
@@ -72,7 +73,7 @@ namespace zlsSpaceInvader {
                 for( let e of this.enemies ){
                     e.targetPos.x += deltaX
                     if( !e.enemy.isFlyingOff &&
-                        Math.random()<0.005
+                        Math.random()<flyOffRate
                     ){
                         e.enemy.startFlyOff( e.targetPos )
                     }

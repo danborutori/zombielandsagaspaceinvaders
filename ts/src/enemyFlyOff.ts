@@ -2,14 +2,14 @@ namespace zlsSpaceInvader {
 
     const v = new Vector2
     const turningSpeed = Math.PI
-    const epsilon = 0.000001
-    const moveSpeed = 60    
+    const moveSpeed = 36    
     const padding = 4.5
 
     export class EnemyFlyOff {
 
         private direction = new Vector2( 0, -1 )
         private state: "homing" | "goStraight" | "regroup" = "homing"
+        private time = 0
         
 
         constructor(
@@ -18,6 +18,8 @@ namespace zlsSpaceInvader {
         ){}
 
         update( deltaTime: number, playerFlight: PlayerFlight ){
+
+            this.time += deltaTime
 
             let targetPos: Vector2 | undefined
 
@@ -33,8 +35,8 @@ namespace zlsSpaceInvader {
             if( targetPos ){
                 v.sub( targetPos, this.enemy.pos )
                 const angle = v.angle(this.direction)
-                const turningAngle = Math.min(Math.abs(angle),turningSpeed*deltaTime)
-                if( turningAngle>epsilon ){
+                if( this.time<2.5 || this.state==="regroup" ){
+                    const turningAngle = Math.min(Math.abs(angle),turningSpeed*deltaTime)
                     this.direction.rotateAround(
                         Math.sign(angle)*turningAngle
                     )
