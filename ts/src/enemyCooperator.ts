@@ -64,11 +64,14 @@ namespace zlsSpaceInvader {
                 }
     
                 for( let e of this.enemies ){
-                    e.pos.x += deltaX
-                    e.pos.y += deltaY
+                    e.vel.set(deltaX,deltaY)
                 }
 
                 this.cooldown += interval
+            }else{
+                for( let e of this.enemies ){
+                    e.vel.set(0,0)
+                }
             }
 
             const anyAlive = this.enemies.reduce( (a, b)=>{

@@ -8,6 +8,7 @@ namespace zlsSpaceInvader {
         private origSprite: HTMLImageElement
         private flashingSprite: HTMLCanvasElement
         private hp = 3
+        vel = new Vector2
 
         constructor(
             sprite: HTMLImageElement,
@@ -30,6 +31,8 @@ namespace zlsSpaceInvader {
 
         update(deltaTime: number): void {
             super.update(deltaTime)
+
+            this.pos.add( this.vel )
 
             this.flashTime -= deltaTime
             if( this.flashTime<=0 ){

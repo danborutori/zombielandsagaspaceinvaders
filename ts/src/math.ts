@@ -22,6 +22,18 @@ namespace zlsSpaceInvader {
             return Math.sqrt(dx*dx+dy*dy)
         }
 
+        set( x: number, y: number ){
+            this.x = x
+            this.y = y
+        }
+
+        add( v: Vector2Like ){
+            this.x += v.x
+            this.y += v.y
+
+            return this
+        }
+
         sub( v1: Vector2Like, v2: Vector2Like ){
             this.x = v1.x-v2.x
             this.y = v1.y-v2.y
