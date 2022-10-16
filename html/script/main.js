@@ -53,9 +53,9 @@ var zlsSpaceInvader;
         function Constant() {
         }
         Constant.maxTimeStep = 1 / 15;
-        Constant.playerMoveSpeed = 200;
-        Constant.playerFireInterval = 0.1;
-        Constant.bulletSpeed = 200;
+        Constant.playerMoveSpeed = 120;
+        Constant.playerFireInterval = 0.16;
+        Constant.bulletSpeed = 120;
         Constant.volume = 0.02;
         return Constant;
     }());
@@ -70,23 +70,75 @@ var zlsSpaceInvader;
             this.x = x;
             this.y = y;
         }
+        Vector2.prototype.clone = function () {
+            return new Vector2(this.x, this.y);
+        };
         Vector2.prototype.copy = function (v) {
             this.x = v.x;
             this.y = v.y;
+            return this;
         };
         Vector2.prototype.distance = function (v) {
             var dx = this.x - v.x;
             var dy = this.y - v.y;
             return Math.sqrt(dx * dx + dy * dy);
         };
+        Vector2.prototype.set = function (x, y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        };
+        Vector2.prototype.add = function (v) {
+            this.x += v.x;
+            this.y += v.y;
+            return this;
+        };
+        Vector2.prototype.addScaled = function (v, scale) {
+            this.x += v.x * scale;
+            this.y += v.y * scale;
+            return this;
+        };
         Vector2.prototype.sub = function (v1, v2) {
             this.x = v1.x - v2.x;
             this.y = v1.y - v2.y;
             return this;
         };
+        Vector2.prototype.multiply = function (n) {
+            this.x *= n;
+            this.y *= n;
+        };
         Vector2.prototype.abs = function () {
             this.x = Math.abs(this.x);
             this.y = Math.abs(this.y);
+        };
+        Vector2.prototype.length = function () {
+            return Math.sqrt(this.x * this.x + this.y * this.y);
+        };
+        Vector2.prototype.normalize = function () {
+            var l = this.length();
+            if (l != 0)
+                this.multiply(1 / l);
+            return this;
+        };
+        Vector2.prototype.angle = function (v) {
+            if (v === undefined) {
+                // FROM: https://github.com/mrdoob/three.js/blob/dev/src/math/Vector2.js
+                // computes the angle in radians with respect to the positive x-axis
+                var angle = Math.atan2(-this.y, -this.x) + Math.PI;
+                return angle;
+            }
+            else {
+                return this.angle() - v.angle();
+            }
+        };
+        // FROM: https://github.com/mrdoob/three.js/blob/dev/src/math/Vector2.js
+        Vector2.prototype.rotateAround = function (angle) {
+            var c = Math.cos(angle), s = Math.sin(angle);
+            var x = this.x;
+            var y = this.y;
+            this.x = x * c - y * s;
+            this.y = x * s + y * c;
+            return this;
         };
         return Vector2;
     }());
@@ -98,6 +150,7 @@ var zlsSpaceInvader;
         function GameObject() {
             this.pos = new zlsSpaceInvader.Vector2;
             this.paused = false;
+            this.renderOrder = 0;
         }
         GameObject.prototype.update = function (deltaTime) { };
         GameObject.prototype.render = function (deltaTime, ctx) { };
@@ -118,7 +171,7 @@ var zlsSpaceInvader;
         SpriteObject.prototype.update = function (deltaTime) { };
         SpriteObject.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
-            ctx.drawImage(this.sprite, Math.floor(this.pos.x - this.sprite.width / 2), Math.floor(this.pos.y + this.sprite.height / 2));
+            ctx.drawImage(this.sprite, Math.floor(this.pos.x - this.sprite.width / 2), Math.floor(this.pos.y - this.sprite.height / 2));
         };
         return SpriteObject;
     }(GameObject));
@@ -146,7 +199,7 @@ var zlsSpaceInvader;
             }
         };
         GameObjectManager.prototype.render = function (deltaTime, ctx) {
-            for (var _i = 0, _a = this.gameObjects; _i < _a.length; _i++) {
+            for (var _i = 0, _a = Array.from(this.gameObjects).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
                 var o = _a[_i];
                 o.render(deltaTime, ctx);
             }
@@ -154,6 +207,25 @@ var zlsSpaceInvader;
         return GameObjectManager;
     }());
     zlsSpaceInvader.GameObjectManager = GameObjectManager;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var Palette = /** @class */ (function () {
+        function Palette() {
+        }
+        Palette.bgColor = "#2C1F22";
+        Palette.font = "7px Trebuchet MS";
+        Palette.BulletColor0 = "#E545FF";
+        Palette.BulletColor1 = "#C62D3E";
+        Palette.BulletColor2 = "#FFB950";
+        Palette.BulletColor3 = "#3851FF";
+        Palette.BulletColor4 = "#D1E0E3";
+        Palette.BulletColor5 = "#FF2C61";
+        Palette.BulletColor6 = "#FFEB48";
+        Palette.BulletColor7 = "#3FEE3B";
+        return Palette;
+    }());
+    zlsSpaceInvader.Palette = Palette;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -249,21 +321,27 @@ var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
     var Bullet = /** @class */ (function (_super) {
         __extends(Bullet, _super);
-        function Bullet(stage) {
-            var _this = _super.call(this, zlsSpaceInvader.Sprites.shared.images["bullet"]) || this;
+        function Bullet(stage, color) {
+            var _this = _super.call(this) || this;
             _this.stage = stage;
+            _this.color = color;
             _this.isBullet = true;
             return _this;
         }
         Bullet.prototype.update = function (deltaTime) {
             _super.prototype.update.call(this, deltaTime);
             this.pos.y -= zlsSpaceInvader.Constant.bulletSpeed * deltaTime;
-            if (this.pos.y <= this.stage.up) {
+            if (this.pos.y <= this.stage.top) {
                 this.removeFromManager();
             }
         };
+        Bullet.prototype.render = function (deltaTime, ctx) {
+            _super.prototype.render.call(this, deltaTime, ctx);
+            ctx.fillStyle = this.color;
+            ctx.fillRect(Math.floor(this.pos.x - 0.5), Math.floor(this.pos.y - 1.5), 1, 3);
+        };
         return Bullet;
-    }(zlsSpaceInvader.SpriteObject));
+    }(zlsSpaceInvader.GameObject));
     zlsSpaceInvader.Bullet = Bullet;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
@@ -275,6 +353,7 @@ var zlsSpaceInvader;
             _this.continueFunc = continueFunc;
             _this.countDown = 9;
             _this.countCoolDown = 1;
+            _this.renderOrder = 1;
             return _this;
         }
         ContinueScreen.prototype.update = function (deltaTime) {
@@ -319,6 +398,8 @@ var zlsSpaceInvader;
             _this.onHitPlayer = onHitPlayer;
             _this.flashTime = 0;
             _this.hp = 3;
+            _this.vel = new zlsSpaceInvader.Vector2;
+            _this.rotate = 0;
             _this.origSprite = sprite;
             _this.flashingSprite = document.createElement("canvas");
             _this.flashingSprite.width = sprite.width;
@@ -330,8 +411,45 @@ var zlsSpaceInvader;
             ctx.drawImage(sprite, 0, 0);
             return _this;
         }
+        EnemyFlight.prototype.startFlyOff = function (regroupPos) {
+            if (!this.flyOff) {
+                this.flyOff = new zlsSpaceInvader.EnemyFlyOff(this, regroupPos);
+            }
+        };
+        Object.defineProperty(EnemyFlight.prototype, "isFlyingOff", {
+            get: function () {
+                return this.flyOff !== undefined;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        EnemyFlight.prototype.endFlyOff = function () {
+            this.flyOff = undefined;
+            this.vel.set(0, 0);
+        };
+        EnemyFlight.prototype.wrapAround = function () {
+            var padding = 9;
+            var w = this.scorer.stage.right - this.scorer.stage.left + padding * 2;
+            var h = this.scorer.stage.bottom - this.scorer.stage.top + padding * 2;
+            while (this.pos.x < this.scorer.stage.left - padding) {
+                this.pos.x += w;
+            }
+            while (this.pos.x > this.scorer.stage.right + padding) {
+                this.pos.x -= w;
+            }
+            while (this.pos.y < this.scorer.stage.top - padding) {
+                this.pos.y += h;
+                this.flyOff && this.flyOff.onWrapY();
+            }
+            while (this.pos.y > this.scorer.stage.bottom + padding) {
+                this.pos.y -= h;
+                this.flyOff && this.flyOff.onWrapY();
+            }
+        };
         EnemyFlight.prototype.update = function (deltaTime) {
             _super.prototype.update.call(this, deltaTime);
+            this.pos.addScaled(this.vel, deltaTime);
+            this.wrapAround();
             this.flashTime -= deltaTime;
             if (this.flashTime <= 0) {
                 this.sprite = this.origSprite;
@@ -365,16 +483,29 @@ var zlsSpaceInvader;
                 }
                 var playerFlight = this.manager && this.manager.gameObjects.filter(function (o) { return o.isPlayerFlight; })[0];
                 if (playerFlight) {
+                    if (this.flyOff) {
+                        this.flyOff.update(deltaTime, playerFlight);
+                    }
+                    else {
+                        this.rotate -= Math.sign(this.rotate) * Math.min(Math.abs(this.rotate), deltaTime * Math.PI * 2);
+                    }
                     v.sub(this.pos, playerFlight.pos).abs();
                     if (v.x < 9 &&
-                        v.y < 9) {
+                        v.y < 9 &&
+                        playerFlight.invincibleTime <= 0) {
                         this.onHitPlayer(this, playerFlight);
                     }
                 }
             }
         };
         EnemyFlight.prototype.render = function (deltaTime, ctx) {
+            ctx.save();
+            ctx.translate(this.pos.x, this.pos.y);
+            var rotateStep = Math.PI / 8;
+            ctx.rotate(Math.round(this.rotate / rotateStep) * rotateStep);
+            ctx.translate(-this.pos.x, -this.pos.y);
             _super.prototype.render.call(this, deltaTime, ctx);
+            ctx.restore();
         };
         return EnemyFlight;
     }(zlsSpaceInvader.SpriteObject));
@@ -428,33 +559,36 @@ var zlsSpaceInvader;
         function EnemyCooperator(stage, enemies, waveEnd) {
             var _this = _super.call(this) || this;
             _this.stage = stage;
-            _this.enemies = enemies;
             _this.waveEnd = waveEnd;
             _this.cooldown = 0;
             _this.moveDir = "left";
+            _this.enemies = enemies.map(function (e) {
+                return {
+                    enemy: e,
+                    initPos: e.pos.clone(),
+                    targetPos: e.pos.clone()
+                };
+            });
             return _this;
         }
         EnemyCooperator.prototype.update = function (deltaTime) {
-            var _this = this;
             _super.prototype.update.call(this, deltaTime);
             this.cooldown -= deltaTime;
             if (this.cooldown <= 0) {
-                var lifeEnemyRatio = this.enemies.reduce(function (a, b) { return a + (b.manager ? 1 : 0); }, 0) / (this.enemies.length - 1);
-                var interval = 0.01 + 0.49 * lifeEnemyRatio;
-                var enemyMoveSpeed = 3 + (1 - lifeEnemyRatio) * 6;
-                var enemyYMoveSpeed = 7 + (1 - lifeEnemyRatio) * 7;
+                var lifeEnemyRatio = this.enemies.reduce(function (a, b) { return a + (b.enemy.manager ? 1 : 0); }, 0) / (this.enemies.length - 1);
+                var interval = (0.01 + 0.49 * lifeEnemyRatio) / 0.6;
+                var enemyMoveSpeed = (3 + (1 - lifeEnemyRatio) * 6) * 0.6;
+                var flyOffRate = 0.005 + (1 - lifeEnemyRatio) * 0.1;
                 var deltaX = 0;
-                var deltaY = 0;
                 switch (this.moveDir) {
                     case "left":
                         var minX = Number.MAX_VALUE;
                         for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
                             var e = _a[_i];
-                            if (e.manager)
-                                minX = Math.min(e.pos.x, minX);
+                            if (e.enemy.manager)
+                                minX = Math.min(e.targetPos.x, minX);
                         }
                         if (minX <= this.stage.left + enemyEdgePadding) {
-                            deltaY = enemyYMoveSpeed;
                             this.moveDir = "right";
                         }
                         break;
@@ -462,34 +596,41 @@ var zlsSpaceInvader;
                         var maxX = Number.MIN_VALUE;
                         for (var _b = 0, _c = this.enemies; _b < _c.length; _b++) {
                             var e = _c[_b];
-                            if (e.manager)
-                                maxX = Math.max(e.pos.x, maxX);
+                            if (e.enemy.manager)
+                                maxX = Math.max(e.targetPos.x, maxX);
                         }
                         if (maxX >= this.stage.right - enemyEdgePadding) {
-                            deltaY = enemyYMoveSpeed;
                             this.moveDir = "left";
                         }
                         break;
                 }
-                if (deltaY == 0) {
-                    switch (this.moveDir) {
-                        case "left":
-                            deltaX = -enemyMoveSpeed;
-                            break;
-                        case "right":
-                            deltaX = enemyMoveSpeed;
-                            break;
-                    }
+                switch (this.moveDir) {
+                    case "left":
+                        deltaX = -enemyMoveSpeed;
+                        break;
+                    case "right":
+                        deltaX = enemyMoveSpeed;
+                        break;
                 }
                 for (var _d = 0, _e = this.enemies; _d < _e.length; _d++) {
                     var e = _e[_d];
-                    e.pos.x += deltaX;
-                    e.pos.y += deltaY;
+                    e.targetPos.x += deltaX;
+                    if (!e.enemy.isFlyingOff &&
+                        Math.random() < flyOffRate) {
+                        e.enemy.startFlyOff(e.targetPos);
+                    }
                 }
                 this.cooldown += interval;
             }
+            for (var _f = 0, _g = this.enemies; _f < _g.length; _f++) {
+                var e = _g[_f];
+                if (!e.enemy.isFlyingOff) {
+                    e.enemy.pos.copy(e.targetPos);
+                    e.enemy.vel.set(0, 0);
+                }
+            }
             var anyAlive = this.enemies.reduce(function (a, b) {
-                return a || (b.manager !== undefined && b.pos.y < _this.stage.bottom);
+                return a || b.enemy.manager !== undefined;
             }, false);
             if (!anyAlive) {
                 this.waveEnd();
@@ -498,6 +639,63 @@ var zlsSpaceInvader;
         return EnemyCooperator;
     }(zlsSpaceInvader.GameObject));
     zlsSpaceInvader.EnemyCooperator = EnemyCooperator;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var v = new zlsSpaceInvader.Vector2;
+    var turningSpeed = Math.PI;
+    var moveSpeed = 36;
+    var padding = 4.5;
+    var EnemyFlyOff = /** @class */ (function () {
+        function EnemyFlyOff(enemy, regroupPos) {
+            this.enemy = enemy;
+            this.regroupPos = regroupPos;
+            this.direction = new zlsSpaceInvader.Vector2(0, -1);
+            this.state = "homing";
+            this.time = 0;
+        }
+        EnemyFlyOff.prototype.update = function (deltaTime, playerFlight) {
+            this.time += deltaTime;
+            var targetPos;
+            switch (this.state) {
+                case "homing":
+                    targetPos = playerFlight.pos;
+                    break;
+                case "regroup":
+                    targetPos = this.regroupPos;
+                    break;
+            }
+            if (targetPos) {
+                v.sub(targetPos, this.enemy.pos);
+                var angle = v.angle(this.direction);
+                if (this.time < 2.5 || this.state === "regroup") {
+                    var turningAngle = Math.min(Math.abs(angle), turningSpeed * deltaTime);
+                    this.direction.rotateAround(Math.sign(angle) * turningAngle);
+                    this.enemy.rotate = this.direction.angle() - Math.PI / 2;
+                }
+                else {
+                    switch (this.state) {
+                        case "homing":
+                            this.state = "goStraight";
+                            break;
+                    }
+                }
+                this.enemy.vel.copy(this.direction).multiply(moveSpeed);
+                switch (this.state) {
+                    case "regroup":
+                        v.sub(this.regroupPos, this.enemy.pos);
+                        if (v.length() < padding) {
+                            this.enemy.endFlyOff();
+                        }
+                }
+            }
+        };
+        EnemyFlyOff.prototype.onWrapY = function () {
+            this.state = "regroup";
+        };
+        return EnemyFlyOff;
+    }());
+    zlsSpaceInvader.EnemyFlyOff = EnemyFlyOff;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -550,13 +748,34 @@ var zlsSpaceInvader;
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
     var memberList = [
-        5,
-        6,
-        4,
-        2,
-        3,
-        0,
-        7
+        {
+            no: 5,
+            bulletColor: zlsSpaceInvader.Palette.BulletColor5
+        },
+        {
+            no: 6,
+            bulletColor: zlsSpaceInvader.Palette.BulletColor6
+        },
+        {
+            no: 4,
+            bulletColor: zlsSpaceInvader.Palette.BulletColor4
+        },
+        {
+            no: 2,
+            bulletColor: zlsSpaceInvader.Palette.BulletColor2
+        },
+        {
+            no: 3,
+            bulletColor: zlsSpaceInvader.Palette.BulletColor3
+        },
+        {
+            no: 0,
+            bulletColor: zlsSpaceInvader.Palette.BulletColor0
+        },
+        {
+            no: 7,
+            bulletColor: zlsSpaceInvader.Palette.BulletColor7
+        }
     ];
     var Franchouchou = /** @class */ (function (_super) {
         __extends(Franchouchou, _super);
@@ -568,9 +787,10 @@ var zlsSpaceInvader;
             _this.members = [];
             _this.canCallMaiMai = true;
             for (var i = 0; i < memberList.length; i++) {
-                var m = new zlsSpaceInvader.SpriteObject(zlsSpaceInvader.Sprites.shared.images["" + memberList[i]]);
+                var m = new zlsSpaceInvader.SpriteObject(zlsSpaceInvader.Sprites.shared.images["" + memberList[i].no]);
+                m.renderOrder = 1;
                 m.pos.x = stage.left + 15 + i * 11;
-                m.pos.y = stage.bottom - 18;
+                m.pos.y = stage.bottom - 9;
                 _this.members.push(m);
                 if (i <= _this.remainingMember - 2) {
                     manager.add(m);
@@ -578,13 +798,17 @@ var zlsSpaceInvader;
             }
             return _this;
         }
-        Object.defineProperty(Franchouchou.prototype, "nextSprite", {
+        Object.defineProperty(Franchouchou.prototype, "nextMember", {
             get: function () {
                 this.remainingMember--;
                 if (this.remainingMember - 1 >= 0) {
                     var m = this.members[this.remainingMember - 1];
                     m.removeFromManager();
-                    return zlsSpaceInvader.Sprites.shared.images["" + memberList[this.remainingMember - 1]];
+                    var mb = memberList[this.remainingMember - 1];
+                    return {
+                        sprite: zlsSpaceInvader.Sprites.shared.images["" + mb.no],
+                        bulletColor: mb.bulletColor
+                    };
                 }
                 return null;
             },
@@ -623,6 +847,7 @@ var zlsSpaceInvader;
             var _this = _super.call(this) || this;
             _this.score = score;
             _this.time = 0;
+            _this.renderOrder = 1;
             return _this;
         }
         HiScoreScreen.prototype.update = function (deltaTime) {
@@ -821,7 +1046,7 @@ var zlsSpaceInvader;
             this.stage = {
                 left: 0,
                 right: 0,
-                up: 0,
+                top: 0,
                 bottom: 0
             };
             this.enemies = [];
@@ -859,22 +1084,16 @@ var zlsSpaceInvader;
             if (this.ctx) {
                 this.stage.left = -this.ctx.canvas.width / 4;
                 this.stage.right = this.ctx.canvas.width / 4;
-                this.stage.up = -this.ctx.canvas.height / 4;
+                this.stage.top = -this.ctx.canvas.height / 4;
                 this.stage.bottom = this.ctx.canvas.height / 4;
             }
             this.gameObjectManager.add(new zlsSpaceInvader.StarNight(this.stage));
-            var enemyBackOff = function () {
-                for (var _i = 0, _a = _this.enemies; _i < _a.length; _i++) {
-                    var e = _a[_i];
-                    e.pos.y += _this.stage.up;
-                }
-            };
             var runOutOfMember = function () {
                 _this.showContinue(scoreAndCredit, playerFlight, franchouchou);
             };
             var playerFlight = new zlsSpaceInvader.PlayerFlight(this.stage, function () {
-                return franchouchou.nextSprite;
-            }, enemyBackOff, runOutOfMember);
+                return franchouchou.nextMember;
+            }, runOutOfMember);
             playerFlight.pos.y = this.stage.bottom - 35;
             this.gameObjectManager.add(playerFlight);
             this.resetEnemies(playerFlight, scoreAndCredit);
@@ -914,7 +1133,7 @@ var zlsSpaceInvader;
                 zlsSpaceInvader.Hand,
                 zlsSpaceInvader.Dog
             ];
-            var enemyYOffset = -55;
+            var enemyYOffset = -46;
             for (var i = 0; i < enemyColumn; i++) {
                 for (var j = 0; j < enemyRows.length; j++) {
                     var e = new enemyRows[j](scoreAndCredit, function (e, p) {
@@ -957,12 +1176,6 @@ var zlsSpaceInvader;
             this.enemyCooperator = new zlsSpaceInvader.EnemyCooperator(this.stage, this.enemies, waveEnd);
             this.gameObjectManager.add(this.enemyCooperator);
         };
-        Main.prototype.enemyBackOff = function () {
-            for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
-                var e = _a[_i];
-                e.pos.y += this.stage.up;
-            }
-        };
         Main.prototype.showContinue = function (scoreAndCredit, playerFlight, franchouchou) {
             var _this = this;
             if (scoreAndCredit.credit > 0) {
@@ -983,7 +1196,6 @@ var zlsSpaceInvader;
                         _this.enemyCooperator.paused = false;
                         playerFlight.reset();
                         franchouchou.reset();
-                        _this.enemyBackOff();
                     }
                     else {
                         _this.showHighestScore(scoreAndCredit);
@@ -1019,11 +1231,12 @@ var zlsSpaceInvader;
             var _this = this;
             var prevTime = performance.now();
             setInterval(function () {
-                var curTime = performance.now();
-                var deltaTime = Math.min(zlsSpaceInvader.Constant.maxTimeStep, (curTime - prevTime) / 1000);
-                if (_this.allowUpdate)
+                if (_this.allowUpdate) {
+                    var curTime = performance.now();
+                    var deltaTime = Math.min(zlsSpaceInvader.Constant.maxTimeStep, (curTime - prevTime) / 1000);
                     _this.update(deltaTime);
-                prevTime = curTime;
+                    prevTime = curTime;
+                }
             }, 10);
         };
         Main.prototype.update = function (deltaTime) {
@@ -1055,33 +1268,25 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
-    var Palette = /** @class */ (function () {
-        function Palette() {
-        }
-        Palette.bgColor = "#2C1F22";
-        Palette.font = "7px Trebuchet MS";
-        return Palette;
-    }());
-    zlsSpaceInvader.Palette = Palette;
-})(zlsSpaceInvader || (zlsSpaceInvader = {}));
-var zlsSpaceInvader;
-(function (zlsSpaceInvader) {
     var padding = 4.5;
+    var invincibleInterval = 3;
     var PlayerFlight = /** @class */ (function (_super) {
         __extends(PlayerFlight, _super);
-        function PlayerFlight(stage, nextSprite, enemyBackOff, allMemberRunOut) {
+        function PlayerFlight(stage, nextMember, allMemberRunOut) {
             var _this = _super.call(this, zlsSpaceInvader.Sprites.shared.images[1]) || this;
             _this.stage = stage;
-            _this.nextSprite = nextSprite;
-            _this.enemyBackOff = enemyBackOff;
+            _this.nextMember = nextMember;
             _this.allMemberRunOut = allMemberRunOut;
             _this.bulletCooldown = 0;
             _this.isPlayerFlight = true;
             _this.next = false;
+            _this.invincibleTime = 0;
+            _this.bulletColor = zlsSpaceInvader.Palette.BulletColor1;
             return _this;
         }
         PlayerFlight.prototype.update = function (deltaTime) {
             _super.prototype.update.call(this, deltaTime);
+            this.invincibleTime -= deltaTime;
             if (zlsSpaceInvader.Input.shared.left)
                 this.pos.x -= zlsSpaceInvader.Constant.playerMoveSpeed * deltaTime;
             if (zlsSpaceInvader.Input.shared.right)
@@ -1090,18 +1295,20 @@ var zlsSpaceInvader;
             this.pos.x = Math.min(this.pos.x, this.stage.right - padding);
             this.bulletCooldown -= deltaTime;
             if (zlsSpaceInvader.Input.shared.fire && this.bulletCooldown <= 0 && this.manager) {
-                var b = new zlsSpaceInvader.Bullet(this.stage);
+                var b = new zlsSpaceInvader.Bullet(this.stage, this.bulletColor);
                 b.pos.copy(this.pos);
+                b.pos.y -= 6;
                 this.manager.add(b);
                 this.bulletCooldown = zlsSpaceInvader.Constant.playerFireInterval;
                 zlsSpaceInvader.Audio.dom.src = "./sound/shoot.wav";
             }
             if (this.next) {
-                var spr = this.nextSprite();
-                if (spr) {
-                    this.sprite = spr;
+                var m = this.nextMember();
+                if (m) {
+                    this.sprite = m.sprite;
+                    this.bulletColor = m.bulletColor;
                     this.pos.x = 0;
-                    this.enemyBackOff();
+                    this.invincibleTime = invincibleInterval;
                 }
                 else {
                     this.allMemberRunOut();
@@ -1112,6 +1319,7 @@ var zlsSpaceInvader;
         };
         PlayerFlight.prototype.reset = function () {
             this.sprite = zlsSpaceInvader.Sprites.shared.images[1];
+            this.bulletColor = zlsSpaceInvader.Palette.BulletColor1;
             this.pos.x = 0;
         };
         return PlayerFlight;
@@ -1138,6 +1346,7 @@ var zlsSpaceInvader;
             _this._score = 0;
             _this._hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0");
             _this.credit = 10;
+            _this.renderOrder = 1;
             return _this;
         }
         Object.defineProperty(ScoreAndCredit.prototype, "score", {
@@ -1164,7 +1373,7 @@ var zlsSpaceInvader;
         ScoreAndCredit.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
             var w = this.stage.right - this.stage.left;
-            var h = this.stage.bottom - this.stage.up;
+            var h = this.stage.bottom - this.stage.top;
             zlsSpaceInvader.TextDrawer.shared.drawText("SCORE " + addLeadingZero(this.score, 6), Math.floor(-w / 2 + 4), Math.floor(-h / 2 + 9), ctx);
             var hiScoreTxt = "HI-SCORE " + addLeadingZero(this.hiScore, 6);
             zlsSpaceInvader.TextDrawer.shared.drawText(hiScoreTxt, Math.floor(w / 2 - 2 - zlsSpaceInvader.TextDrawer.shared.measure(hiScoreTxt)), Math.floor(-h / 2 + 9), ctx);
@@ -1184,20 +1393,21 @@ var zlsSpaceInvader;
         function StarNight(stage) {
             var _this = _super.call(this) || this;
             _this.stage = stage;
+            _this.renderOrder = -1;
             var w = stage.right - stage.left;
-            var h = stage.bottom - stage.up;
+            var h = stage.bottom - stage.top;
             _this.stars = new Array(Math.floor(w * h * starDensity));
             for (var i = 0; i < _this.stars.length; i++) {
                 _this.stars[i] = {
-                    pos: new zlsSpaceInvader.Vector2(stage.left + Math.random() * w, stage.up + Math.random() * h),
-                    speed: 10 + Math.random() * 10
+                    pos: new zlsSpaceInvader.Vector2(stage.left + Math.random() * w, stage.top + Math.random() * h),
+                    speed: (10 + Math.random() * 10) * 0.6
                 };
             }
             return _this;
         }
         StarNight.prototype.update = function (deltaTime) {
             _super.prototype.update.call(this, deltaTime);
-            var h = this.stage.bottom - this.stage.up;
+            var h = this.stage.bottom - this.stage.top;
             for (var _i = 0, _a = this.stars; _i < _a.length; _i++) {
                 var s = _a[_i];
                 s.pos.y += s.speed * deltaTime;
@@ -1225,6 +1435,7 @@ var zlsSpaceInvader;
             var _this = _super.call(this) || this;
             _this.onStart = onStart;
             _this.time = 0;
+            _this.renderOrder = 1;
             return _this;
         }
         StartScreen.prototype.update = function (deltaTime) {
@@ -1313,6 +1524,7 @@ var zlsSpaceInvader;
             _this.wave = wave;
             _this.onEnd = onEnd;
             _this.time = 0;
+            _this.renderOrder = 1;
             return _this;
         }
         WaveScreen.prototype.update = function (deltaTime) {

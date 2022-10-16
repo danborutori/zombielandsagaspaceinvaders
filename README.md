@@ -33,7 +33,7 @@ cd html
 npx lite-server
 ```
 
-### Executing program
+### Live Demo
 Live Demo: https://rawcdn.githack.com/danborutori/zombielandsagaspaceinvaders/r1.2/html/index.html
 
 ## Authors
