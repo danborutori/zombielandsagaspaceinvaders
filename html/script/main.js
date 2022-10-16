@@ -667,8 +667,12 @@ var zlsSpaceInvader;
             }
             if (targetPos) {
                 v.sub(targetPos, this.enemy.pos);
-                var angle = v.angle(this.direction);
-                if (this.time < 2.5 || this.state === "regroup") {
+                if (this.time < 2.5 ||
+                    this.state === "regroup") {
+                    var angle = v.angle(this.direction);
+                    if (angle < -Math.PI) {
+                        angle += Math.PI * 2;
+                    }
                     var turningAngle = Math.min(Math.abs(angle), turningSpeed * deltaTime);
                     this.direction.rotateAround(Math.sign(angle) * turningAngle);
                     this.enemy.rotate = this.direction.angle() - Math.PI / 2;
@@ -737,9 +741,7 @@ var zlsSpaceInvader;
         };
         FloatingText.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
-            ctx.font = zlsSpaceInvader.Palette.font;
-            ctx.fillStyle = "white";
-            ctx.fillText(this.text, Math.floor(this.pos.x - ctx.measureText(this.text).width / 2), Math.floor(this.pos.y));
+            zlsSpaceInvader.TextDrawer.shared.drawText(this.text, Math.floor(this.pos.x - zlsSpaceInvader.TextDrawer.shared.measure(this.text) / 2), Math.floor(this.pos.y), ctx);
         };
         return FloatingText;
     }(zlsSpaceInvader.GameObject));
@@ -1378,7 +1380,7 @@ var zlsSpaceInvader;
             var hiScoreTxt = "HI-SCORE " + addLeadingZero(this.hiScore, 6);
             zlsSpaceInvader.TextDrawer.shared.drawText(hiScoreTxt, Math.floor(w / 2 - 2 - zlsSpaceInvader.TextDrawer.shared.measure(hiScoreTxt)), Math.floor(-h / 2 + 9), ctx);
             var creditTxt = "CREDIT " + addLeadingZero(Math.min(this.credit, 99), 2);
-            zlsSpaceInvader.TextDrawer.shared.drawText(creditTxt, Math.floor(w / 2 - 2 - ctx.measureText(creditTxt).width), Math.floor(h / 2 - 10), ctx);
+            zlsSpaceInvader.TextDrawer.shared.drawText(creditTxt, Math.floor(w / 2 - 2 - zlsSpaceInvader.TextDrawer.shared.measure(creditTxt)), Math.floor(h / 2 - 10), ctx);
             zlsSpaceInvader.TextDrawer.shared.drawText("" + this.franchouchou.remainingMember, Math.floor(-w / 2 + 4), Math.floor(h / 2 - 10), ctx);
         };
         return ScoreAndCredit;
@@ -1488,6 +1490,18 @@ var zlsSpaceInvader;
     characters["?"] = {
         x: 206,
         y: 46
+    };
+    characters["ジ"] = {
+        x: 182,
+        y: 154
+    };
+    characters["ャ"] = {
+        x: 194,
+        y: 154
+    };
+    characters["イ"] = {
+        x: 206,
+        y: 154
     };
     var TextDrawer = /** @class */ (function () {
         function TextDrawer() {
