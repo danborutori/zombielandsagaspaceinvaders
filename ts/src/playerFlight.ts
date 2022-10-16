@@ -2,6 +2,12 @@ namespace zlsSpaceInvader {
 
     const padding = 4.5
     const invincibleInterval = 3
+    const sakuraBulletColor = "#C62D3E"
+
+    export interface Member {
+        sprite: HTMLImageElement
+        bulletColor: string
+    }
 
     export class PlayerFlight extends SpriteObject {
 
@@ -9,10 +15,11 @@ namespace zlsSpaceInvader {
         readonly isPlayerFlight = true
         next = false
         invincibleTime = 0
+        private bulletColor = sakuraBulletColor
 
         constructor(            
             readonly stage: Stage,
-            readonly nextSprite: ()=>HTMLImageElement|null,
+            readonly nextMember: ()=>Member|null,
             readonly allMemberRunOut: ()=>void
         ){
             super(Sprites.shared.images[1])
@@ -34,17 +41,19 @@ namespace zlsSpaceInvader {
             this.bulletCooldown -= deltaTime
 
             if( Input.shared.fire && this.bulletCooldown<=0 && this.manager ){
-                const b = new Bullet(this.stage)
+                const b = new Bullet(this.stage, this.bulletColor)
                 b.pos.copy(this.pos)
+                b.pos.y -= 6
                 this.manager.add(b)
                 this.bulletCooldown = Constant.playerFireInterval
                 Audio.dom.src = "./sound/shoot.wav"
             }
 
             if( this.next ){
-                const spr = this.nextSprite()
-                if( spr ){
-                    this.sprite = spr
+                const m = this.nextMember()
+                if( m ){
+                    this.sprite = m.sprite
+                    this.bulletColor = m.bulletColor
                     this.pos.x = 0
                     this.invincibleTime = invincibleInterval
                 }else{
@@ -58,6 +67,7 @@ namespace zlsSpaceInvader {
 
         reset(){
             this.sprite = Sprites.shared.images[1]
+            this.bulletColor = sakuraBulletColor
             this.pos.x = 0
         }
     }

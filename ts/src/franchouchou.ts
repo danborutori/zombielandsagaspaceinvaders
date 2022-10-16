@@ -1,13 +1,34 @@
 namespace zlsSpaceInvader {
 
     const memberList = [
-        5,
-        6,
-        4,
-        2,
-        3,
-        0,
-        7
+        {
+            no: 5,
+            bulletColor: "#FF2C61"
+        },
+        {
+            no: 6,
+            bulletColor: "#FFEB48"
+        },
+        {
+            no: 4,
+            bulletColor: "#D1E0E3"
+        },
+        {
+            no: 2,
+            bulletColor: "#FFB950"
+        },
+        {
+            no: 3,
+            bulletColor: "#3851FF"
+        },
+        {
+            no: 0,
+            bulletColor: "#E545FF"
+        },
+        {
+            no: 7,
+            bulletColor: "#3FEE3B"
+        }
     ]
 
     export class Franchouchou extends GameObject {
@@ -16,12 +37,16 @@ namespace zlsSpaceInvader {
         private members: SpriteObject[] = []
         private canCallMaiMai = true
 
-        get nextSprite(){
+        get nextMember(){
             this.remainingMember--
             if( this.remainingMember-1>=0 ){
                 const m = this.members[this.remainingMember-1]
                 m.removeFromManager()
-                return Sprites.shared.images[`${memberList[this.remainingMember-1]}`]
+                const mb = memberList[this.remainingMember-1]
+                return {
+                    sprite: Sprites.shared.images[`${mb.no}`],
+                    bulletColor: mb.bulletColor
+                }
             }
             return null
         }
@@ -32,7 +57,7 @@ namespace zlsSpaceInvader {
         ){
             super()
             for( let i=0; i<memberList.length; i++ ){
-                const m = new SpriteObject( Sprites.shared.images[`${memberList[i]}`] )
+                const m = new SpriteObject( Sprites.shared.images[`${memberList[i].no}`] )
                 m.pos.x = stage.left+15+i*11
                 m.pos.y = stage.bottom-9
                 this.members.push(m)

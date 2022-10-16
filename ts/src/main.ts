@@ -64,7 +64,7 @@ namespace zlsSpaceInvader {
             const playerFlight = new PlayerFlight(
                 this.stage,
                 ()=>{
-                    return franchouchou.nextSprite
+                    return franchouchou.nextMember
                 },
                 runOutOfMember
             )
