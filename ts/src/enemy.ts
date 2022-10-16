@@ -43,7 +43,6 @@ namespace zlsSpaceInvader {
 
         endFlyOff(){
             this.flyOff = undefined
-            this.rotate = 0
             this.vel.set(0,0)
         }
 
@@ -104,7 +103,11 @@ namespace zlsSpaceInvader {
 
                 const playerFlight = this.manager && this.manager.gameObjects.filter(o=>(o as PlayerFlight).isPlayerFlight)[0] as PlayerFlight
                 if( playerFlight ){
-                    this.flyOff && this.flyOff.update( deltaTime, playerFlight )
+                    if( this.flyOff ){
+                        this.flyOff.update( deltaTime, playerFlight )
+                    }else{
+                        this.rotate -= Math.sign(this.rotate)*Math.min(Math.abs(this.rotate),deltaTime*Math.PI*2)
+                    }
 
                     v.sub(this.pos, playerFlight.pos).abs()
                     if( 
@@ -122,7 +125,8 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             ctx.save()
             ctx.translate(this.pos.x, this.pos.y)
-            ctx.rotate(this.rotate)
+            const rotateStep = Math.PI/8
+            ctx.rotate(Math.round(this.rotate/rotateStep)*rotateStep)
             ctx.translate(-this.pos.x, -this.pos.y)
             super.render(deltaTime,ctx)
             ctx.restore()

@@ -38,9 +38,7 @@ namespace zlsSpaceInvader {
                     this.direction.rotateAround(
                         Math.sign(angle)*turningAngle
                     )
-                    const rotateStep = Math.PI/8
-                    this.enemy.rotate = 
-                        Math.floor((this.direction.angle()-Math.PI/2)/rotateStep)*rotateStep
+                    this.enemy.rotate = this.direction.angle()-Math.PI/2
                 }else{
                     switch( this.state ){
                     case "homing":
