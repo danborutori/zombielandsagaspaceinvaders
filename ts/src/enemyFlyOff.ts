@@ -34,8 +34,14 @@ namespace zlsSpaceInvader {
 
             if( targetPos ){
                 v.sub( targetPos, this.enemy.pos )
-                const angle = v.angle(this.direction)
-                if( this.time<2.5 || this.state==="regroup" ){
+                if(
+                    this.time<2.5 ||
+                    this.state==="regroup"
+                ){
+                    let angle = v.angle(this.direction)
+                    if( angle<-Math.PI ){
+                        angle += Math.PI*2
+                    }
                     const turningAngle = Math.min(Math.abs(angle),turningSpeed*deltaTime)
                     this.direction.rotateAround(
                         Math.sign(angle)*turningAngle
