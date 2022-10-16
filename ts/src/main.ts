@@ -106,7 +106,7 @@ namespace zlsSpaceInvader {
                 Hand,
                 Dog
             ]
-            const enemyYOffset = -55
+            const enemyYOffset = -46
             
             for( let i=0; i<enemyColumn; i++ ){
 

@@ -34,7 +34,7 @@ namespace zlsSpaceInvader {
             for( let i=0; i<memberList.length; i++ ){
                 const m = new SpriteObject( Sprites.shared.images[`${memberList[i]}`] )
                 m.pos.x = stage.left+15+i*11
-                m.pos.y = stage.bottom-18
+                m.pos.y = stage.bottom-9
                 this.members.push(m)
                 if( i<=this.remainingMember-2 ){
                     manager.add(m)

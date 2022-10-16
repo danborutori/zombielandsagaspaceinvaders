@@ -31,7 +31,7 @@ namespace zlsSpaceInvader {
             super.render( deltaTime, ctx )
             ctx.drawImage(this.sprite,
                 Math.floor(this.pos.x-this.sprite.width/2),
-                Math.floor(this.pos.y+this.sprite.height/2)
+                Math.floor(this.pos.y-this.sprite.height/2)
             )
         }
     }
