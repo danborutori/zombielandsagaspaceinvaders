@@ -57,6 +57,10 @@ namespace zlsSpaceInvader {
             while( this.pos.x > this.scorer.stage.right+padding ){
                 this.pos.x -= w
             }
+            while( this.pos.y < this.scorer.stage.top-padding ){
+                this.pos.y += h
+                this.flyOff && this.flyOff.onWrapY()
+            }
             while( this.pos.y > this.scorer.stage.bottom+padding ){
                 this.pos.y -= h
                 this.flyOff && this.flyOff.onWrapY()

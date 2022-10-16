@@ -83,11 +83,8 @@ namespace zlsSpaceInvader {
 
             for( let e of this.enemies ){
                 if( !e.enemy.isFlyingOff ){
-                    
-                    e.enemy.vel.sub( e.targetPos, e.enemy.pos )
-
-                    const speed = Math.min( e.enemy.vel.length()/deltaTime, 1000 )
-                    e.enemy.vel.normalize().multiply(speed)
+                    e.enemy.pos.copy(e.targetPos)
+                    e.enemy.vel.set(0,0)
                 }
             }
 
