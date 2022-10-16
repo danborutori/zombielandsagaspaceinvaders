@@ -41,6 +41,21 @@ namespace zlsSpaceInvader {
         y: 46
     }
 
+    characters["ジ"] = {
+        x: 182,
+        y: 154
+    }
+
+    characters["ャ"] = {
+        x: 194,
+        y: 154
+    }
+
+    characters["イ"] = {
+        x: 206,
+        y: 154
+    }
+
     export class TextDrawer {
         static readonly shared = new TextDrawer()
 

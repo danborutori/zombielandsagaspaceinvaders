@@ -23,12 +23,11 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
-            ctx.font = Palette.font
-            ctx.fillStyle = "white"
-            ctx.fillText(
+            TextDrawer.shared.drawText(
                 this.text,
-                Math.floor(this.pos.x-ctx.measureText(this.text).width/2),
-                Math.floor(this.pos.y)
+                Math.floor(this.pos.x-TextDrawer.shared.measure(this.text)/2),
+                Math.floor(this.pos.y),
+                ctx
             )
         }
 
