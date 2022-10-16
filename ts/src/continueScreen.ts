@@ -9,6 +9,7 @@ namespace zlsSpaceInvader {
             readonly continueFunc: (b: boolean)=>void
         ){
             super()
+            this.renderOrder = 1
         }
 
         update( deltaTime: number ){

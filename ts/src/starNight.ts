@@ -13,6 +13,7 @@ namespace zlsSpaceInvader {
             readonly stage: Stage
         ){
             super()
+            this.renderOrder = -1
 
             const w = stage.right-stage.left
             const h = stage.bottom-stage.top
@@ -24,7 +25,7 @@ namespace zlsSpaceInvader {
                         stage.left+Math.random()*w,
                         stage.top+Math.random()*h
                     ),
-                    speed: 10+Math.random()*10
+                    speed: (10+Math.random()*10)*0.6
                 }
             }
         }

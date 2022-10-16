@@ -58,6 +58,7 @@ namespace zlsSpaceInvader {
             super()
             for( let i=0; i<memberList.length; i++ ){
                 const m = new SpriteObject( Sprites.shared.images[`${memberList[i].no}`] )
+                m.renderOrder = 1
                 m.pos.x = stage.left+15+i*11
                 m.pos.y = stage.bottom-9
                 this.members.push(m)

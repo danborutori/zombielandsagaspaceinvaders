@@ -8,6 +8,7 @@ namespace zlsSpaceInvader {
             readonly onStart: ()=>void
         ){
             super()
+            this.renderOrder = 1
         }
 
         update(deltaTime: number): void {
