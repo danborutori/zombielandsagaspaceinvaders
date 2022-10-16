@@ -3,31 +3,31 @@ namespace zlsSpaceInvader {
     const memberList = [
         {
             no: 5,
-            bulletColor: "#FF2C61"
+            bulletColor: Palette.BulletColor5
         },
         {
             no: 6,
-            bulletColor: "#FFEB48"
+            bulletColor: Palette.BulletColor6
         },
         {
             no: 4,
-            bulletColor: "#D1E0E3"
+            bulletColor: Palette.BulletColor4
         },
         {
             no: 2,
-            bulletColor: "#FFB950"
+            bulletColor: Palette.BulletColor2
         },
         {
             no: 3,
-            bulletColor: "#3851FF"
+            bulletColor: Palette.BulletColor3
         },
         {
             no: 0,
-            bulletColor: "#E545FF"
+            bulletColor: Palette.BulletColor0
         },
         {
             no: 7,
-            bulletColor: "#3FEE3B"
+            bulletColor: Palette.BulletColor7
         }
     ]
 

@@ -2,7 +2,6 @@ namespace zlsSpaceInvader {
 
     const padding = 4.5
     const invincibleInterval = 3
-    const sakuraBulletColor = "#C62D3E"
 
     export interface Member {
         sprite: HTMLImageElement
@@ -15,7 +14,7 @@ namespace zlsSpaceInvader {
         readonly isPlayerFlight = true
         next = false
         invincibleTime = 0
-        private bulletColor = sakuraBulletColor
+        private bulletColor = Palette.BulletColor1
 
         constructor(            
             readonly stage: Stage,
@@ -67,7 +66,7 @@ namespace zlsSpaceInvader {
 
         reset(){
             this.sprite = Sprites.shared.images[1]
-            this.bulletColor = sakuraBulletColor
+            this.bulletColor = Palette.BulletColor1
             this.pos.x = 0
         }
     }
