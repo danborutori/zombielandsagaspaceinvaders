@@ -142,6 +142,7 @@ namespace zlsSpaceInvader {
                     this.gameObjectManager.add(jai)
                     scoreAndCredit.score += 10000
                     e.removeFromManager()
+                    Audio.play(Audio.sounds.bonus,1)
                 }
             )
             p.pos.y = enemyYOffset-enemySpacing
@@ -215,11 +216,11 @@ namespace zlsSpaceInvader {
         }
 
         onMute( button: HTMLInputElement ){
-            if(Audio.dom.volume!=0 ){
-                Audio.dom.volume = 0
+            if(Audio.volume!=0 ){
+                Audio.volume = 0
                 button.value = "SOUND ON"
             }else{
-                Audio.dom.volume = Constant.volume
+                Audio.volume = Constant.volume
                 button.value = "SOUND OFF"
             }
         }
