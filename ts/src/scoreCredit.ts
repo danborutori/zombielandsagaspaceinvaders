@@ -37,6 +37,7 @@ namespace zlsSpaceInvader {
         ){
             super()
             this.renderOrder = 1
+            this.renderHalf = false
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

@@ -5,6 +5,7 @@ namespace zlsSpaceInvader {
         readonly pos = new Vector2
         manager?: GameObjectManager
         paused: boolean = false
+        renderHalf = true
         renderOrder = 0
 
         update( deltaTime: number ){}
@@ -60,7 +61,12 @@ namespace zlsSpaceInvader {
         }
 
         render( deltaTime: number, ctx: CanvasRenderingContext2D ){
-            for( let o of Array.from(this.gameObjects).sort((a,b)=>a.renderOrder-b.renderOrder) )
+            for( let o of this.gameObjects.filter(o=>!o.renderHalf).sort((a,b)=>a.renderOrder-b.renderOrder) )
+                o.render(deltaTime, ctx)
+        }
+
+        renderHalf( deltaTime: number, ctx: CanvasRenderingContext2D ){
+            for( let o of this.gameObjects.filter(o=>o.renderHalf).sort((a,b)=>a.renderOrder-b.renderOrder) )
                 o.render(deltaTime, ctx)
         }
 
