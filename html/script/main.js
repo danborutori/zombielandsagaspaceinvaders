@@ -150,6 +150,7 @@ var zlsSpaceInvader;
         function GameObject() {
             this.pos = new zlsSpaceInvader.Vector2;
             this.paused = false;
+            this.renderHalf = true;
             this.renderOrder = 0;
         }
         GameObject.prototype.update = function (deltaTime) { };
@@ -199,7 +200,13 @@ var zlsSpaceInvader;
             }
         };
         GameObjectManager.prototype.render = function (deltaTime, ctx) {
-            for (var _i = 0, _a = Array.from(this.gameObjects).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
+            for (var _i = 0, _a = this.gameObjects.filter(function (o) { return !o.renderHalf; }).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
+                var o = _a[_i];
+                o.render(deltaTime, ctx);
+            }
+        };
+        GameObjectManager.prototype.renderHalf = function (deltaTime, ctx) {
+            for (var _i = 0, _a = this.gameObjects.filter(function (o) { return o.renderHalf; }).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
                 var o = _a[_i];
                 o.render(deltaTime, ctx);
             }
@@ -300,22 +307,51 @@ var zlsSpaceInvader;
             dom.onerror = function (e) { return reject(e); };
         });
     }
+    var channels = new Array(2);
+    for (var i = 0; i < channels.length; i++) {
+        var dom = document.createElement("audio");
+        dom.volume = zlsSpaceInvader.Constant.volume;
+        dom.autoplay = true;
+        channels[i] = dom;
+    }
     var Audio = /** @class */ (function () {
         function Audio() {
         }
         Audio.preload = function () {
-            return Promise.all([
-                "./sound/explosion.wav",
-                "./sound/invaderkilled.wav",
-                "./sound/shoot.wav"
-            ].map(function (url) { return loadAudio(url); }));
+            var urls = [];
+            for (var n in Audio.sounds) {
+                urls.push(Audio.sounds[n]);
+            }
+            return Promise.all(urls.map(function (url) { return loadAudio(url); }));
         };
-        Audio.dom = document.createElement("audio");
+        Audio.play = function (sound, channel) {
+            if (channel === void 0) { channel = 0; }
+            channels[channel].src = sound;
+        };
+        Object.defineProperty(Audio, "volume", {
+            get: function () {
+                return channels[0].volume;
+            },
+            set: function (n) {
+                for (var _i = 0, channels_1 = channels; _i < channels_1.length; _i++) {
+                    var a = channels_1[_i];
+                    a.volume = n;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Audio.sounds = {
+            explosion: "./sound/explosion.wav",
+            invaderkilled: "./sound/invaderkilled.wav",
+            shoot: "./sound/shoot.wav",
+            shipFly: "./sound/Galaxian Sound.mp3",
+            bonus: "./sound/Galaxian.mp3",
+        };
         return Audio;
     }());
     zlsSpaceInvader.Audio = Audio;
-    Audio.dom.volume = zlsSpaceInvader.Constant.volume;
-    Audio.dom.autoplay = true;
+    var _sort = new zlsSpaceInvader.Constant;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -354,6 +390,7 @@ var zlsSpaceInvader;
             _this.countDown = 9;
             _this.countCoolDown = 1;
             _this.renderOrder = 1;
+            _this.renderHalf = false;
             return _this;
         }
         ContinueScreen.prototype.update = function (deltaTime) {
@@ -500,10 +537,12 @@ var zlsSpaceInvader;
         };
         EnemyFlight.prototype.render = function (deltaTime, ctx) {
             ctx.save();
-            ctx.translate(this.pos.x, this.pos.y);
+            var x = Math.floor(this.pos.x);
+            var y = Math.floor(this.pos.y);
+            ctx.translate(x, y);
             var rotateStep = Math.PI / 8;
             ctx.rotate(Math.round(this.rotate / rotateStep) * rotateStep);
-            ctx.translate(-this.pos.x, -this.pos.y);
+            ctx.translate(-x, -y);
             _super.prototype.render.call(this, deltaTime, ctx);
             ctx.restore();
         };
@@ -653,6 +692,7 @@ var zlsSpaceInvader;
             this.direction = new zlsSpaceInvader.Vector2(0, -1);
             this.state = "homing";
             this.time = 0;
+            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shipFly, 1);
         }
         EnemyFlyOff.prototype.update = function (deltaTime, playerFlight) {
             this.time += deltaTime;
@@ -708,7 +748,7 @@ var zlsSpaceInvader;
         function Explosion() {
             var _this = _super.call(this, zlsSpaceInvader.Sprites.shared.images["explod"]) || this;
             _this.lifeTime = 0;
-            zlsSpaceInvader.Audio.dom.src = "./sound/invaderkilled.wav";
+            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.invaderkilled, 1);
             return _this;
         }
         Explosion.prototype.update = function (deltaTime) {
@@ -730,6 +770,7 @@ var zlsSpaceInvader;
             var _this = _super.call(this) || this;
             _this.text = text;
             _this.time = 0;
+            _this.renderHalf = false;
             return _this;
         }
         FloatingText.prototype.update = function (deltaTime) {
@@ -850,6 +891,7 @@ var zlsSpaceInvader;
             _this.score = score;
             _this.time = 0;
             _this.renderOrder = 1;
+            _this.renderHalf = false;
             return _this;
         }
         HiScoreScreen.prototype.update = function (deltaTime) {
@@ -1045,6 +1087,7 @@ var zlsSpaceInvader;
             this.allowUpdate = true;
             this.gameObjectManager = new zlsSpaceInvader.GameObjectManager;
             this.ctx = null;
+            this.halfRenderContext = null;
             this.stage = {
                 left: 0,
                 right: 0,
@@ -1057,12 +1100,20 @@ var zlsSpaceInvader;
         }
         Main.prototype.init = function (canvas) {
             return __awaiter(this, void 0, void 0, function () {
+                var lowresCanvas;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             this.ctx = canvas.getContext("2d");
                             if (this.ctx) {
                                 this.ctx.imageSmoothingEnabled = false;
+                            }
+                            lowresCanvas = document.createElement("canvas");
+                            lowresCanvas.width = canvas.width / 2;
+                            lowresCanvas.height = canvas.height / 2;
+                            this.halfRenderContext = lowresCanvas.getContext("2d");
+                            if (this.halfRenderContext) {
+                                this.halfRenderContext.imageSmoothingEnabled = false;
                             }
                             return [4 /*yield*/, Promise.all([
                                     zlsSpaceInvader.Sprites.shared.load(),
@@ -1153,6 +1204,7 @@ var zlsSpaceInvader;
                 _this.gameObjectManager.add(jai);
                 scoreAndCredit.score += 10000;
                 e.removeFromManager();
+                zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.bonus, 1);
             });
             p.pos.y = enemyYOffset - enemySpacing;
             this.gameObjectManager.add(p);
@@ -1220,12 +1272,12 @@ var zlsSpaceInvader;
             this.gameObjectManager.add(hiScoreScr);
         };
         Main.prototype.onMute = function (button) {
-            if (zlsSpaceInvader.Audio.dom.volume != 0) {
-                zlsSpaceInvader.Audio.dom.volume = 0;
+            if (zlsSpaceInvader.Audio.volume != 0) {
+                zlsSpaceInvader.Audio.volume = 0;
                 button.value = "SOUND ON";
             }
             else {
-                zlsSpaceInvader.Audio.dom.volume = zlsSpaceInvader.Constant.volume;
+                zlsSpaceInvader.Audio.volume = zlsSpaceInvader.Constant.volume;
                 button.value = "SOUND OFF";
             }
         };
@@ -1250,16 +1302,23 @@ var zlsSpaceInvader;
             var _this = this;
             this.allowUpdate = false;
             requestAnimationFrame(function () {
-                if (_this.ctx) {
-                    var w = _this.ctx.canvas.width;
-                    var h = _this.ctx.canvas.height;
-                    _this.ctx.fillStyle = zlsSpaceInvader.Palette.bgColor;
-                    _this.ctx.fillRect(0, 0, w, h);
-                    _this.ctx.save();
-                    _this.ctx.translate(w / 2, h / 2);
-                    _this.ctx.scale(2, 2);
-                    _this.gameObjectManager.render(deltaTime, _this.ctx);
-                    _this.ctx.restore();
+                if (_this.halfRenderContext) {
+                    var w = _this.halfRenderContext.canvas.width;
+                    var h = _this.halfRenderContext.canvas.height;
+                    _this.halfRenderContext.fillStyle = zlsSpaceInvader.Palette.bgColor;
+                    _this.halfRenderContext.fillRect(0, 0, w, h);
+                    _this.halfRenderContext.save();
+                    _this.halfRenderContext.translate(w / 2, h / 2);
+                    _this.gameObjectManager.renderHalf(deltaTime, _this.halfRenderContext);
+                    _this.halfRenderContext.restore();
+                    if (_this.ctx) {
+                        _this.ctx.drawImage(_this.halfRenderContext.canvas, 0, 0, w, h, 0, 0, _this.ctx.canvas.width, _this.ctx.canvas.height);
+                        _this.ctx.save();
+                        _this.ctx.translate(_this.ctx.canvas.width / 2, _this.ctx.canvas.height / 2);
+                        _this.ctx.scale(2, 2);
+                        _this.gameObjectManager.render(deltaTime, _this.ctx);
+                        _this.ctx.restore();
+                    }
                 }
                 _this.allowUpdate = true;
             });
@@ -1302,7 +1361,7 @@ var zlsSpaceInvader;
                 b.pos.y -= 6;
                 this.manager.add(b);
                 this.bulletCooldown = zlsSpaceInvader.Constant.playerFireInterval;
-                zlsSpaceInvader.Audio.dom.src = "./sound/shoot.wav";
+                zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shoot);
             }
             if (this.next) {
                 var m = this.nextMember();
@@ -1315,7 +1374,7 @@ var zlsSpaceInvader;
                 else {
                     this.allMemberRunOut();
                 }
-                zlsSpaceInvader.Audio.dom.src = "./sound/explosion.wav";
+                zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.explosion);
                 this.next = false;
             }
         };
@@ -1349,6 +1408,7 @@ var zlsSpaceInvader;
             _this._hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0");
             _this.credit = 10;
             _this.renderOrder = 1;
+            _this.renderHalf = false;
             return _this;
         }
         Object.defineProperty(ScoreAndCredit.prototype, "score", {
@@ -1438,6 +1498,7 @@ var zlsSpaceInvader;
             _this.onStart = onStart;
             _this.time = 0;
             _this.renderOrder = 1;
+            _this.renderHalf = false;
             return _this;
         }
         StartScreen.prototype.update = function (deltaTime) {
@@ -1539,6 +1600,7 @@ var zlsSpaceInvader;
             _this.onEnd = onEnd;
             _this.time = 0;
             _this.renderOrder = 1;
+            _this.renderHalf = false;
             return _this;
         }
         WaveScreen.prototype.update = function (deltaTime) {
