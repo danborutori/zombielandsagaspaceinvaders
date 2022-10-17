@@ -4,6 +4,7 @@ namespace zlsSpaceInvader {
         private allowUpdate = true
         private gameObjectManager = new GameObjectManager
         private ctx: CanvasRenderingContext2D | null = null
+        private halfRenderContext: CanvasRenderingContext2D | null = null
 
         private stage: Stage = {
             left: 0,
@@ -23,6 +24,14 @@ namespace zlsSpaceInvader {
             this.ctx = canvas.getContext("2d")
             if( this.ctx ){
                 this.ctx.imageSmoothingEnabled = false
+            }
+
+            const lowresCanvas = document.createElement( "canvas" )
+            lowresCanvas.width = canvas.width/2
+            lowresCanvas.height = canvas.height/2
+            this.halfRenderContext = lowresCanvas.getContext("2d")
+            if( this.halfRenderContext ){
+                this.halfRenderContext.imageSmoothingEnabled = false
             }
 
             await Promise.all([
@@ -238,20 +247,40 @@ namespace zlsSpaceInvader {
         private render( deltaTime: number ){
             this.allowUpdate = false
             requestAnimationFrame(()=>{
-                if( this.ctx ){
-                    const w = this.ctx.canvas.width
-                    const h = this.ctx.canvas.height
+                if(  this.halfRenderContext){
+                    const w = this.halfRenderContext.canvas.width
+                    const h = this.halfRenderContext.canvas.height
 
-                    this.ctx.fillStyle = Palette.bgColor
-                    this.ctx.fillRect(0,0,w,h)
+                    this.halfRenderContext.fillStyle = Palette.bgColor
+                    this.halfRenderContext.fillRect(0,0,w,h)
 
-                    this.ctx.save()
-                    this.ctx.translate(w/2, h/2)
-                    this.ctx.scale(2,2)
+                    this.halfRenderContext.save()
+                    this.halfRenderContext.translate(w/2, h/2)
 
-                    this.gameObjectManager.render( deltaTime, this.ctx )
+                    this.gameObjectManager.renderHalf(
+                        deltaTime,
+                        this.halfRenderContext
+                    )
 
-                    this.ctx.restore()
+                    this.halfRenderContext.restore()
+
+                    if( this.ctx ){
+                        this.ctx.drawImage(this.halfRenderContext.canvas,
+                        0, 0, w, h,
+                        0, 0, this.ctx.canvas.width, this.ctx.canvas.height )
+
+                        this.ctx.save()
+                        this.ctx.translate(this.ctx.canvas.width/2, this.ctx.canvas.height/2)
+                        this.ctx.scale(2,2)
+
+                        this.gameObjectManager.render(
+                            deltaTime,
+                            this.ctx
+                        )
+
+                        this.ctx.restore()
+                    }
+
                 }
                 this.allowUpdate = true
             })

@@ -10,6 +10,7 @@ namespace zlsSpaceInvader {
         ){
             super()
             this.renderOrder = 1
+            this.renderHalf = false
         }
 
         update(deltaTime: number): void {

@@ -128,10 +128,12 @@ namespace zlsSpaceInvader {
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             ctx.save()
-            ctx.translate(this.pos.x, this.pos.y)
+            const x = Math.floor(this.pos.x)
+            const y = Math.floor(this.pos.y)
+            ctx.translate(x, y)
             const rotateStep = Math.PI/8
             ctx.rotate(Math.round(this.rotate/rotateStep)*rotateStep)
-            ctx.translate(-this.pos.x, -this.pos.y)
+            ctx.translate(-x, -y)
             super.render(deltaTime,ctx)
             ctx.restore()
         }

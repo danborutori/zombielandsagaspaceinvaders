@@ -8,6 +8,7 @@ namespace zlsSpaceInvader {
             readonly text: string
         ){
             super()
+            this.renderHalf = false
         }
 
         update( deltaTime: number ){
