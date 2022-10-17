@@ -11,19 +11,50 @@ namespace zlsSpaceInvader {
         })
     }
 
+    const channels: HTMLAudioElement[] = new Array(2)
+    for( let i=0; i<channels.length; i++ ){
+        const dom = document.createElement("audio")
+        dom.volume = Constant.volume
+        dom.autoplay = true
+    
+        channels[i] = dom
+    }
+
+
     export class Audio {
-        static dom = document.createElement("audio")
+        static sounds = {
+            explosion: "./sound/explosion.wav",
+            invaderkilled: "./sound/invaderkilled.wav",
+            shoot: "./sound/shoot.wav",
+            shipFly: "./sound/Galaxian Sound.mp3",
+            bonus: "./sound/Galaxian.mp3",
+        }
 
         static preload(){
-            return Promise.all([
-                "./sound/explosion.wav",
-                "./sound/invaderkilled.wav",
-                "./sound/shoot.wav"
-            ].map( url=>loadAudio(url)))
+            const urls: string[] = []
+            for( let n in Audio.sounds ){
+                urls.push( (Audio.sounds as any)[n] )
+            }
+            return Promise.all(
+                urls.map( url=>loadAudio(url))
+            )
+        }
+
+        static play(
+            sound: string,
+            channel: number = 0
+        ){
+            channels[channel].src = sound
+        }
+
+        static get volume(){
+            return channels[0].volume
+        }
+
+        static set volume( n: number ){
+            for( let a of channels ) a.volume = n
         }
     }
 
-    Audio.dom.volume = Constant.volume
-    Audio.dom.autoplay = true
-
+    const _sort = new Constant
 }

@@ -15,7 +15,9 @@ namespace zlsSpaceInvader {
         constructor(
             readonly enemy: EnemyFlight,
             readonly regroupPos: Vector2
-        ){}
+        ){
+            Audio.play( Audio.sounds.shipFly, 1 )
+        }
 
         update( deltaTime: number, playerFlight: PlayerFlight ){
 
