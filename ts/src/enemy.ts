@@ -9,7 +9,7 @@ namespace zlsSpaceInvader {
         private flashingSprite: HTMLCanvasElement
         private hp = 3
         readonly vel = new Vector2
-        private flyOff?: EnemyFlyOff
+        protected flyOff?: EnemyFlyOff
         rotate = 0
 
         constructor(
@@ -100,6 +100,7 @@ namespace zlsSpaceInvader {
                             ex.pos.copy(this.pos)
                             this.manager.add(ex)
                             this.removeFromManager()
+                            this.flyOff && this.flyOff.onDie()
                             this.scorer.score += this.score
                         }
                     }
@@ -138,84 +139,5 @@ namespace zlsSpaceInvader {
             ctx.restore()
         }
     }
-
-    export class Zombie1 extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["zombie1"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Zombie2 extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["zombie2"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Hand extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["hand"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Dog extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["dog"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Producer extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["p"],
-                scorer,
-                1000,
-                onHitPlayer
-            )
-        }
-
-    }
+    
 }

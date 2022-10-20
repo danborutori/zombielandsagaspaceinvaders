@@ -7,9 +7,9 @@ namespace zlsSpaceInvader {
 
     export class EnemyFlyOff {
 
-        private direction = new Vector2( 0, -1 )
-        private state: "homing" | "goStraight" | "regroup" = "homing"
-        private time = 0
+        protected direction = new Vector2( 0, -1 )
+        protected state: "homing" | "goStraight" | "regroup" | "stop" = "homing"
+        protected time = 0
         
 
         constructor(
@@ -32,13 +32,17 @@ namespace zlsSpaceInvader {
             case "regroup":
                 targetPos = this.regroupPos
                 break
+            case "stop":
+                targetPos = v.set(this.enemy.pos.x, this.enemy.pos.y+100)
+                break
             }
 
             if( targetPos ){
                 v.sub( targetPos, this.enemy.pos )
                 if(
                     this.time<2.5 ||
-                    this.state==="regroup"
+                    this.state==="regroup" ||
+                    this.state==="stop"
                 ){
                     let angle = v.angle(this.direction)
                     if( angle<-Math.PI ){
@@ -57,8 +61,6 @@ namespace zlsSpaceInvader {
                     }
                 }
 
-                this.enemy.vel.copy(this.direction).multiply(moveSpeed)
-
                 switch( this.state ){
                 case "regroup":
                     v.sub( this.regroupPos, this.enemy.pos )
@@ -67,11 +69,22 @@ namespace zlsSpaceInvader {
                     }
                 }
             }
+
+            switch( this.state ){
+            case "stop":
+                this.enemy.vel.set(0,0)
+                break
+            default:
+                this.enemy.vel.copy(this.direction).multiply(moveSpeed)
+                break
+            }
         }
 
         onWrapY(){
             this.state = "regroup"
         }
+
+        onDie(){}
 
     }
 
