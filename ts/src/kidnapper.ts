@@ -51,7 +51,9 @@ namespace zlsSpaceInvader {
                     let captured = false
                     while( time<2 ){
                         time -= await this.enemy.wait(0)
-                        if(Math.abs(playerFlight.pos.x-this.enemy.pos.x)<9
+                        if(
+                            Math.abs(playerFlight.pos.x-this.enemy.pos.x)<9 &&
+                            playerFlight.invincibleTime<=0
                         ){
                             await this.capture(playerFlight, wave)
                             captured = true
@@ -86,6 +88,10 @@ namespace zlsSpaceInvader {
                 this.enemy.manager.add( rotFlight )
                 this.enemy.kidnapped = rotFlight
 
+                player.invincibleTime = 9000
+                player.visible = false
+                player.paused = true
+
                 try{
 
                     await this.enemy.wait(1)
@@ -97,13 +103,20 @@ namespace zlsSpaceInvader {
             
                     await this.enemy.wait(3)
 
-                }catch(e){
-                }finally{
                     this.kidnapBeamState = "beamEnd"
                     this.state = "regroup"
+
+                    await this.enemy.wait(5)
+    
+                }catch(e){
+                }finally{
+                    player.invincibleTime = 0
+                    player.visible = true
+                    player.paused = false
+                    player.next = true
                 }
 
-                // TODO: hide player flight and invincible, player flight next, capturing enemy invincible
+                // TODO: capturing enemy invincible
             }
         }
     }

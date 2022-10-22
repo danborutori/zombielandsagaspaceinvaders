@@ -7,6 +7,7 @@ namespace zlsSpaceInvader {
         paused: boolean = false
         renderHalf = true
         renderOrder = 0
+        visible = true
 
         private waitPromises: {
             time: number
@@ -87,12 +88,12 @@ namespace zlsSpaceInvader {
         }
 
         render( deltaTime: number, ctx: CanvasRenderingContext2D ){
-            for( let o of this.gameObjects.filter(o=>!o.renderHalf).sort((a,b)=>a.renderOrder-b.renderOrder) )
+            for( let o of this.gameObjects.filter(o=>!o.renderHalf && o.visible).sort((a,b)=>a.renderOrder-b.renderOrder) )
                 o.render(deltaTime, ctx)
         }
 
         renderHalf( deltaTime: number, ctx: CanvasRenderingContext2D ){
-            for( let o of this.gameObjects.filter(o=>o.renderHalf).sort((a,b)=>a.renderOrder-b.renderOrder) )
+            for( let o of this.gameObjects.filter(o=>o.renderHalf && o.visible).sort((a,b)=>a.renderOrder-b.renderOrder) )
                 o.render(deltaTime, ctx)
         }
 
