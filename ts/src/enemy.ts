@@ -9,7 +9,7 @@ namespace zlsSpaceInvader {
         private flashingSprite: HTMLCanvasElement
         private hp = 3
         readonly vel = new Vector2
-        protected flyOff?: EnemyFlyOff
+        protected flyOff?: EnemyFlyOff<EnemyFlight>
         rotate = 0
 
         constructor(

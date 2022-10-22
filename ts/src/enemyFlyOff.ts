@@ -5,7 +5,7 @@ namespace zlsSpaceInvader {
     const moveSpeed = 36    
     const padding = 4.5
 
-    export class EnemyFlyOff {
+    export class EnemyFlyOff<T extends EnemyFlight> {
 
         protected direction = new Vector2( 0, -1 )
         protected state: "homing" | "goStraight" | "regroup" | "stop" = "homing"
@@ -13,7 +13,7 @@ namespace zlsSpaceInvader {
         
 
         constructor(
-            readonly enemy: EnemyFlight,
+            readonly enemy: T,
             readonly regroupPos: Vector2
         ){
             Audio.play( Audio.sounds.shipFly, 1 )
