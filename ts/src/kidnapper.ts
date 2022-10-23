@@ -239,8 +239,8 @@ namespace zlsSpaceInvader {
                 while( !posXSet ){
                     const dt = await this.wait(0)
 
-                    const numFlight = 1
-                    const targetX = -9*numFlight/2
+                    const numFlight = this.player.flightUnits.length
+                    const targetX = -9*numFlight/2+(numFlight-1)*9/2
                     const dx = targetX-this.player.pos.x
                     this.player.pos.x += Math.sign( dx )*Math.min( 100*dt, Math.abs( dx) )
                     
@@ -263,7 +263,7 @@ namespace zlsSpaceInvader {
 
                 this.visible = false
 
-                // TODO: append player flight
+                this.player.add( this.flightUnit )
 
                 await this.wait(2)
 

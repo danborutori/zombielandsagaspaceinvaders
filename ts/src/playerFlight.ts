@@ -1,6 +1,5 @@
 namespace zlsSpaceInvader {
 
-    const padding = 4.5
     const invincibleInterval = 3
 
     export interface Member {
@@ -41,7 +40,9 @@ namespace zlsSpaceInvader {
             if( Input.shared.left )
                 this.pos.x -= Constant.playerMoveSpeed*deltaTime
             if( Input.shared.right )
-                this.pos.x += Constant.playerMoveSpeed*deltaTime                
+                this.pos.x += Constant.playerMoveSpeed*deltaTime
+
+            const padding = this.flightUnits.length*9/2
 
             this.pos.x = Math.max(this.pos.x, this.stage.left+padding)
             this.pos.x = Math.min(this.pos.x, this.stage.right-padding)
@@ -101,6 +102,23 @@ namespace zlsSpaceInvader {
             ]
             this.visible = true
             this.pos.x = 0
+        }
+
+        add( unit: FlightUnit ){
+            const leftMostPos = this.flightUnits.length>0?this.flightUnits[0].pos.x:0
+            this.flightUnits.push( unit )
+            for( let i=0; i<this.flightUnits.length; i++ ){
+                const u = this.flightUnits[i]
+                u.pos.x = (i-(this.flightUnits.length-1)/2)*9
+            }
+            this.pos.x += leftMostPos-this.flightUnits[0].pos.x
+        }
+
+        remove( index: number ){
+            const leftMostPos = this.flightUnits.length>0?this.flightUnits[0].pos.x:0
+            this.flightUnits.splice(index, 1)
+            if(this.flightUnits.length>0)
+                this.pos.x += leftMostPos-this.flightUnits[0].pos.x
         }
     }
 
