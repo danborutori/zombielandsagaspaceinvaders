@@ -114,11 +114,20 @@ namespace zlsSpaceInvader {
             this.pos.x += leftMostPos-this.flightUnits[0].pos.x
         }
 
-        remove( index: number ){
-            const leftMostPos = this.flightUnits.length>0?this.flightUnits[0].pos.x:0
-            this.flightUnits.splice(index, 1)
-            if(this.flightUnits.length>0)
-                this.pos.x += leftMostPos-this.flightUnits[0].pos.x
+        remove( index: number ){            
+            if( this.flightUnits.length>1 ){
+                const positioningUnit = this.flightUnits[index==0?1:0]
+                const leftMostPos = positioningUnit.pos.x
+                this.flightUnits.splice(index, 1)
+                for( let i=0; i<this.flightUnits.length; i++ ){
+                    const u = this.flightUnits[i]
+                    u.pos.x = (i-(this.flightUnits.length-1)/2)*9
+                }
+                this.pos.x += leftMostPos-positioningUnit.pos.x
+                this.invincibleTime = 1
+            }else{
+                this.next = true
+            }
         }
     }
 

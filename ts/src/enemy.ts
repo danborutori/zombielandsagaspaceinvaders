@@ -17,7 +17,7 @@ namespace zlsSpaceInvader {
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
             readonly score: number = 100,
-            readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
+            readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(sprite)
 
@@ -112,13 +112,20 @@ namespace zlsSpaceInvader {
                         this.rotate -= Math.sign(this.rotate)*Math.min(Math.abs(this.rotate),deltaTime*Math.PI*2)
                     }
 
-                    v.sub(this.pos, playerFlight.pos).abs()
-                    if( 
-                        v.x<9 &&
-                        v.y<9 &&
-                        playerFlight.invincibleTime<=0
-                    ){
-                        this.onHitPlayer(this,playerFlight as PlayerFlight)
+                    if( playerFlight.invincibleTime<=0 ){
+                        for( let i=0; i<playerFlight.flightUnits.length; i++ ){
+                            const u = playerFlight.flightUnits[i]
+                            v.sub(this.pos, playerFlight.pos)
+                            .sub(u.pos)
+                            .abs()
+                            if( 
+                                v.x<9 &&
+                                v.y<9
+                            ){
+                                this.onHitPlayer(this,playerFlight as PlayerFlight, i)
+                                break
+                            }
+                        }
                     }
                 }
             }

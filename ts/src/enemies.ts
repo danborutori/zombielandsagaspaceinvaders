@@ -4,7 +4,7 @@ namespace zlsSpaceInvader {
 
         constructor(
             scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(
                 Sprites.shared.images["zombie1"],
@@ -20,7 +20,7 @@ namespace zlsSpaceInvader {
 
         constructor(
             scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(
                 Sprites.shared.images["zombie2"],
@@ -36,7 +36,7 @@ namespace zlsSpaceInvader {
 
         constructor(
             scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(
                 Sprites.shared.images["hand"],
@@ -52,7 +52,7 @@ namespace zlsSpaceInvader {
 
         constructor(
             scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
+            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(
                 Sprites.shared.images["dog"],

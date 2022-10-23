@@ -122,8 +122,8 @@ namespace zlsSpaceInvader {
                 for( let j=0; j<enemyRows.length; j++ ){
                     const e = new enemyRows[j](
                         scoreAndCredit,
-                        (e, p)=>{
-                            p.next = true
+                        (e, p, i)=>{
+                            p.remove( i )
                             Audio.play( Audio.sounds.explosion )
                         }
                     )
