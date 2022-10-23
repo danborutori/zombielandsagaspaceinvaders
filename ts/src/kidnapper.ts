@@ -81,7 +81,6 @@ namespace zlsSpaceInvader {
                     wave.removeFromManager()
                 }
             }
-
         }
 
         private async capture( player: PlayerFlight, wave: CaptureWave ){
@@ -136,6 +135,7 @@ namespace zlsSpaceInvader {
                 }
             }
         }
+
     }
 
     class RotatingPlayerFlight extends SpriteObject {
@@ -234,6 +234,22 @@ namespace zlsSpaceInvader {
                 this.kidnapped.followBack()
             }
         }
+
+        setCapture( sprite: HTMLImageElement ){
+
+            if( this.manager ){
+                const dummyPlayer = new PlayerFlight(this.scorer.stage, ()=>null, ()=>{})
+                dummyPlayer.sprite = sprite
+
+                const rotFlight = new RotatingPlayerFlight( dummyPlayer, this )
+                rotFlight.state = "stickBack"
+
+                this.manager.add( rotFlight )
+                this.kidnapped = rotFlight
+            }
+
+        }
+
     }
 
     class CaptureWave extends GameObject {

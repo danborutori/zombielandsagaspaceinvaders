@@ -131,24 +131,13 @@ namespace zlsSpaceInvader {
                     e.pos.y = j*enemySpacing+enemyYOffset
                     this.gameObjectManager.add( e )
                     this.enemies.push(e)
+
+                    if( j==0 && i==4 ){
+                        (e as Zombie1).setCapture( Sprites.shared.images["p"])
+                    }
                 }
 
             }
-
-            const p = new Producer(
-                scoreAndCredit,
-                (e, p)=>{
-                    const jai = new FloatingText("ジャイ")
-                    jai.pos.copy(p.pos)
-                    this.gameObjectManager.add(jai)
-                    scoreAndCredit.score += 10000
-                    e.removeFromManager()
-                    Audio.play(Audio.sounds.bonus,1)
-                }
-            )
-            p.pos.y = enemyYOffset-enemySpacing
-            this.gameObjectManager.add( p )
-            this.enemies.push(p)
 
             const waveEnd = ()=>{
                 this.resetEnemies( playerFlight, scoreAndCredit)

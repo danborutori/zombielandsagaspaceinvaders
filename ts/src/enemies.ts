@@ -64,20 +64,4 @@ namespace zlsSpaceInvader {
 
     }
 
-    export class Producer extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["p"],
-                scorer,
-                1000,
-                onHitPlayer
-            )
-        }
-
-    }
-
 }
