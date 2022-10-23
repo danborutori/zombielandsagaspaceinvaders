@@ -90,7 +90,11 @@ namespace zlsSpaceInvader {
                 this.beamTime = 0
                 this.enemy.invincible = true
     
-                const rotFlight = new RotatingPlayerFlight( player, this.enemy, this.cooperator )
+                const rotFlight = new RotatingPlayerFlight(
+                    player,
+                    player.flightUnits[0],  // FIXME: flight unit index
+                    this.enemy,
+                    this.cooperator )
 
                 this.enemy.manager.add( rotFlight )
                 this.enemy.kidnapped = rotFlight
@@ -145,11 +149,11 @@ namespace zlsSpaceInvader {
 
         constructor(
             readonly player: PlayerFlight,
+            readonly flightUnit: FlightUnit,
             readonly enemy: Kidnapper,
-            readonly cooperator: EnemyCooperator,
-            sprite?: HTMLImageElement
+            readonly cooperator: EnemyCooperator            
         ){
-            super( sprite || player.sprite )
+            super( flightUnit.sprite )
             this.pos.copy(player.pos)
         }
 
@@ -310,7 +314,12 @@ namespace zlsSpaceInvader {
         setCapture( player: PlayerFlight, sprite: HTMLImageElement, cooperator: EnemyCooperator ){
 
             if( this.manager ){
-                const rotFlight = new RotatingPlayerFlight( player, this, cooperator, sprite )
+                const rotFlight = new RotatingPlayerFlight(
+                    player,
+                    new FlightUnit( sprite, Palette.BulletColor1 ),  // FIXME: bullet color
+                    this,
+                    cooperator
+                )
                 rotFlight.state = "stickBack"
 
                 this.manager.add( rotFlight )

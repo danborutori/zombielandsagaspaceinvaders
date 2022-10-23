@@ -8,21 +8,29 @@ namespace zlsSpaceInvader {
         bulletColor: string
     }
 
-    export class PlayerFlight extends SpriteObject {
+    export class PlayerFlight extends GameObject {
 
         private bulletCooldown = 0
         readonly isPlayerFlight = true
         next = false
         invincibleTime = 0
         canShoot = true
-        private bulletColor = Palette.BulletColor1
+
+        flightUnits: FlightUnit[]
 
         constructor(            
             readonly stage: Stage,
             readonly nextMember: ()=>Member|null,
             readonly allMemberRunOut: ()=>void
         ){
-            super(Sprites.shared.images[1])
+            super()
+
+            this.flightUnits = [
+                new FlightUnit(
+                    Sprites.shared.images[1],
+                    Palette.BulletColor1
+                )
+            ]
         }
 
         update(deltaTime: number): void {
@@ -41,10 +49,13 @@ namespace zlsSpaceInvader {
             this.bulletCooldown -= deltaTime
 
             if( Input.shared.fire && this.bulletCooldown<=0 && this.manager && this.canShoot ){
-                const b = new Bullet(this.stage, this.bulletColor)
-                b.pos.copy(this.pos)
-                b.pos.y -= 6
-                this.manager.add(b)
+                for( let u of this.flightUnits ){
+                    const b = new Bullet(this.stage, u.bulletColor)
+                    b.pos.copy(this.pos)
+                    b.pos.x += u.pos.x
+                    b.pos.y -= 6
+                    this.manager.add(b)
+                }
                 this.bulletCooldown = Constant.playerFireInterval
                 Audio.play( Audio.sounds.shoot )
             }
@@ -52,8 +63,12 @@ namespace zlsSpaceInvader {
             if( this.next ){
                 const m = this.nextMember()
                 if( m ){
-                    this.sprite = m.sprite
-                    this.bulletColor = m.bulletColor
+                    this.flightUnits = [
+                        new FlightUnit(
+                            m.sprite,
+                            m.bulletColor
+                        )
+                    ]
                     this.visible = true
                     this.pos.x = 0
                     this.invincibleTime = invincibleInterval
@@ -65,12 +80,39 @@ namespace zlsSpaceInvader {
             }
         }
 
+        render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
+            super.render(deltaTime,ctx)
+
+            for( let u of this.flightUnits ){
+                ctx.drawImage(
+                    u.sprite,
+                    Math.floor(this.pos.x+u.pos.x-u.sprite.width/2),
+                    Math.floor(this.pos.y+u.pos.y-u.sprite.height/2)
+                )
+            }
+        }
+
         reset(){
-            this.sprite = Sprites.shared.images[1]
-            this.bulletColor = Palette.BulletColor1
+            this.flightUnits = [
+                new FlightUnit(
+                    Sprites.shared.images[1],
+                    Palette.BulletColor1
+                )
+            ]
             this.visible = true
             this.pos.x = 0
         }
+    }
+
+    export class FlightUnit {
+
+        readonly pos = new Vector2
+
+        constructor(
+            readonly sprite: HTMLImageElement,
+            readonly bulletColor: string
+        ){}
+
     }
 
 }
