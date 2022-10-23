@@ -49,20 +49,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
-    var Constant = /** @class */ (function () {
-        function Constant() {
-        }
-        Constant.maxTimeStep = 1 / 15;
-        Constant.playerMoveSpeed = 120;
-        Constant.playerFireInterval = 0.16;
-        Constant.bulletSpeed = 120;
-        Constant.volume = 0.02;
-        return Constant;
-    }());
-    zlsSpaceInvader.Constant = Constant;
-})(zlsSpaceInvader || (zlsSpaceInvader = {}));
-var zlsSpaceInvader;
-(function (zlsSpaceInvader) {
     var Vector2 = /** @class */ (function () {
         function Vector2(x, y) {
             if (x === void 0) { x = 0; }
@@ -99,8 +85,14 @@ var zlsSpaceInvader;
             return this;
         };
         Vector2.prototype.sub = function (v1, v2) {
-            this.x = v1.x - v2.x;
-            this.y = v1.y - v2.y;
+            if (v2) {
+                this.x = v1.x - v2.x;
+                this.y = v1.y - v2.y;
+            }
+            else {
+                this.x -= v1.x;
+                this.y -= v1.y;
+            }
             return this;
         };
         Vector2.prototype.multiply = function (n) {
@@ -152,11 +144,39 @@ var zlsSpaceInvader;
             this.paused = false;
             this.renderHalf = true;
             this.renderOrder = 0;
+            this.visible = true;
+            this.waitPromises = [];
         }
-        GameObject.prototype.update = function (deltaTime) { };
+        GameObject.prototype.update = function (deltaTime) {
+            for (var _i = 0, _a = Array.from(this.waitPromises); _i < _a.length; _i++) {
+                var w = _a[_i];
+                w.time -= deltaTime;
+                if (w.time <= 0) {
+                    w.resolve(-w.time);
+                    w.resolved = true;
+                }
+            }
+            this.waitPromises = this.waitPromises.filter(function (w) { return !w.resolved; });
+        };
         GameObject.prototype.render = function (deltaTime, ctx) { };
         GameObject.prototype.removeFromManager = function () {
+            for (var _i = 0, _a = this.waitPromises; _i < _a.length; _i++) {
+                var w = _a[_i];
+                w.reject(new Error("Object removed before timeout."));
+            }
+            this.waitPromises.length = 0;
             this.manager && this.manager.remove(this);
+        };
+        GameObject.prototype.wait = function (time) {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                _this.waitPromises.push({
+                    time: time,
+                    resolve: resolve,
+                    reject: reject,
+                    resolved: false
+                });
+            });
         };
         return GameObject;
     }());
@@ -169,7 +189,6 @@ var zlsSpaceInvader;
             _this.pos = new zlsSpaceInvader.Vector2;
             return _this;
         }
-        SpriteObject.prototype.update = function (deltaTime) { };
         SpriteObject.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
             ctx.drawImage(this.sprite, Math.floor(this.pos.x - this.sprite.width / 2), Math.floor(this.pos.y - this.sprite.height / 2));
@@ -200,13 +219,13 @@ var zlsSpaceInvader;
             }
         };
         GameObjectManager.prototype.render = function (deltaTime, ctx) {
-            for (var _i = 0, _a = this.gameObjects.filter(function (o) { return !o.renderHalf; }).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
+            for (var _i = 0, _a = this.gameObjects.filter(function (o) { return !o.renderHalf && o.visible; }).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
                 var o = _a[_i];
                 o.render(deltaTime, ctx);
             }
         };
         GameObjectManager.prototype.renderHalf = function (deltaTime, ctx) {
-            for (var _i = 0, _a = this.gameObjects.filter(function (o) { return o.renderHalf; }).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
+            for (var _i = 0, _a = this.gameObjects.filter(function (o) { return o.renderHalf && o.visible; }).sort(function (a, b) { return a.renderOrder - b.renderOrder; }); _i < _a.length; _i++) {
                 var o = _a[_i];
                 o.render(deltaTime, ctx);
             }
@@ -214,6 +233,503 @@ var zlsSpaceInvader;
         return GameObjectManager;
     }());
     zlsSpaceInvader.GameObjectManager = GameObjectManager;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var v = new zlsSpaceInvader.Vector2;
+    var EnemyFlight = /** @class */ (function (_super) {
+        __extends(EnemyFlight, _super);
+        function EnemyFlight(sprite, scorer, score, onHitPlayer) {
+            if (score === void 0) { score = 100; }
+            var _this = _super.call(this, sprite) || this;
+            _this.scorer = scorer;
+            _this.score = score;
+            _this.onHitPlayer = onHitPlayer;
+            _this.flashTime = 0;
+            _this.hp = 3;
+            _this.vel = new zlsSpaceInvader.Vector2;
+            _this.rotate = 0;
+            _this.invincible = false;
+            _this.origSprite = sprite;
+            _this.flashingSprite = document.createElement("canvas");
+            _this.flashingSprite.width = sprite.width;
+            _this.flashingSprite.height = sprite.height;
+            var ctx = _this.flashingSprite.getContext("2d");
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, _this.flashingSprite.width, _this.flashingSprite.height);
+            ctx.globalCompositeOperation = "destination-in";
+            ctx.drawImage(sprite, 0, 0);
+            return _this;
+        }
+        EnemyFlight.prototype.startFlyOff = function (cooperator, regroupPos) {
+            if (!this.flyOff) {
+                this.flyOff = new zlsSpaceInvader.EnemyFlyOff(this, regroupPos);
+            }
+        };
+        Object.defineProperty(EnemyFlight.prototype, "isFlyingOff", {
+            get: function () {
+                return this.flyOff !== undefined;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        EnemyFlight.prototype.endFlyOff = function () {
+            this.flyOff = undefined;
+            this.vel.set(0, 0);
+        };
+        EnemyFlight.prototype.wrapAround = function () {
+            var padding = 9;
+            var w = this.scorer.stage.right - this.scorer.stage.left + padding * 2;
+            var h = this.scorer.stage.bottom - this.scorer.stage.top + padding * 2;
+            while (this.pos.x < this.scorer.stage.left - padding) {
+                this.pos.x += w;
+            }
+            while (this.pos.x > this.scorer.stage.right + padding) {
+                this.pos.x -= w;
+            }
+            while (this.pos.y < this.scorer.stage.top - padding) {
+                this.pos.y += h;
+                this.flyOff && this.flyOff.onWrapY();
+            }
+            while (this.pos.y > this.scorer.stage.bottom + padding) {
+                this.pos.y -= h;
+                this.flyOff && this.flyOff.onWrapY();
+            }
+        };
+        EnemyFlight.prototype.update = function (deltaTime) {
+            _super.prototype.update.call(this, deltaTime);
+            this.pos.addScaled(this.vel, deltaTime);
+            this.wrapAround();
+            this.flashTime -= deltaTime;
+            if (this.flashTime <= 0) {
+                this.sprite = this.origSprite;
+            }
+            else {
+                if (Math.floor(this.flashTime / 0.03) % 2 == 0) {
+                    this.sprite = this.origSprite;
+                }
+                else {
+                    this.sprite = this.flashingSprite;
+                }
+            }
+            if (this.manager) {
+                if (!this.invincible) {
+                    var bs = this.manager.gameObjects.filter(function (b) { return b.isBullet; });
+                    for (var _i = 0, bs_1 = bs; _i < bs_1.length; _i++) {
+                        var b = bs_1[_i];
+                        v.sub(this.pos, b.pos).abs();
+                        if (v.x < 5 &&
+                            v.y < 5.5) {
+                            this.flashTime = 0.1;
+                            b.removeFromManager();
+                            this.hp -= 1;
+                            if (this.hp <= 0) {
+                                var ex = new zlsSpaceInvader.Explosion;
+                                ex.pos.copy(this.pos);
+                                this.manager.add(ex);
+                                this.removeFromManager();
+                                this.flyOff && this.flyOff.onDie();
+                                this.scorer.score += this.score;
+                            }
+                        }
+                    }
+                }
+                var playerFlight = this.manager && this.manager.gameObjects.filter(function (o) { return o.isPlayerFlight; })[0];
+                if (playerFlight) {
+                    if (this.flyOff) {
+                        this.flyOff.update(deltaTime, playerFlight);
+                    }
+                    else {
+                        this.rotate -= Math.sign(this.rotate) * Math.min(Math.abs(this.rotate), deltaTime * Math.PI * 2);
+                    }
+                    v.sub(this.pos, playerFlight.pos).abs();
+                    if (v.x < 9 &&
+                        v.y < 9 &&
+                        playerFlight.invincibleTime <= 0) {
+                        this.onHitPlayer(this, playerFlight);
+                    }
+                }
+            }
+        };
+        EnemyFlight.prototype.render = function (deltaTime, ctx) {
+            ctx.save();
+            var x = Math.floor(this.pos.x);
+            var y = Math.floor(this.pos.y);
+            ctx.translate(x, y);
+            var rotateStep = Math.PI / 8;
+            ctx.rotate(Math.round(this.rotate / rotateStep) * rotateStep);
+            ctx.translate(-x, -y);
+            _super.prototype.render.call(this, deltaTime, ctx);
+            ctx.restore();
+        };
+        return EnemyFlight;
+    }(zlsSpaceInvader.SpriteObject));
+    zlsSpaceInvader.EnemyFlight = EnemyFlight;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var v = new zlsSpaceInvader.Vector2;
+    var turningSpeed = Math.PI;
+    var moveSpeed = 36;
+    var padding = 4.5;
+    var EnemyFlyOff = /** @class */ (function () {
+        function EnemyFlyOff(enemy, regroupPos) {
+            this.enemy = enemy;
+            this.regroupPos = regroupPos;
+            this.direction = new zlsSpaceInvader.Vector2(0, -1);
+            this.state = "homing";
+            this.time = 0;
+            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shipFly, 1);
+        }
+        EnemyFlyOff.prototype.update = function (deltaTime, playerFlight) {
+            this.time += deltaTime;
+            var targetPos;
+            switch (this.state) {
+                case "homing":
+                    targetPos = playerFlight.pos;
+                    break;
+                case "regroup":
+                    targetPos = this.regroupPos;
+                    break;
+                case "stop":
+                    targetPos = v.set(this.enemy.pos.x, this.enemy.pos.y + 100);
+                    break;
+            }
+            if (targetPos) {
+                v.sub(targetPos, this.enemy.pos);
+                if (this.time < 2.5 ||
+                    this.state === "regroup" ||
+                    this.state === "stop") {
+                    var angle = v.angle(this.direction);
+                    if (angle < -Math.PI) {
+                        angle += Math.PI * 2;
+                    }
+                    var turningAngle = Math.min(Math.abs(angle), turningSpeed * deltaTime);
+                    this.direction.rotateAround(Math.sign(angle) * turningAngle);
+                    this.enemy.rotate = this.direction.angle() - Math.PI / 2;
+                }
+                else {
+                    switch (this.state) {
+                        case "homing":
+                            this.state = "goStraight";
+                            break;
+                    }
+                }
+                switch (this.state) {
+                    case "regroup":
+                        v.sub(this.regroupPos, this.enemy.pos);
+                        if (v.length() < padding) {
+                            this.enemy.endFlyOff();
+                        }
+                }
+            }
+            switch (this.state) {
+                case "stop":
+                    this.enemy.vel.set(0, 0);
+                    break;
+                default:
+                    this.enemy.vel.copy(this.direction).multiply(moveSpeed);
+                    break;
+            }
+        };
+        EnemyFlyOff.prototype.onWrapY = function () {
+            this.state = "regroup";
+        };
+        EnemyFlyOff.prototype.onDie = function () { };
+        return EnemyFlyOff;
+    }());
+    zlsSpaceInvader.EnemyFlyOff = EnemyFlyOff;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var Constant = /** @class */ (function () {
+        function Constant() {
+        }
+        Constant.maxTimeStep = 1 / 15;
+        Constant.playerMoveSpeed = 120;
+        Constant.playerFireInterval = 0.16;
+        Constant.bulletSpeed = 120;
+        Constant.volume = 0.02;
+        return Constant;
+    }());
+    zlsSpaceInvader.Constant = Constant;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var v1 = new zlsSpaceInvader.Vector2;
+    var KidnapperFlyOff = /** @class */ (function (_super) {
+        __extends(KidnapperFlyOff, _super);
+        function KidnapperFlyOff(cooperator, enemy, regroupPos) {
+            var _this = _super.call(this, enemy, regroupPos) || this;
+            _this.cooperator = cooperator;
+            _this.kidnapBeamState = "canShot";
+            _this.beamTime = 0;
+            return _this;
+        }
+        KidnapperFlyOff.prototype.update = function (deltaTime, playerFlight) {
+            _super.prototype.update.call(this, deltaTime, playerFlight);
+            this.beamTime += deltaTime;
+            switch (this.state) {
+                case "goStraight":
+                case "homing":
+                    switch (this.kidnapBeamState) {
+                        case "canShot":
+                            if (this.enemy.pos.y > playerFlight.pos.y - 40)
+                                this.shotBeam(playerFlight);
+                            break;
+                    }
+                    break;
+            }
+        };
+        KidnapperFlyOff.prototype.shotBeam = function (playerFlight) {
+            return __awaiter(this, void 0, void 0, function () {
+                var wave, time, captured, _a, e_1;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!this.enemy.manager) return [3 /*break*/, 12];
+                            this.state = "stop";
+                            this.kidnapBeamState = "shootingBeam";
+                            this.beamTime = 0;
+                            wave = new CaptureWave(this.enemy);
+                            wave.pos.copy(this.enemy.pos);
+                            wave.pos.y += 4.5;
+                            this.enemy.manager.add(wave);
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam, 1);
+                            _b.label = 1;
+                        case 1:
+                            _b.trys.push([1, 10, 11, 12]);
+                            return [4 /*yield*/, this.enemy.wait(1)];
+                        case 2:
+                            _b.sent();
+                            time = 0;
+                            captured = false;
+                            _b.label = 3;
+                        case 3:
+                            if (!(time < 2 && !captured)) return [3 /*break*/, 5];
+                            _a = time;
+                            return [4 /*yield*/, this.enemy.wait(0)];
+                        case 4:
+                            time = _a + _b.sent();
+                            if (Math.abs(playerFlight.pos.x - this.enemy.pos.x) < 9 &&
+                                playerFlight.invincibleTime <= 0) {
+                                captured = true;
+                            }
+                            return [3 /*break*/, 3];
+                        case 5:
+                            if (!captured) return [3 /*break*/, 7];
+                            return [4 /*yield*/, this.capture(playerFlight, wave)];
+                        case 6:
+                            _b.sent();
+                            return [3 /*break*/, 9];
+                        case 7:
+                            wave.state = "shorten";
+                            return [4 /*yield*/, this.enemy.wait(1.5)];
+                        case 8:
+                            _b.sent();
+                            this.kidnapBeamState = "beamEnd";
+                            this.state = "goStraight";
+                            this.beamTime = 0;
+                            _b.label = 9;
+                        case 9: return [3 /*break*/, 12];
+                        case 10:
+                            e_1 = _b.sent();
+                            return [3 /*break*/, 12];
+                        case 11:
+                            wave.removeFromManager();
+                            return [7 /*endfinally*/];
+                        case 12: return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        KidnapperFlyOff.prototype.capture = function (player, wave) {
+            return __awaiter(this, void 0, void 0, function () {
+                var rotFlight, txt, e_2;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!this.enemy.manager) return [3 /*break*/, 8];
+                            this.cooperator.allowFlyOff = false;
+                            this.state = "stop";
+                            this.beamTime = 0;
+                            this.enemy.invincible = true;
+                            rotFlight = new RotatingPlayerFlight(player, this.enemy);
+                            this.enemy.manager.add(rotFlight);
+                            this.enemy.kidnapped = rotFlight;
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam2, 1);
+                            player.invincibleTime = 9000; // large enough interval
+                            player.visible = false;
+                            player.paused = true;
+                            _a.label = 1;
+                        case 1:
+                            _a.trys.push([1, 6, 7, 8]);
+                            return [4 /*yield*/, this.enemy.wait(1)];
+                        case 2:
+                            _a.sent();
+                            wave.state = "shorten";
+                            return [4 /*yield*/, this.enemy.wait(0.5)];
+                        case 3:
+                            _a.sent();
+                            this.enemy.kidnapped.state = "stop";
+                            return [4 /*yield*/, this.enemy.wait(3)];
+                        case 4:
+                            _a.sent();
+                            this.kidnapBeamState = "beamEnd";
+                            this.state = "regroup";
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess, 1);
+                            txt = new zlsSpaceInvader.FloatingText("MEMBER CAPTURED");
+                            this.enemy.manager.add(txt);
+                            return [4 /*yield*/, this.enemy.wait(5)];
+                        case 5:
+                            _a.sent();
+                            return [3 /*break*/, 8];
+                        case 6:
+                            e_2 = _a.sent();
+                            throw e_2;
+                        case 7:
+                            this.cooperator.allowFlyOff = true;
+                            player.invincibleTime = 0;
+                            player.visible = true;
+                            player.paused = false;
+                            player.next = true;
+                            this.enemy.invincible = false;
+                            return [7 /*endfinally*/];
+                        case 8: return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        return KidnapperFlyOff;
+    }(zlsSpaceInvader.EnemyFlyOff));
+    var RotatingPlayerFlight = /** @class */ (function (_super) {
+        __extends(RotatingPlayerFlight, _super);
+        function RotatingPlayerFlight(player, enemy) {
+            var _this = _super.call(this, player.sprite) || this;
+            _this.enemy = enemy;
+            _this.rotate = 0;
+            _this.state = "rotating";
+            _this.pos.copy(player.pos);
+            return _this;
+        }
+        RotatingPlayerFlight.prototype.update = function (deltaTime) {
+            _super.prototype.update.call(this, deltaTime);
+            switch (this.state) {
+                case "rotating":
+                    this.rotate += deltaTime * Math.PI * 8;
+                    break;
+                case "stop":
+                case "followBack":
+                    this.rotate = 0;
+                    break;
+                case "stickBack":
+                    this.rotate = this.enemy.rotate;
+                    break;
+            }
+            switch (this.state) {
+                case "stickBack":
+                    this.pos.copy(this.enemy.pos);
+                    this.pos.y -= 14;
+                    break;
+                default:
+                    v1.copy(this.enemy.pos);
+                    switch (this.state) {
+                        case "followBack":
+                            v1.y -= 14;
+                            break;
+                        default:
+                            v1.y += 10;
+                            break;
+                    }
+                    v1.sub(this.pos);
+                    var l = v1.length();
+                    if (l < 1 && this.state == "followBack") {
+                        this.state = "stickBack";
+                    }
+                    v1.normalize();
+                    v1.multiply(Math.min(l, 50 * deltaTime));
+                    this.pos.add(v1);
+                    break;
+            }
+        };
+        RotatingPlayerFlight.prototype.followBack = function () {
+            this.state = "followBack";
+        };
+        RotatingPlayerFlight.prototype.render = function (deltaTime, ctx) {
+            ctx.save();
+            var x = Math.floor(this.pos.x);
+            var y = Math.floor(this.pos.y);
+            ctx.translate(x, y);
+            var rotateStep = Math.PI / 8;
+            ctx.rotate(Math.round(this.rotate / rotateStep) * rotateStep);
+            ctx.translate(-x, -y);
+            _super.prototype.render.call(this, deltaTime, ctx);
+            ctx.restore();
+        };
+        return RotatingPlayerFlight;
+    }(zlsSpaceInvader.SpriteObject));
+    var Kidnapper = /** @class */ (function (_super) {
+        __extends(Kidnapper, _super);
+        function Kidnapper() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Kidnapper.prototype.startFlyOff = function (cooperator, regroupPos) {
+            if (!this.flyOff) {
+                if (!this.kidnapped)
+                    this.flyOff = new KidnapperFlyOff(cooperator, this, regroupPos);
+                else
+                    _super.prototype.startFlyOff.call(this, cooperator, regroupPos);
+            }
+        };
+        Kidnapper.prototype.endFlyOff = function () {
+            _super.prototype.endFlyOff.call(this);
+            if (this.kidnapped &&
+                this.kidnapped.state == "stop") {
+                this.kidnapped.followBack();
+            }
+        };
+        return Kidnapper;
+    }(zlsSpaceInvader.EnemyFlight));
+    zlsSpaceInvader.Kidnapper = Kidnapper;
+    var CaptureWave = /** @class */ (function (_super) {
+        __extends(CaptureWave, _super);
+        function CaptureWave(enemy) {
+            var _this = _super.call(this) || this;
+            _this.enemy = enemy;
+            _this.frames = [
+                zlsSpaceInvader.Sprites.shared.images.captureWave0,
+                zlsSpaceInvader.Sprites.shared.images.captureWave1,
+                zlsSpaceInvader.Sprites.shared.images.captureWave2,
+            ];
+            _this.time = 0;
+            _this.height = 0;
+            _this.state = "elongate";
+            _this.renderOrder = 1;
+            return _this;
+        }
+        CaptureWave.prototype.update = function (deltaTime) {
+            _super.prototype.update.call(this, deltaTime);
+            this.time += deltaTime;
+            switch (this.state) {
+                case "elongate":
+                    this.height = Math.min(1, this.height + deltaTime);
+                    break;
+                case "shorten":
+                    this.height = Math.max(0, this.height - deltaTime);
+                    break;
+            }
+            if (!this.enemy.manager)
+                this.removeFromManager();
+        };
+        CaptureWave.prototype.render = function (deltaTime, ctx) {
+            _super.prototype.render.call(this, deltaTime, ctx);
+            var frame = this.frames[Math.floor(this.time / 0.1) % this.frames.length];
+            var h = Math.floor(this.height / 0.2) * 0.2;
+            h = Math.floor(frame.height * h);
+            ctx.drawImage(frame, 0, 0, frame.width, h, Math.floor(this.pos.x - frame.width / 2), this.pos.y, frame.width, h);
+        };
+        return CaptureWave;
+    }(zlsSpaceInvader.GameObject));
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -254,6 +770,9 @@ var zlsSpaceInvader;
         bullet: "./images/bullet.png",
         star: "./images/star.png",
         font: "./images/font.png",
+        captureWave0: "./images/capture_wave0.png",
+        captureWave1: "./images/capture_wave1.png",
+        captureWave2: "./images/capture_wave2.png"
     };
     function loadImage(img, url) {
         return new Promise(function (resolve, reject) {
@@ -282,6 +801,9 @@ var zlsSpaceInvader;
                 bullet: new Image,
                 star: new Image,
                 font: new Image,
+                captureWave0: new Image,
+                captureWave1: new Image,
+                captureWave2: new Image,
             };
         }
         Sprites.prototype.load = function () {
@@ -347,6 +869,10 @@ var zlsSpaceInvader;
             shoot: "./sound/shoot.wav",
             shipFly: "./sound/Galaxian Sound.mp3",
             bonus: "./sound/Galaxian.mp3",
+            captureBeam: "./sound/capture_beam.mp3",
+            captureBeam2: "./sound/capture_beam2.mp3",
+            captured: "./sound/captured.mp3",
+            capturedSuccess: "./sound/captured_success.mp3",
         };
         return Audio;
     }());
@@ -424,138 +950,13 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
-    var v = new zlsSpaceInvader.Vector2;
-    var EnemyFlight = /** @class */ (function (_super) {
-        __extends(EnemyFlight, _super);
-        function EnemyFlight(sprite, scorer, score, onHitPlayer) {
-            if (score === void 0) { score = 100; }
-            var _this = _super.call(this, sprite) || this;
-            _this.scorer = scorer;
-            _this.score = score;
-            _this.onHitPlayer = onHitPlayer;
-            _this.flashTime = 0;
-            _this.hp = 3;
-            _this.vel = new zlsSpaceInvader.Vector2;
-            _this.rotate = 0;
-            _this.origSprite = sprite;
-            _this.flashingSprite = document.createElement("canvas");
-            _this.flashingSprite.width = sprite.width;
-            _this.flashingSprite.height = sprite.height;
-            var ctx = _this.flashingSprite.getContext("2d");
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, _this.flashingSprite.width, _this.flashingSprite.height);
-            ctx.globalCompositeOperation = "destination-in";
-            ctx.drawImage(sprite, 0, 0);
-            return _this;
-        }
-        EnemyFlight.prototype.startFlyOff = function (regroupPos) {
-            if (!this.flyOff) {
-                this.flyOff = new zlsSpaceInvader.EnemyFlyOff(this, regroupPos);
-            }
-        };
-        Object.defineProperty(EnemyFlight.prototype, "isFlyingOff", {
-            get: function () {
-                return this.flyOff !== undefined;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        EnemyFlight.prototype.endFlyOff = function () {
-            this.flyOff = undefined;
-            this.vel.set(0, 0);
-        };
-        EnemyFlight.prototype.wrapAround = function () {
-            var padding = 9;
-            var w = this.scorer.stage.right - this.scorer.stage.left + padding * 2;
-            var h = this.scorer.stage.bottom - this.scorer.stage.top + padding * 2;
-            while (this.pos.x < this.scorer.stage.left - padding) {
-                this.pos.x += w;
-            }
-            while (this.pos.x > this.scorer.stage.right + padding) {
-                this.pos.x -= w;
-            }
-            while (this.pos.y < this.scorer.stage.top - padding) {
-                this.pos.y += h;
-                this.flyOff && this.flyOff.onWrapY();
-            }
-            while (this.pos.y > this.scorer.stage.bottom + padding) {
-                this.pos.y -= h;
-                this.flyOff && this.flyOff.onWrapY();
-            }
-        };
-        EnemyFlight.prototype.update = function (deltaTime) {
-            _super.prototype.update.call(this, deltaTime);
-            this.pos.addScaled(this.vel, deltaTime);
-            this.wrapAround();
-            this.flashTime -= deltaTime;
-            if (this.flashTime <= 0) {
-                this.sprite = this.origSprite;
-            }
-            else {
-                if (Math.floor(this.flashTime / 0.03) % 2 == 0) {
-                    this.sprite = this.origSprite;
-                }
-                else {
-                    this.sprite = this.flashingSprite;
-                }
-            }
-            if (this.manager) {
-                var bs = this.manager.gameObjects.filter(function (b) { return b.isBullet; });
-                for (var _i = 0, bs_1 = bs; _i < bs_1.length; _i++) {
-                    var b = bs_1[_i];
-                    v.sub(this.pos, b.pos).abs();
-                    if (v.x < 5 &&
-                        v.y < 5.5) {
-                        this.flashTime = 0.1;
-                        b.removeFromManager();
-                        this.hp -= 1;
-                        if (this.hp <= 0) {
-                            var ex = new zlsSpaceInvader.Explosion;
-                            ex.pos.copy(this.pos);
-                            this.manager.add(ex);
-                            this.removeFromManager();
-                            this.scorer.score += this.score;
-                        }
-                    }
-                }
-                var playerFlight = this.manager && this.manager.gameObjects.filter(function (o) { return o.isPlayerFlight; })[0];
-                if (playerFlight) {
-                    if (this.flyOff) {
-                        this.flyOff.update(deltaTime, playerFlight);
-                    }
-                    else {
-                        this.rotate -= Math.sign(this.rotate) * Math.min(Math.abs(this.rotate), deltaTime * Math.PI * 2);
-                    }
-                    v.sub(this.pos, playerFlight.pos).abs();
-                    if (v.x < 9 &&
-                        v.y < 9 &&
-                        playerFlight.invincibleTime <= 0) {
-                        this.onHitPlayer(this, playerFlight);
-                    }
-                }
-            }
-        };
-        EnemyFlight.prototype.render = function (deltaTime, ctx) {
-            ctx.save();
-            var x = Math.floor(this.pos.x);
-            var y = Math.floor(this.pos.y);
-            ctx.translate(x, y);
-            var rotateStep = Math.PI / 8;
-            ctx.rotate(Math.round(this.rotate / rotateStep) * rotateStep);
-            ctx.translate(-x, -y);
-            _super.prototype.render.call(this, deltaTime, ctx);
-            ctx.restore();
-        };
-        return EnemyFlight;
-    }(zlsSpaceInvader.SpriteObject));
-    zlsSpaceInvader.EnemyFlight = EnemyFlight;
     var Zombie1 = /** @class */ (function (_super) {
         __extends(Zombie1, _super);
         function Zombie1(scorer, onHitPlayer) {
             return _super.call(this, zlsSpaceInvader.Sprites.shared.images["zombie1"], scorer, 100, onHitPlayer) || this;
         }
         return Zombie1;
-    }(EnemyFlight));
+    }(zlsSpaceInvader.Kidnapper));
     zlsSpaceInvader.Zombie1 = Zombie1;
     var Zombie2 = /** @class */ (function (_super) {
         __extends(Zombie2, _super);
@@ -563,7 +964,7 @@ var zlsSpaceInvader;
             return _super.call(this, zlsSpaceInvader.Sprites.shared.images["zombie2"], scorer, 100, onHitPlayer) || this;
         }
         return Zombie2;
-    }(EnemyFlight));
+    }(zlsSpaceInvader.EnemyFlight));
     zlsSpaceInvader.Zombie2 = Zombie2;
     var Hand = /** @class */ (function (_super) {
         __extends(Hand, _super);
@@ -571,7 +972,7 @@ var zlsSpaceInvader;
             return _super.call(this, zlsSpaceInvader.Sprites.shared.images["hand"], scorer, 100, onHitPlayer) || this;
         }
         return Hand;
-    }(EnemyFlight));
+    }(zlsSpaceInvader.EnemyFlight));
     zlsSpaceInvader.Hand = Hand;
     var Dog = /** @class */ (function (_super) {
         __extends(Dog, _super);
@@ -579,7 +980,7 @@ var zlsSpaceInvader;
             return _super.call(this, zlsSpaceInvader.Sprites.shared.images["dog"], scorer, 100, onHitPlayer) || this;
         }
         return Dog;
-    }(EnemyFlight));
+    }(zlsSpaceInvader.EnemyFlight));
     zlsSpaceInvader.Dog = Dog;
     var Producer = /** @class */ (function (_super) {
         __extends(Producer, _super);
@@ -587,7 +988,7 @@ var zlsSpaceInvader;
             return _super.call(this, zlsSpaceInvader.Sprites.shared.images["p"], scorer, 1000, onHitPlayer) || this;
         }
         return Producer;
-    }(EnemyFlight));
+    }(zlsSpaceInvader.EnemyFlight));
     zlsSpaceInvader.Producer = Producer;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
@@ -601,6 +1002,7 @@ var zlsSpaceInvader;
             _this.waveEnd = waveEnd;
             _this.cooldown = 0;
             _this.moveDir = "left";
+            _this.allowFlyOff = true;
             _this.enemies = enemies.map(function (e) {
                 return {
                     enemy: e,
@@ -651,12 +1053,14 @@ var zlsSpaceInvader;
                         deltaX = enemyMoveSpeed;
                         break;
                 }
-                for (var _d = 0, _e = this.enemies; _d < _e.length; _d++) {
-                    var e = _e[_d];
-                    e.targetPos.x += deltaX;
-                    if (!e.enemy.isFlyingOff &&
-                        Math.random() < flyOffRate) {
-                        e.enemy.startFlyOff(e.targetPos);
+                if (this.allowFlyOff) {
+                    for (var _d = 0, _e = this.enemies; _d < _e.length; _d++) {
+                        var e = _e[_d];
+                        e.targetPos.x += deltaX;
+                        if (!e.enemy.isFlyingOff &&
+                            Math.random() < flyOffRate) {
+                            e.enemy.startFlyOff(this, e.targetPos);
+                        }
                     }
                 }
                 this.cooldown += interval;
@@ -678,68 +1082,6 @@ var zlsSpaceInvader;
         return EnemyCooperator;
     }(zlsSpaceInvader.GameObject));
     zlsSpaceInvader.EnemyCooperator = EnemyCooperator;
-})(zlsSpaceInvader || (zlsSpaceInvader = {}));
-var zlsSpaceInvader;
-(function (zlsSpaceInvader) {
-    var v = new zlsSpaceInvader.Vector2;
-    var turningSpeed = Math.PI;
-    var moveSpeed = 36;
-    var padding = 4.5;
-    var EnemyFlyOff = /** @class */ (function () {
-        function EnemyFlyOff(enemy, regroupPos) {
-            this.enemy = enemy;
-            this.regroupPos = regroupPos;
-            this.direction = new zlsSpaceInvader.Vector2(0, -1);
-            this.state = "homing";
-            this.time = 0;
-            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shipFly, 1);
-        }
-        EnemyFlyOff.prototype.update = function (deltaTime, playerFlight) {
-            this.time += deltaTime;
-            var targetPos;
-            switch (this.state) {
-                case "homing":
-                    targetPos = playerFlight.pos;
-                    break;
-                case "regroup":
-                    targetPos = this.regroupPos;
-                    break;
-            }
-            if (targetPos) {
-                v.sub(targetPos, this.enemy.pos);
-                if (this.time < 2.5 ||
-                    this.state === "regroup") {
-                    var angle = v.angle(this.direction);
-                    if (angle < -Math.PI) {
-                        angle += Math.PI * 2;
-                    }
-                    var turningAngle = Math.min(Math.abs(angle), turningSpeed * deltaTime);
-                    this.direction.rotateAround(Math.sign(angle) * turningAngle);
-                    this.enemy.rotate = this.direction.angle() - Math.PI / 2;
-                }
-                else {
-                    switch (this.state) {
-                        case "homing":
-                            this.state = "goStraight";
-                            break;
-                    }
-                }
-                this.enemy.vel.copy(this.direction).multiply(moveSpeed);
-                switch (this.state) {
-                    case "regroup":
-                        v.sub(this.regroupPos, this.enemy.pos);
-                        if (v.length() < padding) {
-                            this.enemy.endFlyOff();
-                        }
-                }
-            }
-        };
-        EnemyFlyOff.prototype.onWrapY = function () {
-            this.state = "regroup";
-        };
-        return EnemyFlyOff;
-    }());
-    zlsSpaceInvader.EnemyFlyOff = EnemyFlyOff;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -1191,6 +1533,7 @@ var zlsSpaceInvader;
                 for (var j = 0; j < enemyRows.length; j++) {
                     var e = new enemyRows[j](scoreAndCredit, function (e, p) {
                         p.next = true;
+                        zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.explosion);
                     });
                     e.pos.x = (-enemyColumn / 2 + i + 0.5) * enemySpacing;
                     e.pos.y = j * enemySpacing + enemyYOffset;
@@ -1374,7 +1717,6 @@ var zlsSpaceInvader;
                 else {
                     this.allMemberRunOut();
                 }
-                zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.explosion);
                 this.next = false;
             }
         };

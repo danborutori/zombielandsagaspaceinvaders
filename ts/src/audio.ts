@@ -11,7 +11,7 @@ namespace zlsSpaceInvader {
         })
     }
 
-    const channels: HTMLAudioElement[] = new Array(2)
+    const channels: HTMLAudioElement[] = new Array(3)
     for( let i=0; i<channels.length; i++ ){
         const dom = document.createElement("audio")
         dom.volume = Constant.volume
@@ -28,6 +28,10 @@ namespace zlsSpaceInvader {
             shoot: "./sound/shoot.wav",
             shipFly: "./sound/Galaxian Sound.mp3",
             bonus: "./sound/Galaxian.mp3",
+            captureBeam: "./sound/capture_beam.mp3",
+            captureBeam2: "./sound/capture_beam2.mp3",
+            captured: "./sound/captured.mp3",
+            capturedSuccess: "./sound/captured_success.mp3",
         }
 
         static preload(){
@@ -45,6 +49,12 @@ namespace zlsSpaceInvader {
             channel: number = 0
         ){
             channels[channel].src = sound
+        }
+
+        static stop(
+            channel: number
+        ){
+            channels[channel].pause()
         }
 
         static get volume(){

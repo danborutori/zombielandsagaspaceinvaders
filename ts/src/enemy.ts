@@ -11,6 +11,7 @@ namespace zlsSpaceInvader {
         readonly vel = new Vector2
         protected flyOff?: EnemyFlyOff<EnemyFlight>
         rotate = 0
+        invincible = false
 
         constructor(
             sprite: HTMLImageElement,
@@ -31,7 +32,7 @@ namespace zlsSpaceInvader {
             ctx.drawImage( sprite, 0, 0 )
         }
 
-        startFlyOff( regroupPos: Vector2 ){
+        startFlyOff( cooperator: EnemyCooperator, regroupPos: Vector2 ){
             if( !this.flyOff ){
                 this.flyOff = new EnemyFlyOff(this, regroupPos )
             }
@@ -86,22 +87,24 @@ namespace zlsSpaceInvader {
             }
 
             if( this.manager ){
-                const bs = this.manager.gameObjects.filter(b=>(b as Bullet).isBullet)
-                for( let b of bs ){
-                    v.sub(this.pos, b.pos).abs()
-                    if( v.x<5 &&
-                        v.y<5.5
-                    ){
-                        this.flashTime = 0.1
-                        b.removeFromManager()
-                        this.hp -= 1
-                        if( this.hp<=0 ){
-                            const ex = new Explosion
-                            ex.pos.copy(this.pos)
-                            this.manager.add(ex)
-                            this.removeFromManager()
-                            this.flyOff && this.flyOff.onDie()
-                            this.scorer.score += this.score
+                if( !this.invincible ){
+                    const bs = this.manager.gameObjects.filter(b=>(b as Bullet).isBullet)
+                    for( let b of bs ){
+                        v.sub(this.pos, b.pos).abs()
+                        if( v.x<5 &&
+                            v.y<5.5
+                        ){
+                            this.flashTime = 0.1
+                            b.removeFromManager()
+                            this.hp -= 1
+                            if( this.hp<=0 ){
+                                const ex = new Explosion
+                                ex.pos.copy(this.pos)
+                                this.manager.add(ex)
+                                this.removeFromManager()
+                                this.flyOff && this.flyOff.onDie()
+                                this.scorer.score += this.score
+                            }
                         }
                     }
                 }

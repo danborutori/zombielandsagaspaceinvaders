@@ -11,7 +11,11 @@ namespace zlsSpaceInvader {
             = "canShot"
         private beamTime = 0
 
-        constructor( enemy: Kidnapper, regroupPos: Vector2 ){
+        constructor(
+            readonly cooperator: EnemyCooperator,
+            enemy: Kidnapper,
+            regroupPos: Vector2
+        ){
             super(enemy, regroupPos)
         }
 
@@ -44,24 +48,26 @@ namespace zlsSpaceInvader {
                 wave.pos.y += 4.5
                 this.enemy.manager.add(wave)
 
+                Audio.play( Audio.sounds.captureBeam, 1 )
+
                 try {
                     await this.enemy.wait(1)
 
                     let time = 0
                     let captured = false
-                    while( time<2 ){
-                        time -= await this.enemy.wait(0)
+                    while( time<2 && !captured ){
+                        time += await this.enemy.wait(0)
                         if(
                             Math.abs(playerFlight.pos.x-this.enemy.pos.x)<9 &&
                             playerFlight.invincibleTime<=0
                         ){
-                            await this.capture(playerFlight, wave)
                             captured = true
-                            break
                         }
                     }
 
-                    if( !captured ){
+                    if( captured ){
+                        await this.capture(playerFlight, wave)
+                    }else{
                         wave.state = "shorten"
                         await this.enemy.wait(1.5)
 
@@ -79,16 +85,21 @@ namespace zlsSpaceInvader {
         }
 
         private async capture( player: PlayerFlight, wave: CaptureWave ){
-            this.state = "stop"
-            this.beamTime = 0
-
             if( this.enemy.manager ){
+                this.cooperator.allowFlyOff = false
+                this.state = "stop"
+                this.beamTime = 0
+                this.enemy.invincible = true
+    
                 const rotFlight = new RotatingPlayerFlight( player, this.enemy )
 
                 this.enemy.manager.add( rotFlight )
                 this.enemy.kidnapped = rotFlight
 
-                player.invincibleTime = 9000
+                Audio.stop(1)
+                Audio.play( Audio.sounds.captureBeam2, 2 )
+
+                player.invincibleTime = 9000 // large enough interval
                 player.visible = false
                 player.paused = true
 
@@ -105,18 +116,24 @@ namespace zlsSpaceInvader {
 
                     this.kidnapBeamState = "beamEnd"
                     this.state = "regroup"
+                    Audio.play( Audio.sounds.capturedSuccess, 2 )
+
+                    const txt = new FloatingText("MEMBER CAPTURED")
+                    this.enemy.manager.add(txt)
 
                     await this.enemy.wait(5)
     
                 }catch(e){
+                    throw e
                 }finally{
+                    this.cooperator.allowFlyOff = true
+
                     player.invincibleTime = 0
-                    player.visible = true
+                    // player.visible = true
                     player.paused = false
                     player.next = true
+                    this.enemy.invincible = false
                 }
-
-                // TODO: capturing enemy invincible
             }
         }
     }
@@ -199,12 +216,12 @@ namespace zlsSpaceInvader {
 
         kidnapped?: RotatingPlayerFlight
 
-        startFlyOff(regroupPos: Vector2): void {
+        startFlyOff( cooperator: EnemyCooperator, regroupPos: Vector2): void {
             if( !this.flyOff ){
                 if( !this.kidnapped )
-                    this.flyOff = new KidnapperFlyOff(this, regroupPos )
+                    this.flyOff = new KidnapperFlyOff(cooperator, this, regroupPos )
                 else
-                    this.flyOff = new EnemyFlyOff(this, regroupPos )
+                    super.startFlyOff(cooperator, regroupPos )
             }
         }
 
@@ -249,7 +266,6 @@ namespace zlsSpaceInvader {
                 this.height = Math.max(0,this.height-deltaTime)
                 break
             }
-
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

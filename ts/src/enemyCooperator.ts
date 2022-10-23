@@ -11,6 +11,7 @@ namespace zlsSpaceInvader {
             initPos: Vector2
             targetPos: Vector2
         }[]
+        allowFlyOff = true
 
         constructor(
             readonly stage: Stage,
@@ -70,12 +71,14 @@ namespace zlsSpaceInvader {
                     break
                 }
     
-                for( let e of this.enemies ){
-                    e.targetPos.x += deltaX
-                    if( !e.enemy.isFlyingOff &&
-                        Math.random()<flyOffRate
-                    ){
-                        e.enemy.startFlyOff( e.targetPos )
+                if( this.allowFlyOff ){
+                    for( let e of this.enemies ){
+                        e.targetPos.x += deltaX
+                        if( !e.enemy.isFlyingOff &&
+                            Math.random()<flyOffRate
+                        ){
+                            e.enemy.startFlyOff( this, e.targetPos )
+                        }
                     }
                 }
 

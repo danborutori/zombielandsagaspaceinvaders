@@ -13,36 +13,43 @@ namespace zlsSpaceInvader {
             time: number
             resolve: (n: number)=>void
             reject: (e: Error)=>void
+            resolved: boolean
         }[] = []
 
         update( deltaTime: number ){
-            for( let w of this.waitPromises ){
+            for( let w of Array.from(this.waitPromises) ){
                 w.time -= deltaTime
                 if( w.time<=0 ){
-                    w.resolve(w.time)
+                    w.resolve(-w.time)
+                    w.resolved = true
                 }
             }
-            this.waitPromises = this.waitPromises.filter(w=>w.time>0)
+            this.waitPromises = this.waitPromises.filter(w=>!w.resolved)
         }
 
         render( deltaTime: number, ctx: CanvasRenderingContext2D ){}
 
         removeFromManager(){
             for( let w of this.waitPromises ){
-                w.reject(new Error("Object removed before timeout."))
+                w.reject(new Error("Object removed."))
             }
             this.waitPromises.length = 0
             this.manager && this.manager.remove(this)
         }
 
         wait( time: number ){
-            return new Promise<number>( (resolve, reject)=>{
-                this.waitPromises.push({
-                    time: time,
-                    resolve: resolve,
-                    reject: reject
+            if( this.manager ){
+                return new Promise<number>( (resolve, reject)=>{
+                    this.waitPromises.push({
+                        time: time,
+                        resolve: resolve,
+                        reject: reject,
+                        resolved: false
+                    })
                 })
-            })
+            }else{
+                return Promise.reject(new Error("Manager is undefined"))
+            }
         }
     }
 

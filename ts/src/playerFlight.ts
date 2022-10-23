@@ -53,12 +53,12 @@ namespace zlsSpaceInvader {
                 if( m ){
                     this.sprite = m.sprite
                     this.bulletColor = m.bulletColor
+                    this.visible = true
                     this.pos.x = 0
                     this.invincibleTime = invincibleInterval
                 }else{
                     this.allMemberRunOut()
                 }
-                Audio.play( Audio.sounds.explosion )
 
                 this.next = false
             }
@@ -67,6 +67,7 @@ namespace zlsSpaceInvader {
         reset(){
             this.sprite = Sprites.shared.images[1]
             this.bulletColor = Palette.BulletColor1
+            this.visible = true
             this.pos.x = 0
         }
     }

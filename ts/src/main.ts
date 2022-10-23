@@ -124,6 +124,7 @@ namespace zlsSpaceInvader {
                         scoreAndCredit,
                         (e, p)=>{
                             p.next = true
+                            Audio.play( Audio.sounds.explosion )
                         }
                     )
                     e.pos.x = (-enemyColumn/2+i+0.5)*enemySpacing
