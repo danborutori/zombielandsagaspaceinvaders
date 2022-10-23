@@ -159,7 +159,12 @@ namespace zlsSpaceInvader {
             )
             this.gameObjectManager.add( this.enemyCooperator )
 
-            ;(this.enemies[enemyRows.length*4] as Zombie1).setCapture( playerFlight, Sprites.shared.images["p"], this.enemyCooperator)
+            let pInPlayer = playerFlight.flightUnits.reduce((a,b)=>{
+                return a || b.sprite===Sprites.shared.images["p"]
+            }, false)
+            
+            if( !pInPlayer )
+                (this.enemies[enemyRows.length*4] as Zombie1).setCapture( playerFlight, Sprites.shared.images["p"], this.enemyCooperator)
         }
 
         private showContinue(
