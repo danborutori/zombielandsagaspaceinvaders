@@ -131,10 +131,6 @@ namespace zlsSpaceInvader {
                     e.pos.y = j*enemySpacing+enemyYOffset
                     this.gameObjectManager.add( e )
                     this.enemies.push(e)
-
-                    if( j==0 && i==4 ){
-                        (e as Zombie1).setCapture( Sprites.shared.images["p"])
-                    }
                 }
 
             }
@@ -162,6 +158,8 @@ namespace zlsSpaceInvader {
                 waveEnd
             )
             this.gameObjectManager.add( this.enemyCooperator )
+
+            ;(this.enemies[enemyRows.length*4] as Zombie1).setCapture( playerFlight, Sprites.shared.images["p"], this.enemyCooperator)
         }
 
         private showContinue(

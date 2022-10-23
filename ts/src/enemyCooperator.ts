@@ -13,6 +13,10 @@ namespace zlsSpaceInvader {
         }[]
         allowFlyOff = true
 
+        set invincible( b: boolean ){
+            for( let e of this.enemies ) e.enemy.invincible = b
+        }
+
         constructor(
             readonly stage: Stage,
             enemies: EnemyFlight[],

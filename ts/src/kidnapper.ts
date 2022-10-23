@@ -90,7 +90,7 @@ namespace zlsSpaceInvader {
                 this.beamTime = 0
                 this.enemy.invincible = true
     
-                const rotFlight = new RotatingPlayerFlight( player, this.enemy )
+                const rotFlight = new RotatingPlayerFlight( player, this.enemy, this.cooperator )
 
                 this.enemy.manager.add( rotFlight )
                 this.enemy.kidnapped = rotFlight
@@ -141,13 +141,15 @@ namespace zlsSpaceInvader {
     class RotatingPlayerFlight extends SpriteObject {
 
         private rotate = 0
-        state: "rotating" | "stop" | "followBack" | "stickBack" = "rotating"
+        state: "rotating" | "stop" | "followBack" | "stickBack" | "free" = "rotating"
 
         constructor(
-            player: PlayerFlight,
-            readonly enemy: Kidnapper
+            readonly player: PlayerFlight,
+            readonly enemy: Kidnapper,
+            readonly cooperator: EnemyCooperator,
+            sprite?: HTMLImageElement
         ){
-            super( player.sprite )
+            super( sprite || player.sprite )
             this.pos.copy(player.pos)
         }
 
@@ -156,6 +158,7 @@ namespace zlsSpaceInvader {
 
             switch(this.state){
             case "rotating":
+            case "free":
                 this.rotate += deltaTime * Math.PI * 8
                 break
             case "stop":
@@ -171,6 +174,8 @@ namespace zlsSpaceInvader {
             case "stickBack":
                 this.pos.copy(this.enemy.pos)
                 this.pos.y -= 14
+                break
+            case "free":
                 break
             default:
                 v1.copy( this.enemy.pos )
@@ -210,6 +215,64 @@ namespace zlsSpaceInvader {
             ctx.restore()
         }
 
+        async setFree(){
+
+            this.state = "free"
+
+            this.player.invincibleTime = 9000 // large enough number
+            this.player.canShoot = false
+            this.cooperator.allowFlyOff = false
+            this.cooperator.invincible = true
+
+            Audio.play( Audio.sounds.capturedSuccess, 2 )
+
+            try{
+                await this.wait(3)
+
+                this.player.paused = true
+
+                let posXSet = false
+                while( !posXSet ){
+                    const dt = await this.wait(0)
+
+                    const numFlight = 1
+                    const targetX = -9*numFlight/2
+                    const dx = targetX-this.player.pos.x
+                    this.player.pos.x += Math.sign( dx )*Math.min( 100*dt, Math.abs( dx) )
+                    
+                    const targetX2 = 9*numFlight/2
+                    const dx2 = targetX2-this.pos.x
+                    this.pos.x += Math.sign( dx2 )*Math.min( 100*dt, Math.abs( dx2) )
+
+                    posXSet = dx==0 && dx2==0
+                }
+
+                let posYSet = false
+                while( !posYSet ){
+                    const dt = await this.wait(0)                    
+
+                    const dy = this.player.pos.y-this.pos.y
+                    this.pos.y += Math.sign( dy )*Math.min( 100*dt, Math.abs( dy) )
+
+                    posYSet = dy == 0
+                }
+
+                this.visible = false
+
+                // TODO: append player flight
+
+                await this.wait(2)
+
+            }catch(e){
+            }finally{
+                this.player.invincibleTime = 0
+                this.player.paused = false
+                this.player.canShoot = true
+                this.cooperator.allowFlyOff = true
+                this.cooperator.invincible = false
+                this.removeFromManager()
+            }
+        }
     }
 
     export class Kidnapper extends EnemyFlight {
@@ -235,13 +298,19 @@ namespace zlsSpaceInvader {
             }
         }
 
-        setCapture( sprite: HTMLImageElement ){
+        protected onDie(): void {
+
+            if( this.kidnapped ){
+                this.kidnapped.setFree()
+            }
+
+            super.onDie()
+        }
+
+        setCapture( player: PlayerFlight, sprite: HTMLImageElement, cooperator: EnemyCooperator ){
 
             if( this.manager ){
-                const dummyPlayer = new PlayerFlight(this.scorer.stage, ()=>null, ()=>{})
-                dummyPlayer.sprite = sprite
-
-                const rotFlight = new RotatingPlayerFlight( dummyPlayer, this )
+                const rotFlight = new RotatingPlayerFlight( player, this, cooperator, sprite )
                 rotFlight.state = "stickBack"
 
                 this.manager.add( rotFlight )
@@ -249,7 +318,7 @@ namespace zlsSpaceInvader {
             }
 
         }
-
+        
     }
 
     class CaptureWave extends GameObject {

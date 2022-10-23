@@ -14,6 +14,7 @@ namespace zlsSpaceInvader {
         readonly isPlayerFlight = true
         next = false
         invincibleTime = 0
+        canShoot = true
         private bulletColor = Palette.BulletColor1
 
         constructor(            
@@ -39,7 +40,7 @@ namespace zlsSpaceInvader {
 
             this.bulletCooldown -= deltaTime
 
-            if( Input.shared.fire && this.bulletCooldown<=0 && this.manager ){
+            if( Input.shared.fire && this.bulletCooldown<=0 && this.manager && this.canShoot ){
                 const b = new Bullet(this.stage, this.bulletColor)
                 b.pos.copy(this.pos)
                 b.pos.y -= 6
