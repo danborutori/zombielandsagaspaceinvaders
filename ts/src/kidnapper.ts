@@ -344,12 +344,15 @@ namespace zlsSpaceInvader {
             super.onDie()
         }
 
-        setCapture( player: PlayerFlight, sprite: HTMLImageElement, cooperator: EnemyCooperator ){
+        setCapture(
+            player: PlayerFlight,
+            flightUnit: FlightUnit,
+            cooperator: EnemyCooperator ){
 
             if( this.manager ){
                 const rotFlight = new RotatingPlayerFlight(
                     player,
-                    [new FlightUnit( sprite, Palette.BulletColor1 )],  // FIXME: bullet color
+                    [flightUnit],  // FIXME: bullet color
                     this,
                     cooperator
                 )

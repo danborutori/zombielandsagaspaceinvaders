@@ -164,7 +164,11 @@ namespace zlsSpaceInvader {
             }, false)
             
             if( !pInPlayer )
-                (this.enemies[enemyRows.length*4] as Zombie1).setCapture( playerFlight, Sprites.shared.images["p"], this.enemyCooperator)
+                (this.enemies[enemyRows.length*4] as Zombie1).setCapture(
+                    playerFlight,
+                    new FlightUnit( Sprites.shared.images["p"], Palette.BulletColor1 ),
+                    this.enemyCooperator
+                )
         }
 
         private showContinue(
