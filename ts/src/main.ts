@@ -48,7 +48,7 @@ namespace zlsSpaceInvader {
                 this.stage,
                 {
                     get remainingMember(){
-                        return franchouchou.remainingMember
+                        return franchouchou.remainingMember+playerFlight.flightUnits.length
                     }
                 }
             )
@@ -176,7 +176,16 @@ namespace zlsSpaceInvader {
             playerFlight: PlayerFlight,
             franchouchou: Franchouchou
         ){
-            if( scoreAndCredit.credit>0 ){
+            const renewFlights = Array.from( playerFlight.flightUnits )
+            for( let u of playerFlight.removedUnits ){
+                if(
+                    u.sprite!==Sprites.shared.images["p"] &&
+                    u.sprite!==Sprites.shared.images["7"]
+                )
+                    renewFlights.push(u)
+            }
+
+            if( scoreAndCredit.credit>0 && renewFlights.length>0 ){
 
                 playerFlight.paused = true
                 for( let e of this.enemies ) e.paused = true
@@ -190,8 +199,9 @@ namespace zlsSpaceInvader {
                         for( let e of this.enemies ) e.paused = false
                         this.enemyCooperator.paused = false
 
-                        playerFlight.reset()
-                        franchouchou.reset()
+                        playerFlight.reset(renewFlights[0])
+                        franchouchou.reset(renewFlights.slice(1))
+                        playerFlight.invincibleTime = 1
                     }else{
                         this.showHighestScore( scoreAndCredit )
                     }

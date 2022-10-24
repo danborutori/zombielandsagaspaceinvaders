@@ -38,7 +38,7 @@ namespace zlsSpaceInvader {
         private canCallMaiMai = true
 
         get remainingMember(){
-            return this.units.length+1
+            return this.units.length
         }
 
         get nextMember(){
@@ -55,7 +55,12 @@ namespace zlsSpaceInvader {
         ){
             super()
             this.renderOrder = 1
-            this.reset()
+            this.reset(memberList.slice(0,6).map( m=>
+                new FlightUnit(
+                    Sprites.shared.images[`${m.no}`],
+                    m.bulletColor
+                )
+            ))
         }
 
         update( deltaTime: number ){
@@ -89,14 +94,9 @@ namespace zlsSpaceInvader {
             }
         }
 
-        reset(){
+        reset( renewUnits: FlightUnit[] ){
             this.canCallMaiMai = true
-            this.units = memberList.slice(0,6).map( m=>
-                new FlightUnit(
-                    Sprites.shared.images[`${m.no}`],
-                    m.bulletColor
-                )
-            )
+            this.units = Array.from(renewUnits)
         }
     }
 

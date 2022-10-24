@@ -135,6 +135,7 @@ namespace zlsSpaceInvader {
                     player.invincibleTime = 0
                     // player.visible = true
                     player.paused = false
+                    player.flightUnits.length = 0
                     player.next = true
                     this.enemy.invincible = false
                 }

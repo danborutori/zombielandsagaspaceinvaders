@@ -16,6 +16,7 @@ namespace zlsSpaceInvader {
         canShoot = true
 
         flightUnits: FlightUnit[]
+        removedUnits: FlightUnit[] = []
 
         constructor(            
             readonly stage: Stage,
@@ -52,6 +53,9 @@ namespace zlsSpaceInvader {
             if( this.next ){
                 const m = this.nextMember()
                 if( m ){
+                    for( let u of this.flightUnits ){
+                        this.removedUnits.push(u)
+                    }
                     this.flightUnits = [
                         new FlightUnit(
                             m.sprite,
@@ -92,13 +96,11 @@ namespace zlsSpaceInvader {
             }
         }
 
-        reset(){
+        reset( flightUnit: FlightUnit ){
             this.flightUnits = [
-                new FlightUnit(
-                    Sprites.shared.images[1],
-                    Palette.BulletColor1
-                )
+                flightUnit
             ]
+            this.removedUnits.length = 0
             this.visible = true
             this.pos.x = 0
         }
@@ -118,7 +120,7 @@ namespace zlsSpaceInvader {
             if( this.flightUnits.length>1 ){
                 const positioningUnit = this.flightUnits[index==0?1:0]
                 const leftMostPos = positioningUnit.pos.x
-                this.flightUnits.splice(index, 1)
+                this.removedUnits.push( this.flightUnits.splice(index, 1)[0] )
                 for( let i=0; i<this.flightUnits.length; i++ ){
                     const u = this.flightUnits[i]
                     u.pos.x = (i-(this.flightUnits.length-1)/2)*9
