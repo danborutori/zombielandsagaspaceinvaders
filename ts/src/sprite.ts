@@ -18,6 +18,9 @@ namespace zlsSpaceInvader {
         bullet: "./images/bullet.png",
         star: "./images/star.png",
         font: "./images/font.png",
+        captureWave0: "./images/capture_wave0.png",
+        captureWave1: "./images/capture_wave1.png",
+        captureWave2: "./images/capture_wave2.png"
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -49,6 +52,9 @@ namespace zlsSpaceInvader {
             bullet: new Image,
             star: new Image,
             font: new Image,
+            captureWave0: new Image,
+            captureWave1: new Image,
+            captureWave2: new Image,
         }
 
         load(){

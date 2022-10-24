@@ -48,7 +48,7 @@ namespace zlsSpaceInvader {
                 this.stage,
                 {
                     get remainingMember(){
-                        return franchouchou.remainingMember
+                        return franchouchou.remainingMember+playerFlight.flightUnits.length
                     }
                 }
             )
@@ -122,8 +122,9 @@ namespace zlsSpaceInvader {
                 for( let j=0; j<enemyRows.length; j++ ){
                     const e = new enemyRows[j](
                         scoreAndCredit,
-                        (e, p)=>{
-                            p.next = true
+                        (e, p, i)=>{
+                            p.remove( i )
+                            Audio.play( Audio.sounds.explosion )
                         }
                     )
                     e.pos.x = (-enemyColumn/2+i+0.5)*enemySpacing
@@ -133,21 +134,6 @@ namespace zlsSpaceInvader {
                 }
 
             }
-
-            const p = new Producer(
-                scoreAndCredit,
-                (e, p)=>{
-                    const jai = new FloatingText("ジャイ")
-                    jai.pos.copy(p.pos)
-                    this.gameObjectManager.add(jai)
-                    scoreAndCredit.score += 10000
-                    e.removeFromManager()
-                    Audio.play(Audio.sounds.bonus,1)
-                }
-            )
-            p.pos.y = enemyYOffset-enemySpacing
-            this.gameObjectManager.add( p )
-            this.enemies.push(p)
 
             const waveEnd = ()=>{
                 this.resetEnemies( playerFlight, scoreAndCredit)
@@ -172,6 +158,17 @@ namespace zlsSpaceInvader {
                 waveEnd
             )
             this.gameObjectManager.add( this.enemyCooperator )
+
+            let pInPlayer = playerFlight.flightUnits.reduce((a,b)=>{
+                return a || b.sprite===Sprites.shared.images["p"]
+            }, false)
+            
+            if( !pInPlayer )
+                (this.enemies[enemyRows.length*4] as Zombie1).setCapture(
+                    playerFlight,
+                    new FlightUnit( Sprites.shared.images["p"], Palette.BulletColor1 ),
+                    this.enemyCooperator
+                )
         }
 
         private showContinue(
@@ -179,34 +176,57 @@ namespace zlsSpaceInvader {
             playerFlight: PlayerFlight,
             franchouchou: Franchouchou
         ){
-            if( scoreAndCredit.credit>0 ){
+            const renewFlights = Array.from( playerFlight.flightUnits )
+            for( let u of playerFlight.removedUnits ){
+                if(
+                    u.sprite!==Sprites.shared.images["p"]
+                )
+                    renewFlights.push(u)
+            }
 
-                playerFlight.paused = true
-                for( let e of this.enemies ) e.paused = true
-                this.enemyCooperator.paused = true
+            if( renewFlights.length>0 ){
+                if( scoreAndCredit.credit>0 && renewFlights.length>0 ){
 
-                const continueScreen =  new ContinueScreen(b=>{
-                    if( b ){
-                        scoreAndCredit.credit--
+                    playerFlight.paused = true
+                    for( let e of this.enemies ) e.paused = true
+                    this.enemyCooperator.paused = true
 
-                        playerFlight.paused = false
-                        for( let e of this.enemies ) e.paused = false
-                        this.enemyCooperator.paused = false
+                    const continueScreen =  new ContinueScreen(b=>{
+                        if( b ){
+                            scoreAndCredit.credit--
 
-                        playerFlight.reset()
-                        franchouchou.reset()
-                    }else{
-                        this.showHighestScore( scoreAndCredit )
-                    }
-                })
-                this.gameObjectManager.add( continueScreen)
+                            playerFlight.paused = false
+                            for( let e of this.enemies ) e.paused = false
+                            this.enemyCooperator.paused = false
 
+                            playerFlight.reset(renewFlights[0])
+                            franchouchou.reset(renewFlights.slice(1))
+                            playerFlight.invincibleTime = 1
+                        }else{
+                            this.showHighestScore( scoreAndCredit )
+                        }
+                    })
+                    this.gameObjectManager.add( continueScreen)
+
+                }else{
+                    playerFlight.paused = true
+                    for( let e of this.enemies ) e.paused = true
+                    this.enemyCooperator.paused = true
+                    
+                    this.showHighestScore( scoreAndCredit )
+                }
             }else{
                 playerFlight.paused = true
                 for( let e of this.enemies ) e.paused = true
                 this.enemyCooperator.paused = true
-                
-                this.showHighestScore( scoreAndCredit )
+
+                const t = new FloatingText(
+                    "ALL MEMBERS CAPTURED",
+                    ()=>{
+                        this.showHighestScore( scoreAndCredit )
+                    }
+                )
+                this.gameObjectManager.add(t)
             }
         }
 

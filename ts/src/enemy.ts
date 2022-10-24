@@ -9,14 +9,15 @@ namespace zlsSpaceInvader {
         private flashingSprite: HTMLCanvasElement
         private hp = 3
         readonly vel = new Vector2
-        private flyOff?: EnemyFlyOff
+        protected flyOff?: EnemyFlyOff<EnemyFlight>
         rotate = 0
+        invincible = false
 
         constructor(
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
             readonly score: number = 100,
-            readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
+            readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(sprite)
 
@@ -31,7 +32,7 @@ namespace zlsSpaceInvader {
             ctx.drawImage( sprite, 0, 0 )
         }
 
-        startFlyOff( regroupPos: Vector2 ){
+        startFlyOff( cooperator: EnemyCooperator, regroupPos: Vector2 ){
             if( !this.flyOff ){
                 this.flyOff = new EnemyFlyOff(this, regroupPos )
             }
@@ -86,21 +87,19 @@ namespace zlsSpaceInvader {
             }
 
             if( this.manager ){
-                const bs = this.manager.gameObjects.filter(b=>(b as Bullet).isBullet)
-                for( let b of bs ){
-                    v.sub(this.pos, b.pos).abs()
-                    if( v.x<5 &&
-                        v.y<5.5
-                    ){
-                        this.flashTime = 0.1
-                        b.removeFromManager()
-                        this.hp -= 1
-                        if( this.hp<=0 ){
-                            const ex = new Explosion
-                            ex.pos.copy(this.pos)
-                            this.manager.add(ex)
-                            this.removeFromManager()
-                            this.scorer.score += this.score
+                if( !this.invincible ){
+                    const bs = this.manager.gameObjects.filter(b=>(b as Bullet).isBullet)
+                    for( let b of bs ){
+                        v.sub(this.pos, b.pos).abs()
+                        if( v.x<5 &&
+                            v.y<5.5
+                        ){
+                            this.flashTime = 0.1
+                            b.removeFromManager()
+                            this.hp -= 1
+                            if( this.hp<=0 ){
+                                this.onDie()
+                            }
                         }
                     }
                 }
@@ -113,18 +112,35 @@ namespace zlsSpaceInvader {
                         this.rotate -= Math.sign(this.rotate)*Math.min(Math.abs(this.rotate),deltaTime*Math.PI*2)
                     }
 
-                    v.sub(this.pos, playerFlight.pos).abs()
-                    if( 
-                        v.x<9 &&
-                        v.y<9 &&
-                        playerFlight.invincibleTime<=0
-                    ){
-                        this.onHitPlayer(this,playerFlight as PlayerFlight)
+                    if( playerFlight.invincibleTime<=0 ){
+                        for( let i=0; i<playerFlight.flightUnits.length; i++ ){
+                            const u = playerFlight.flightUnits[i]
+                            v.sub(this.pos, playerFlight.pos)
+                            .sub(u.pos)
+                            .abs()
+                            if( 
+                                v.x<9 &&
+                                v.y<9
+                            ){
+                                this.onHitPlayer(this,playerFlight as PlayerFlight, i)
+                                break
+                            }
+                        }
                     }
                 }
             }
         }
 
+        protected onDie(){
+            if( this.manager ){
+                const ex = new Explosion
+                ex.pos.copy(this.pos)
+                this.manager.add(ex)
+                this.removeFromManager()
+                this.flyOff && this.flyOff.onDie()
+                this.scorer.score += this.score
+            }
+        }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             ctx.save()
@@ -138,84 +154,5 @@ namespace zlsSpaceInvader {
             ctx.restore()
         }
     }
-
-    export class Zombie1 extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["zombie1"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Zombie2 extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["zombie2"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Hand extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["hand"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Dog extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["dog"],
-                scorer,
-                100,
-                onHitPlayer
-            )
-        }
-
-    }
-
-    export class Producer extends EnemyFlight {
-
-        constructor(
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight)=>void
-        ){
-            super(
-                Sprites.shared.images["p"],
-                scorer,
-                1000,
-                onHitPlayer
-            )
-        }
-
-    }
+    
 }
