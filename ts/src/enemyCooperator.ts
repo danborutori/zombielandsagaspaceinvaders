@@ -12,6 +12,7 @@ namespace zlsSpaceInvader {
             targetPos: Vector2
         }[]
         allowFlyOff = true
+        allowEnd = true
 
         set invincible( b: boolean ){
             for( let e of this.enemies ) e.enemy.invincible = b
@@ -97,11 +98,13 @@ namespace zlsSpaceInvader {
             }
 
 
-            const anyAlive = this.enemies.reduce( (a, b)=>{
-                return a || b.enemy.manager!==undefined
-            }, false)
-            if( !anyAlive ){
-                this.waveEnd()
+            if( this.allowEnd ){
+                const anyAlive = this.enemies.reduce( (a, b)=>{
+                    return a || b.enemy.manager!==undefined
+                }, false)
+                if( !anyAlive ){
+                    this.waveEnd()
+                }
             }
         }
     }

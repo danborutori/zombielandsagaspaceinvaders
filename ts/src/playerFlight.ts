@@ -49,18 +49,6 @@ namespace zlsSpaceInvader {
 
             this.bulletCooldown -= deltaTime
 
-            if( Input.shared.fire && this.bulletCooldown<=0 && this.manager && this.canShoot ){
-                for( let u of this.flightUnits ){
-                    const b = new Bullet(this.stage, u.bulletColor)
-                    b.pos.copy(this.pos)
-                    b.pos.x += u.pos.x
-                    b.pos.y -= 6
-                    this.manager.add(b)
-                }
-                this.bulletCooldown = Constant.playerFireInterval
-                Audio.play( Audio.sounds.shoot )
-            }
-
             if( this.next ){
                 const m = this.nextMember()
                 if( m ){
@@ -78,7 +66,18 @@ namespace zlsSpaceInvader {
                 }
 
                 this.next = false
+            }else if( Input.shared.fire && this.bulletCooldown<=0 && this.manager && this.canShoot ){
+                for( let u of this.flightUnits ){
+                    const b = new Bullet(this.stage, u.bulletColor)
+                    b.pos.copy(this.pos)
+                    b.pos.x += u.pos.x
+                    b.pos.y -= 6
+                    this.manager.add(b)
+                }
+                this.bulletCooldown = Constant.playerFireInterval
+                Audio.play( Audio.sounds.shoot )
             }
+
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

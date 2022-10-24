@@ -254,6 +254,7 @@ namespace zlsSpaceInvader {
             this.player.canShoot = false
             this.cooperator.allowFlyOff = false
             this.cooperator.invincible = true
+            this.cooperator.allowEnd = false
 
             Audio.play( Audio.sounds.capturedSuccess, 2 )
 
@@ -305,6 +306,7 @@ namespace zlsSpaceInvader {
                 this.player.canShoot = true
                 this.cooperator.allowFlyOff = true
                 this.cooperator.invincible = false
+                this.cooperator.allowEnd = true
                 this.removeFromManager()
             }
         }
