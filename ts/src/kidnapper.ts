@@ -57,8 +57,9 @@ namespace zlsSpaceInvader {
                     let captured = false
                     while( time<2 && !captured ){
                         time += await this.enemy.wait(0)
+                        let padding = 4.5+playerFlight.flightUnits.length*9/2
                         if(
-                            Math.abs(playerFlight.pos.x-this.enemy.pos.x)<9 &&
+                            Math.abs(playerFlight.pos.x-this.enemy.pos.x)<padding &&
                             playerFlight.invincibleTime<=0
                         ){
                             captured = true
@@ -92,7 +93,7 @@ namespace zlsSpaceInvader {
     
                 const rotFlight = new RotatingPlayerFlight(
                     player,
-                    player.flightUnits[0],  // FIXME: flight unit index
+                    player.flightUnits,
                     this.enemy,
                     this.cooperator )
 
@@ -142,24 +143,40 @@ namespace zlsSpaceInvader {
 
     }
 
-    class RotatingPlayerFlight extends SpriteObject {
+    class RotatingPlayerFlight extends GameObject {
 
         private rotate = 0
-        state: "rotating" | "stop" | "followBack" | "stickBack" | "free" = "rotating"
+        state: "rotating" | "stop" | "followBack" | "stickBack" | "free" | "combine" = "rotating"
+
+        private units: FlightUnit[]
+        private spacing = 9
 
         constructor(
             readonly player: PlayerFlight,
-            readonly flightUnit: FlightUnit,
+            units: FlightUnit[],
             readonly enemy: Kidnapper,
             readonly cooperator: EnemyCooperator            
         ){
-            super( flightUnit.sprite )
+            super()
+            this.units = Array.from( units )
             this.pos.copy(player.pos)
         }
 
         update( deltaTime: number ){
             super.update( deltaTime )
 
+            switch( this.state ){
+            case "stop":
+            case "followBack":
+            case "stickBack":
+                this.spacing = Math.max(0,this.spacing-deltaTime*50)
+                break
+            case "free":
+            case "combine":
+                this.spacing = Math.min(9,this.spacing+deltaTime*50)
+                break
+            }
+    
             switch(this.state){
             case "rotating":
             case "free":
@@ -167,6 +184,7 @@ namespace zlsSpaceInvader {
                 break
             case "stop":
             case "followBack":
+            case "combine":
                 this.rotate = 0
                 break
             case "stickBack":
@@ -180,6 +198,7 @@ namespace zlsSpaceInvader {
                 this.pos.y -= 14
                 break
             case "free":
+            case "combine":
                 break
             default:
                 v1.copy( this.enemy.pos )
@@ -208,15 +227,23 @@ namespace zlsSpaceInvader {
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
-            ctx.save()
-            const x = Math.floor(this.pos.x)
-            const y = Math.floor(this.pos.y)
-            ctx.translate(x, y)
-            const rotateStep = Math.PI/8
-            ctx.rotate(Math.round(this.rotate/rotateStep)*rotateStep)
-            ctx.translate(-x, -y)
             super.render(deltaTime,ctx)
-            ctx.restore()
+
+            for( let i=this.spacing>0?0:this.units.length-1; i<this.units.length; i++ ){
+                const u = this.units[i]
+
+                ctx.save()
+                ctx.translate(
+                    Math.floor((-(this.units.length-1)/2+i)*this.spacing+this.pos.x),
+                    Math.floor(this.pos.y) )
+                ctx.rotate( this.rotate )
+                ctx.drawImage(
+                    u.sprite,
+                    Math.floor(-u.sprite.width/2),
+                    Math.floor(-u.sprite.height/2)
+                )
+                ctx.restore()
+            }
         }
 
         async setFree(){
@@ -233,18 +260,22 @@ namespace zlsSpaceInvader {
             try{
                 await this.wait(3)
 
+
+                this.state = "combine"
+
                 this.player.paused = true
 
                 let posXSet = false
                 while( !posXSet ){
                     const dt = await this.wait(0)
 
-                    const numFlight = this.player.flightUnits.length
-                    const targetX = -9*numFlight/2+(numFlight-1)*9/2
+                    const numFlight = this.player.flightUnits.length+this.units.length
+                    const leftMost = -9*(numFlight-1)/2
+                    const targetX = leftMost-this.player.flightUnits[0].pos.x
                     const dx = targetX-this.player.pos.x
                     this.player.pos.x += Math.sign( dx )*Math.min( 100*dt, Math.abs( dx) )
                     
-                    const targetX2 = 9*numFlight/2
+                    const targetX2 = targetX+(this.player.flightUnits.length+this.units.length)*9/2
                     const dx2 = targetX2-this.pos.x
                     this.pos.x += Math.sign( dx2 )*Math.min( 100*dt, Math.abs( dx2) )
 
@@ -263,7 +294,7 @@ namespace zlsSpaceInvader {
 
                 this.visible = false
 
-                this.player.add( this.flightUnit )
+                this.player.add( this.units )
 
                 await this.wait(2)
 
@@ -316,7 +347,7 @@ namespace zlsSpaceInvader {
             if( this.manager ){
                 const rotFlight = new RotatingPlayerFlight(
                     player,
-                    new FlightUnit( sprite, Palette.BulletColor1 ),  // FIXME: bullet color
+                    [new FlightUnit( sprite, Palette.BulletColor1 )],  // FIXME: bullet color
                     this,
                     cooperator
                 )

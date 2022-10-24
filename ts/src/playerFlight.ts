@@ -104,9 +104,10 @@ namespace zlsSpaceInvader {
             this.pos.x = 0
         }
 
-        add( unit: FlightUnit ){
+        add( units: FlightUnit[] ){
             const leftMostPos = this.flightUnits.length>0?this.flightUnits[0].pos.x:0
-            this.flightUnits.push( unit )
+            for( let u of units )
+                this.flightUnits.push( u )
             for( let i=0; i<this.flightUnits.length; i++ ){
                 const u = this.flightUnits[i]
                 u.pos.x = (i-(this.flightUnits.length-1)/2)*9
