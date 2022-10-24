@@ -162,21 +162,26 @@ var zlsSpaceInvader;
         GameObject.prototype.removeFromManager = function () {
             for (var _i = 0, _a = this.waitPromises; _i < _a.length; _i++) {
                 var w = _a[_i];
-                w.reject(new Error("Object removed before timeout."));
+                w.reject(new Error("Object removed."));
             }
             this.waitPromises.length = 0;
             this.manager && this.manager.remove(this);
         };
         GameObject.prototype.wait = function (time) {
             var _this = this;
-            return new Promise(function (resolve, reject) {
-                _this.waitPromises.push({
-                    time: time,
-                    resolve: resolve,
-                    reject: reject,
-                    resolved: false
+            if (this.manager) {
+                return new Promise(function (resolve, reject) {
+                    _this.waitPromises.push({
+                        time: time,
+                        resolve: resolve,
+                        reject: reject,
+                        resolved: false
+                    });
                 });
-            });
+            }
+            else {
+                return Promise.reject(new Error("Manager is undefined"));
+            }
         };
         return GameObject;
     }());
@@ -324,12 +329,7 @@ var zlsSpaceInvader;
                             b.removeFromManager();
                             this.hp -= 1;
                             if (this.hp <= 0) {
-                                var ex = new zlsSpaceInvader.Explosion;
-                                ex.pos.copy(this.pos);
-                                this.manager.add(ex);
-                                this.removeFromManager();
-                                this.flyOff && this.flyOff.onDie();
-                                this.scorer.score += this.score;
+                                this.onDie();
                             }
                         }
                     }
@@ -342,13 +342,30 @@ var zlsSpaceInvader;
                     else {
                         this.rotate -= Math.sign(this.rotate) * Math.min(Math.abs(this.rotate), deltaTime * Math.PI * 2);
                     }
-                    v.sub(this.pos, playerFlight.pos).abs();
-                    if (v.x < 9 &&
-                        v.y < 9 &&
-                        playerFlight.invincibleTime <= 0) {
-                        this.onHitPlayer(this, playerFlight);
+                    if (playerFlight.invincibleTime <= 0) {
+                        for (var i = 0; i < playerFlight.flightUnits.length; i++) {
+                            var u = playerFlight.flightUnits[i];
+                            v.sub(this.pos, playerFlight.pos)
+                                .sub(u.pos)
+                                .abs();
+                            if (v.x < 9 &&
+                                v.y < 9) {
+                                this.onHitPlayer(this, playerFlight, i);
+                                break;
+                            }
+                        }
                     }
                 }
+            }
+        };
+        EnemyFlight.prototype.onDie = function () {
+            if (this.manager) {
+                var ex = new zlsSpaceInvader.Explosion;
+                ex.pos.copy(this.pos);
+                this.manager.add(ex);
+                this.removeFromManager();
+                this.flyOff && this.flyOff.onDie();
+                this.scorer.score += this.score;
             }
         };
         EnemyFlight.prototype.render = function (deltaTime, ctx) {
@@ -483,7 +500,7 @@ var zlsSpaceInvader;
         };
         KidnapperFlyOff.prototype.shotBeam = function (playerFlight) {
             return __awaiter(this, void 0, void 0, function () {
-                var wave, time, captured, _a, e_1;
+                var wave, time, captured, _a, padding, e_1;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -491,7 +508,7 @@ var zlsSpaceInvader;
                             this.state = "stop";
                             this.kidnapBeamState = "shootingBeam";
                             this.beamTime = 0;
-                            wave = new CaptureWave(this.enemy);
+                            wave = new CaptureWave();
                             wave.pos.copy(this.enemy.pos);
                             wave.pos.y += 4.5;
                             this.enemy.manager.add(wave);
@@ -511,7 +528,8 @@ var zlsSpaceInvader;
                             return [4 /*yield*/, this.enemy.wait(0)];
                         case 4:
                             time = _a + _b.sent();
-                            if (Math.abs(playerFlight.pos.x - this.enemy.pos.x) < 9 &&
+                            padding = 4.5 + playerFlight.flightUnits.length * 9 / 2;
+                            if (Math.abs(playerFlight.pos.x - this.enemy.pos.x) < padding &&
                                 playerFlight.invincibleTime <= 0) {
                                 captured = true;
                             }
@@ -554,10 +572,11 @@ var zlsSpaceInvader;
                             this.state = "stop";
                             this.beamTime = 0;
                             this.enemy.invincible = true;
-                            rotFlight = new RotatingPlayerFlight(player, this.enemy);
+                            rotFlight = new RotatingPlayerFlight(player, player.flightUnits, this.enemy, this.cooperator);
                             this.enemy.manager.add(rotFlight);
                             this.enemy.kidnapped = rotFlight;
-                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam2, 1);
+                            zlsSpaceInvader.Audio.stop(1);
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam2, 2);
                             player.invincibleTime = 9000; // large enough interval
                             player.visible = false;
                             player.paused = true;
@@ -577,7 +596,7 @@ var zlsSpaceInvader;
                             _a.sent();
                             this.kidnapBeamState = "beamEnd";
                             this.state = "regroup";
-                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess, 1);
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess, 2);
                             txt = new zlsSpaceInvader.FloatingText("MEMBER CAPTURED");
                             this.enemy.manager.add(txt);
                             return [4 /*yield*/, this.enemy.wait(5)];
@@ -590,8 +609,9 @@ var zlsSpaceInvader;
                         case 7:
                             this.cooperator.allowFlyOff = true;
                             player.invincibleTime = 0;
-                            player.visible = true;
+                            // player.visible = true
                             player.paused = false;
+                            player.flightUnits.length = 0;
                             player.next = true;
                             this.enemy.invincible = false;
                             return [7 /*endfinally*/];
@@ -604,22 +624,39 @@ var zlsSpaceInvader;
     }(zlsSpaceInvader.EnemyFlyOff));
     var RotatingPlayerFlight = /** @class */ (function (_super) {
         __extends(RotatingPlayerFlight, _super);
-        function RotatingPlayerFlight(player, enemy) {
-            var _this = _super.call(this, player.sprite) || this;
+        function RotatingPlayerFlight(player, units, enemy, cooperator) {
+            var _this = _super.call(this) || this;
+            _this.player = player;
             _this.enemy = enemy;
+            _this.cooperator = cooperator;
             _this.rotate = 0;
             _this.state = "rotating";
+            _this.spacing = 9;
+            _this.units = Array.from(units);
             _this.pos.copy(player.pos);
             return _this;
         }
         RotatingPlayerFlight.prototype.update = function (deltaTime) {
             _super.prototype.update.call(this, deltaTime);
             switch (this.state) {
+                case "stop":
+                case "followBack":
+                case "stickBack":
+                    this.spacing = Math.max(0, this.spacing - deltaTime * 50);
+                    break;
+                case "free":
+                case "combine":
+                    this.spacing = Math.min(9, this.spacing + deltaTime * 50);
+                    break;
+            }
+            switch (this.state) {
                 case "rotating":
+                case "free":
                     this.rotate += deltaTime * Math.PI * 8;
                     break;
                 case "stop":
                 case "followBack":
+                case "combine":
                     this.rotate = 0;
                     break;
                 case "stickBack":
@@ -630,6 +667,9 @@ var zlsSpaceInvader;
                 case "stickBack":
                     this.pos.copy(this.enemy.pos);
                     this.pos.y -= 14;
+                    break;
+                case "free":
+                case "combine":
                     break;
                 default:
                     v1.copy(this.enemy.pos);
@@ -656,18 +696,92 @@ var zlsSpaceInvader;
             this.state = "followBack";
         };
         RotatingPlayerFlight.prototype.render = function (deltaTime, ctx) {
-            ctx.save();
-            var x = Math.floor(this.pos.x);
-            var y = Math.floor(this.pos.y);
-            ctx.translate(x, y);
-            var rotateStep = Math.PI / 8;
-            ctx.rotate(Math.round(this.rotate / rotateStep) * rotateStep);
-            ctx.translate(-x, -y);
             _super.prototype.render.call(this, deltaTime, ctx);
-            ctx.restore();
+            for (var i = this.spacing > 0 ? 0 : this.units.length - 1; i < this.units.length; i++) {
+                var u = this.units[i];
+                ctx.save();
+                ctx.translate(Math.floor((-(this.units.length - 1) / 2 + i) * this.spacing + this.pos.x), Math.floor(this.pos.y));
+                ctx.rotate(this.rotate);
+                ctx.drawImage(u.sprite, Math.floor(-u.sprite.width / 2), Math.floor(-u.sprite.height / 2));
+                ctx.restore();
+            }
+        };
+        RotatingPlayerFlight.prototype.setFree = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var posXSet, dt, numFlight, leftMost, targetX, dx, targetX2, dx2, posYSet, dt, dy, e_3;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            this.state = "free";
+                            this.player.invincibleTime = 9000; // large enough number
+                            this.player.canShoot = false;
+                            this.cooperator.allowFlyOff = false;
+                            this.cooperator.invincible = true;
+                            this.cooperator.allowEnd = false;
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess, 2);
+                            _a.label = 1;
+                        case 1:
+                            _a.trys.push([1, 10, 11, 12]);
+                            return [4 /*yield*/, this.wait(3)];
+                        case 2:
+                            _a.sent();
+                            this.state = "combine";
+                            this.player.paused = true;
+                            posXSet = false;
+                            _a.label = 3;
+                        case 3:
+                            if (!!posXSet) return [3 /*break*/, 5];
+                            return [4 /*yield*/, this.wait(0)];
+                        case 4:
+                            dt = _a.sent();
+                            numFlight = this.player.flightUnits.length + this.units.length;
+                            leftMost = -9 * (numFlight - 1) / 2;
+                            targetX = leftMost - this.player.flightUnits[0].pos.x;
+                            dx = targetX - this.player.pos.x;
+                            this.player.pos.x += Math.sign(dx) * Math.min(100 * dt, Math.abs(dx));
+                            targetX2 = targetX + (this.player.flightUnits.length + this.units.length) * 9 / 2;
+                            dx2 = targetX2 - this.pos.x;
+                            this.pos.x += Math.sign(dx2) * Math.min(100 * dt, Math.abs(dx2));
+                            posXSet = dx == 0 && dx2 == 0;
+                            return [3 /*break*/, 3];
+                        case 5:
+                            posYSet = false;
+                            _a.label = 6;
+                        case 6:
+                            if (!!posYSet) return [3 /*break*/, 8];
+                            return [4 /*yield*/, this.wait(0)];
+                        case 7:
+                            dt = _a.sent();
+                            dy = this.player.pos.y - this.pos.y;
+                            this.pos.y += Math.sign(dy) * Math.min(100 * dt, Math.abs(dy));
+                            posYSet = dy == 0;
+                            return [3 /*break*/, 6];
+                        case 8:
+                            this.visible = false;
+                            this.player.add(this.units);
+                            return [4 /*yield*/, this.wait(2)];
+                        case 9:
+                            _a.sent();
+                            return [3 /*break*/, 12];
+                        case 10:
+                            e_3 = _a.sent();
+                            return [3 /*break*/, 12];
+                        case 11:
+                            this.player.invincibleTime = 0;
+                            this.player.paused = false;
+                            this.player.canShoot = true;
+                            this.cooperator.allowFlyOff = true;
+                            this.cooperator.invincible = false;
+                            this.cooperator.allowEnd = true;
+                            this.removeFromManager();
+                            return [7 /*endfinally*/];
+                        case 12: return [2 /*return*/];
+                    }
+                });
+            });
         };
         return RotatingPlayerFlight;
-    }(zlsSpaceInvader.SpriteObject));
+    }(zlsSpaceInvader.GameObject));
     var Kidnapper = /** @class */ (function (_super) {
         __extends(Kidnapper, _super);
         function Kidnapper() {
@@ -688,14 +802,28 @@ var zlsSpaceInvader;
                 this.kidnapped.followBack();
             }
         };
+        Kidnapper.prototype.onDie = function () {
+            if (this.kidnapped) {
+                this.kidnapped.setFree();
+            }
+            _super.prototype.onDie.call(this);
+        };
+        Kidnapper.prototype.setCapture = function (player, flightUnit, cooperator) {
+            if (this.manager) {
+                var rotFlight = new RotatingPlayerFlight(player, [flightUnit], // FIXME: bullet color
+                this, cooperator);
+                rotFlight.state = "stickBack";
+                this.manager.add(rotFlight);
+                this.kidnapped = rotFlight;
+            }
+        };
         return Kidnapper;
     }(zlsSpaceInvader.EnemyFlight));
     zlsSpaceInvader.Kidnapper = Kidnapper;
     var CaptureWave = /** @class */ (function (_super) {
         __extends(CaptureWave, _super);
-        function CaptureWave(enemy) {
+        function CaptureWave() {
             var _this = _super.call(this) || this;
-            _this.enemy = enemy;
             _this.frames = [
                 zlsSpaceInvader.Sprites.shared.images.captureWave0,
                 zlsSpaceInvader.Sprites.shared.images.captureWave1,
@@ -718,8 +846,6 @@ var zlsSpaceInvader;
                     this.height = Math.max(0, this.height - deltaTime);
                     break;
             }
-            if (!this.enemy.manager)
-                this.removeFromManager();
         };
         CaptureWave.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
@@ -829,7 +955,7 @@ var zlsSpaceInvader;
             dom.onerror = function (e) { return reject(e); };
         });
     }
-    var channels = new Array(2);
+    var channels = new Array(3);
     for (var i = 0; i < channels.length; i++) {
         var dom = document.createElement("audio");
         dom.volume = zlsSpaceInvader.Constant.volume;
@@ -849,6 +975,9 @@ var zlsSpaceInvader;
         Audio.play = function (sound, channel) {
             if (channel === void 0) { channel = 0; }
             channels[channel].src = sound;
+        };
+        Audio.stop = function (channel) {
+            channels[channel].pause();
         };
         Object.defineProperty(Audio, "volume", {
             get: function () {
@@ -982,14 +1111,6 @@ var zlsSpaceInvader;
         return Dog;
     }(zlsSpaceInvader.EnemyFlight));
     zlsSpaceInvader.Dog = Dog;
-    var Producer = /** @class */ (function (_super) {
-        __extends(Producer, _super);
-        function Producer(scorer, onHitPlayer) {
-            return _super.call(this, zlsSpaceInvader.Sprites.shared.images["p"], scorer, 1000, onHitPlayer) || this;
-        }
-        return Producer;
-    }(zlsSpaceInvader.EnemyFlight));
-    zlsSpaceInvader.Producer = Producer;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
@@ -1003,6 +1124,7 @@ var zlsSpaceInvader;
             _this.cooldown = 0;
             _this.moveDir = "left";
             _this.allowFlyOff = true;
+            _this.allowEnd = true;
             _this.enemies = enemies.map(function (e) {
                 return {
                     enemy: e,
@@ -1012,6 +1134,16 @@ var zlsSpaceInvader;
             });
             return _this;
         }
+        Object.defineProperty(EnemyCooperator.prototype, "invincible", {
+            set: function (b) {
+                for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
+                    var e = _a[_i];
+                    e.enemy.invincible = b;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         EnemyCooperator.prototype.update = function (deltaTime) {
             _super.prototype.update.call(this, deltaTime);
             this.cooldown -= deltaTime;
@@ -1072,11 +1204,13 @@ var zlsSpaceInvader;
                     e.enemy.vel.set(0, 0);
                 }
             }
-            var anyAlive = this.enemies.reduce(function (a, b) {
-                return a || b.enemy.manager !== undefined;
-            }, false);
-            if (!anyAlive) {
-                this.waveEnd();
+            if (this.allowEnd) {
+                var anyAlive = this.enemies.reduce(function (a, b) {
+                    return a || b.enemy.manager !== undefined;
+                }, false);
+                if (!anyAlive) {
+                    this.waveEnd();
+                }
             }
         };
         return EnemyCooperator;
@@ -1108,9 +1242,10 @@ var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
     var FloatingText = /** @class */ (function (_super) {
         __extends(FloatingText, _super);
-        function FloatingText(text) {
+        function FloatingText(text, onRemove) {
             var _this = _super.call(this) || this;
             _this.text = text;
+            _this.onRemove = onRemove;
             _this.time = 0;
             _this.renderHalf = false;
             return _this;
@@ -1119,6 +1254,7 @@ var zlsSpaceInvader;
             _super.prototype.update.call(this, deltaTime);
             this.time += deltaTime;
             if (this.time > 3) {
+                this.onRemove && this.onRemove();
                 this.removeFromManager();
             }
         };
@@ -1168,32 +1304,26 @@ var zlsSpaceInvader;
             var _this = _super.call(this) || this;
             _this.stage = stage;
             _this.manager = manager;
-            _this.remainingMember = 7;
-            _this.members = [];
+            _this.units = [];
             _this.canCallMaiMai = true;
-            for (var i = 0; i < memberList.length; i++) {
-                var m = new zlsSpaceInvader.SpriteObject(zlsSpaceInvader.Sprites.shared.images["" + memberList[i].no]);
-                m.renderOrder = 1;
-                m.pos.x = stage.left + 15 + i * 11;
-                m.pos.y = stage.bottom - 9;
-                _this.members.push(m);
-                if (i <= _this.remainingMember - 2) {
-                    manager.add(m);
-                }
-            }
+            _this.renderOrder = 1;
+            _this.reset(memberList.slice(0, 6).map(function (m) {
+                return new zlsSpaceInvader.FlightUnit(zlsSpaceInvader.Sprites.shared.images["" + m.no], m.bulletColor);
+            }));
             return _this;
         }
+        Object.defineProperty(Franchouchou.prototype, "remainingMember", {
+            get: function () {
+                return this.units.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Franchouchou.prototype, "nextMember", {
             get: function () {
-                this.remainingMember--;
-                if (this.remainingMember - 1 >= 0) {
-                    var m = this.members[this.remainingMember - 1];
-                    m.removeFromManager();
-                    var mb = memberList[this.remainingMember - 1];
-                    return {
-                        sprite: zlsSpaceInvader.Sprites.shared.images["" + mb.no],
-                        bulletColor: mb.bulletColor
-                    };
+                if (this.units.length > 0) {
+                    var m = this.units.pop();
+                    return m;
                 }
                 return null;
             },
@@ -1202,23 +1332,21 @@ var zlsSpaceInvader;
         });
         Franchouchou.prototype.update = function (deltaTime) {
             _super.prototype.update.call(this, deltaTime);
-            if (this.remainingMember == 7 &&
-                zlsSpaceInvader.Input.shared.maimai &&
+            if (zlsSpaceInvader.Input.shared.maimai &&
                 this.canCallMaiMai) {
-                this.remainingMember = 8;
-                this.manager.add(this.members[6]);
+                this.units.push(new zlsSpaceInvader.FlightUnit(zlsSpaceInvader.Sprites.shared.images["" + memberList[6].no], memberList[6].bulletColor));
                 this.canCallMaiMai = false;
             }
         };
-        Franchouchou.prototype.reset = function () {
-            this.remainingMember = 7;
-            this.canCallMaiMai = true;
-            for (var i = 0; i < this.members.length; i++) {
-                var m = this.members[i];
-                if (i <= this.remainingMember - 2) {
-                    this.manager.add(m);
-                }
+        Franchouchou.prototype.render = function (deltaTime, ctx) {
+            _super.prototype.render.call(this, deltaTime, ctx);
+            for (var i = 0; i < this.units.length; i++) {
+                var spr = this.units[i].sprite;
+                ctx.drawImage(spr, Math.floor(this.stage.left + 15 + i * 11 - spr.width / 2), Math.floor(this.stage.bottom - 9 - spr.height / 2));
             }
+        };
+        Franchouchou.prototype.reset = function (renewUnits) {
+            this.units = Array.from(renewUnits);
         };
         return Franchouchou;
     }(zlsSpaceInvader.GameObject));
@@ -1473,7 +1601,7 @@ var zlsSpaceInvader;
             var _this = this;
             var scoreAndCredit = new zlsSpaceInvader.ScoreAndCredit(this.stage, {
                 get remainingMember() {
-                    return franchouchou.remainingMember;
+                    return franchouchou.remainingMember + playerFlight.flightUnits.length;
                 }
             });
             if (this.ctx) {
@@ -1531,8 +1659,8 @@ var zlsSpaceInvader;
             var enemyYOffset = -46;
             for (var i = 0; i < enemyColumn; i++) {
                 for (var j = 0; j < enemyRows.length; j++) {
-                    var e = new enemyRows[j](scoreAndCredit, function (e, p) {
-                        p.next = true;
+                    var e = new enemyRows[j](scoreAndCredit, function (e, p, i) {
+                        p.remove(i);
                         zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.explosion);
                     });
                     e.pos.x = (-enemyColumn / 2 + i + 0.5) * enemySpacing;
@@ -1541,17 +1669,6 @@ var zlsSpaceInvader;
                     this.enemies.push(e);
                 }
             }
-            var p = new zlsSpaceInvader.Producer(scoreAndCredit, function (e, p) {
-                var jai = new zlsSpaceInvader.FloatingText("ジャイ");
-                jai.pos.copy(p.pos);
-                _this.gameObjectManager.add(jai);
-                scoreAndCredit.score += 10000;
-                e.removeFromManager();
-                zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.bonus, 1);
-            });
-            p.pos.y = enemyYOffset - enemySpacing;
-            this.gameObjectManager.add(p);
-            this.enemies.push(p);
             var waveEnd = function () {
                 _this.resetEnemies(playerFlight, scoreAndCredit);
                 playerFlight.paused = true;
@@ -1572,42 +1689,68 @@ var zlsSpaceInvader;
             };
             this.enemyCooperator = new zlsSpaceInvader.EnemyCooperator(this.stage, this.enemies, waveEnd);
             this.gameObjectManager.add(this.enemyCooperator);
+            var pInPlayer = playerFlight.flightUnits.reduce(function (a, b) {
+                return a || b.sprite === zlsSpaceInvader.Sprites.shared.images["p"];
+            }, false);
+            if (!pInPlayer)
+                this.enemies[enemyRows.length * 4].setCapture(playerFlight, new zlsSpaceInvader.FlightUnit(zlsSpaceInvader.Sprites.shared.images["p"], zlsSpaceInvader.Palette.BulletColor1), this.enemyCooperator);
         };
         Main.prototype.showContinue = function (scoreAndCredit, playerFlight, franchouchou) {
             var _this = this;
-            if (scoreAndCredit.credit > 0) {
-                playerFlight.paused = true;
-                for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
-                    var e = _a[_i];
-                    e.paused = true;
-                }
-                this.enemyCooperator.paused = true;
-                var continueScreen = new zlsSpaceInvader.ContinueScreen(function (b) {
-                    if (b) {
-                        scoreAndCredit.credit--;
-                        playerFlight.paused = false;
-                        for (var _i = 0, _a = _this.enemies; _i < _a.length; _i++) {
-                            var e = _a[_i];
-                            e.paused = false;
+            var renewFlights = Array.from(playerFlight.flightUnits);
+            for (var _i = 0, _a = playerFlight.removedUnits; _i < _a.length; _i++) {
+                var u = _a[_i];
+                if (u.sprite !== zlsSpaceInvader.Sprites.shared.images["p"])
+                    renewFlights.push(u);
+            }
+            if (renewFlights.length > 0) {
+                if (scoreAndCredit.credit > 0 && renewFlights.length > 0) {
+                    playerFlight.paused = true;
+                    for (var _b = 0, _c = this.enemies; _b < _c.length; _b++) {
+                        var e = _c[_b];
+                        e.paused = true;
+                    }
+                    this.enemyCooperator.paused = true;
+                    var continueScreen = new zlsSpaceInvader.ContinueScreen(function (b) {
+                        if (b) {
+                            scoreAndCredit.credit--;
+                            playerFlight.paused = false;
+                            for (var _i = 0, _a = _this.enemies; _i < _a.length; _i++) {
+                                var e = _a[_i];
+                                e.paused = false;
+                            }
+                            _this.enemyCooperator.paused = false;
+                            playerFlight.reset(renewFlights[0]);
+                            franchouchou.reset(renewFlights.slice(1));
+                            playerFlight.invincibleTime = 1;
                         }
-                        _this.enemyCooperator.paused = false;
-                        playerFlight.reset();
-                        franchouchou.reset();
+                        else {
+                            _this.showHighestScore(scoreAndCredit);
+                        }
+                    });
+                    this.gameObjectManager.add(continueScreen);
+                }
+                else {
+                    playerFlight.paused = true;
+                    for (var _d = 0, _e = this.enemies; _d < _e.length; _d++) {
+                        var e = _e[_d];
+                        e.paused = true;
                     }
-                    else {
-                        _this.showHighestScore(scoreAndCredit);
-                    }
-                });
-                this.gameObjectManager.add(continueScreen);
+                    this.enemyCooperator.paused = true;
+                    this.showHighestScore(scoreAndCredit);
+                }
             }
             else {
                 playerFlight.paused = true;
-                for (var _b = 0, _c = this.enemies; _b < _c.length; _b++) {
-                    var e = _c[_b];
+                for (var _f = 0, _g = this.enemies; _f < _g.length; _f++) {
+                    var e = _g[_f];
                     e.paused = true;
                 }
                 this.enemyCooperator.paused = true;
-                this.showHighestScore(scoreAndCredit);
+                var t = new zlsSpaceInvader.FloatingText("ALL MEMBERS CAPTURED", function () {
+                    _this.showHighestScore(scoreAndCredit);
+                });
+                this.gameObjectManager.add(t);
             }
         };
         Main.prototype.showHighestScore = function (scoreAndCredit) {
@@ -1672,12 +1815,11 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
-    var padding = 4.5;
     var invincibleInterval = 3;
     var PlayerFlight = /** @class */ (function (_super) {
         __extends(PlayerFlight, _super);
         function PlayerFlight(stage, nextMember, allMemberRunOut) {
-            var _this = _super.call(this, zlsSpaceInvader.Sprites.shared.images[1]) || this;
+            var _this = _super.call(this) || this;
             _this.stage = stage;
             _this.nextMember = nextMember;
             _this.allMemberRunOut = allMemberRunOut;
@@ -1685,7 +1827,11 @@ var zlsSpaceInvader;
             _this.isPlayerFlight = true;
             _this.next = false;
             _this.invincibleTime = 0;
-            _this.bulletColor = zlsSpaceInvader.Palette.BulletColor1;
+            _this.canShoot = true;
+            _this.removedUnits = [];
+            _this.flightUnits = [
+                new FlightUnit(zlsSpaceInvader.Sprites.shared.images[1], zlsSpaceInvader.Palette.BulletColor1)
+            ];
             return _this;
         }
         PlayerFlight.prototype.update = function (deltaTime) {
@@ -1695,22 +1841,21 @@ var zlsSpaceInvader;
                 this.pos.x -= zlsSpaceInvader.Constant.playerMoveSpeed * deltaTime;
             if (zlsSpaceInvader.Input.shared.right)
                 this.pos.x += zlsSpaceInvader.Constant.playerMoveSpeed * deltaTime;
+            var padding = this.flightUnits.length * 9 / 2;
             this.pos.x = Math.max(this.pos.x, this.stage.left + padding);
             this.pos.x = Math.min(this.pos.x, this.stage.right - padding);
             this.bulletCooldown -= deltaTime;
-            if (zlsSpaceInvader.Input.shared.fire && this.bulletCooldown <= 0 && this.manager) {
-                var b = new zlsSpaceInvader.Bullet(this.stage, this.bulletColor);
-                b.pos.copy(this.pos);
-                b.pos.y -= 6;
-                this.manager.add(b);
-                this.bulletCooldown = zlsSpaceInvader.Constant.playerFireInterval;
-                zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shoot);
-            }
             if (this.next) {
                 var m = this.nextMember();
                 if (m) {
-                    this.sprite = m.sprite;
-                    this.bulletColor = m.bulletColor;
+                    for (var _i = 0, _a = this.flightUnits; _i < _a.length; _i++) {
+                        var u = _a[_i];
+                        this.removedUnits.push(u);
+                    }
+                    this.flightUnits = [
+                        new FlightUnit(m.sprite, m.bulletColor)
+                    ];
+                    this.visible = true;
                     this.pos.x = 0;
                     this.invincibleTime = invincibleInterval;
                 }
@@ -1719,15 +1864,74 @@ var zlsSpaceInvader;
                 }
                 this.next = false;
             }
+            else if (zlsSpaceInvader.Input.shared.fire && this.bulletCooldown <= 0 && this.manager && this.canShoot) {
+                for (var _b = 0, _c = this.flightUnits; _b < _c.length; _b++) {
+                    var u = _c[_b];
+                    var b = new zlsSpaceInvader.Bullet(this.stage, u.bulletColor);
+                    b.pos.copy(this.pos);
+                    b.pos.x += u.pos.x;
+                    b.pos.y -= 6;
+                    this.manager.add(b);
+                }
+                this.bulletCooldown = zlsSpaceInvader.Constant.playerFireInterval;
+                zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shoot);
+            }
         };
-        PlayerFlight.prototype.reset = function () {
-            this.sprite = zlsSpaceInvader.Sprites.shared.images[1];
-            this.bulletColor = zlsSpaceInvader.Palette.BulletColor1;
+        PlayerFlight.prototype.render = function (deltaTime, ctx) {
+            _super.prototype.render.call(this, deltaTime, ctx);
+            for (var _i = 0, _a = this.flightUnits; _i < _a.length; _i++) {
+                var u = _a[_i];
+                ctx.drawImage(u.sprite, Math.floor(this.pos.x + u.pos.x - u.sprite.width / 2), Math.floor(this.pos.y + u.pos.y - u.sprite.height / 2));
+            }
+        };
+        PlayerFlight.prototype.reset = function (flightUnit) {
+            this.flightUnits = [
+                flightUnit
+            ];
+            this.removedUnits.length = 0;
+            this.visible = true;
             this.pos.x = 0;
         };
+        PlayerFlight.prototype.add = function (units) {
+            var leftMostPos = this.flightUnits.length > 0 ? this.flightUnits[0].pos.x : 0;
+            for (var _i = 0, units_1 = units; _i < units_1.length; _i++) {
+                var u = units_1[_i];
+                this.flightUnits.push(u);
+            }
+            for (var i = 0; i < this.flightUnits.length; i++) {
+                var u = this.flightUnits[i];
+                u.pos.x = (i - (this.flightUnits.length - 1) / 2) * 9;
+            }
+            this.pos.x += leftMostPos - this.flightUnits[0].pos.x;
+        };
+        PlayerFlight.prototype.remove = function (index) {
+            if (this.flightUnits.length > 1) {
+                var positioningUnit = this.flightUnits[index == 0 ? 1 : 0];
+                var leftMostPos = positioningUnit.pos.x;
+                this.removedUnits.push(this.flightUnits.splice(index, 1)[0]);
+                for (var i = 0; i < this.flightUnits.length; i++) {
+                    var u = this.flightUnits[i];
+                    u.pos.x = (i - (this.flightUnits.length - 1) / 2) * 9;
+                }
+                this.pos.x += leftMostPos - positioningUnit.pos.x;
+                this.invincibleTime = 1;
+            }
+            else {
+                this.next = true;
+            }
+        };
         return PlayerFlight;
-    }(zlsSpaceInvader.SpriteObject));
+    }(zlsSpaceInvader.GameObject));
     zlsSpaceInvader.PlayerFlight = PlayerFlight;
+    var FlightUnit = /** @class */ (function () {
+        function FlightUnit(sprite, bulletColor) {
+            this.sprite = sprite;
+            this.bulletColor = bulletColor;
+            this.pos = new zlsSpaceInvader.Vector2;
+        }
+        return FlightUnit;
+    }());
+    zlsSpaceInvader.FlightUnit = FlightUnit;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
