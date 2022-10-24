@@ -33,20 +33,18 @@ namespace zlsSpaceInvader {
 
     export class Franchouchou extends GameObject {
 
-        remainingMember = 7
-        private members: SpriteObject[] = []
+        private units: FlightUnit[] = []
+
         private canCallMaiMai = true
 
+        get remainingMember(){
+            return this.units.length+1
+        }
+
         get nextMember(){
-            this.remainingMember--
-            if( this.remainingMember-1>=0 ){
-                const m = this.members[this.remainingMember-1]
-                m.removeFromManager()
-                const mb = memberList[this.remainingMember-1]
-                return {
-                    sprite: Sprites.shared.images[`${mb.no}`],
-                    bulletColor: mb.bulletColor
-                }
+            if( this.units.length>0 ){                
+                const m = this.units.pop()
+                return m!
             }
             return null
         }
@@ -56,41 +54,49 @@ namespace zlsSpaceInvader {
             readonly manager: GameObjectManager
         ){
             super()
-            for( let i=0; i<memberList.length; i++ ){
-                const m = new SpriteObject( Sprites.shared.images[`${memberList[i].no}`] )
-                m.renderOrder = 1
-                m.pos.x = stage.left+15+i*11
-                m.pos.y = stage.bottom-9
-                this.members.push(m)
-                if( i<=this.remainingMember-2 ){
-                    manager.add(m)
-                }
-            }
+            this.renderOrder = 1
+            this.reset()
         }
 
         update( deltaTime: number ){
             super.update( deltaTime )
 
             if(
-                this.remainingMember==7 &&
                 Input.shared.maimai &&
                 this.canCallMaiMai
             ){
-                this.remainingMember = 8
-                this.manager.add(this.members[6])
+                this.units.push(
+                    new FlightUnit(
+                        Sprites.shared.images[`${memberList[6].no}`],
+                        memberList[6].bulletColor
+                    )    
+                )
                 this.canCallMaiMai = false
             }
         }
 
-        reset(){
-            this.remainingMember = 7
-            this.canCallMaiMai = true
-            for( let i=0; i<this.members.length; i++ ){
-                const m = this.members[i]
-                if( i<=this.remainingMember-2 ){
-                    this.manager.add(m)
-                }
+        render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
+            super.render( deltaTime, ctx )
+
+            for( let i=0; i<this.units.length; i++ ){
+                const spr =this.units[i].sprite
+
+                ctx.drawImage(
+                    spr,
+                    Math.floor(this.stage.left+15+i*11-spr.width/2),
+                    Math.floor(this.stage.bottom-9-spr.height/2)
+                )
             }
+        }
+
+        reset(){
+            this.canCallMaiMai = true
+            this.units = memberList.slice(0,6).map( m=>
+                new FlightUnit(
+                    Sprites.shared.images[`${m.no}`],
+                    m.bulletColor
+                )
+            )
         }
     }
 
