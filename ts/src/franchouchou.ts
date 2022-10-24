@@ -95,7 +95,6 @@ namespace zlsSpaceInvader {
         }
 
         reset( renewUnits: FlightUnit[] ){
-            this.canCallMaiMai = true
             this.units = Array.from(renewUnits)
         }
     }
