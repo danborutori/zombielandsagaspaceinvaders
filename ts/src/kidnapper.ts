@@ -89,7 +89,7 @@ namespace zlsSpaceInvader {
                 this.cooperator.allowFlyOff = false
                 this.state = "stop"
                 this.beamTime = 0
-                this.enemy.invincible = true
+                this.cooperator.invincible = true
     
                 const rotFlight = new RotatingPlayerFlight(
                     player,
@@ -137,7 +137,7 @@ namespace zlsSpaceInvader {
                     player.paused = false
                     player.flightUnits.length = 0
                     player.next = true
-                    this.enemy.invincible = false
+                    this.cooperator.invincible = false
                 }
             }
         }
