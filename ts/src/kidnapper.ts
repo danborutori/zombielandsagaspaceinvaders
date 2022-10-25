@@ -249,66 +249,68 @@ namespace zlsSpaceInvader {
 
         async setFree(){
 
-            this.state = "free"
+            if( this.state!="free"){
+                this.state = "free"
 
-            this.player.invincibleTime = 9000 // large enough number
-            this.player.canShoot = false
-            this.cooperator.allowFlyOff = false
-            this.cooperator.invincible = true
-            this.cooperator.allowEnd = false
+                this.player.invincibleTime = 9000 // large enough number
+                this.player.canShoot = false
+                this.cooperator.allowFlyOff = false
+                this.cooperator.invincible = true
+                this.cooperator.allowEnd = false
 
-            Audio.play( Audio.sounds.capturedSuccess, 2 )
+                Audio.play( Audio.sounds.capturedSuccess, 2 )
 
-            try{
-                await this.wait(3)
+                try{
+                    await this.wait(3)
 
 
-                this.state = "combine"
+                    this.state = "combine"
 
-                this.player.paused = true
+                    this.player.paused = true
 
-                let posXSet = false
-                while( !posXSet ){
-                    const dt = await this.wait(0)
+                    let posXSet = false
+                    while( !posXSet ){
+                        const dt = await this.wait(0)
 
-                    const numFlight = this.player.flightUnits.length+this.units.length
-                    const leftMost = -9*(numFlight-1)/2
-                    const targetX = leftMost-this.player.flightUnits[0].pos.x
-                    const dx = targetX-this.player.pos.x
-                    this.player.pos.x += Math.sign( dx )*Math.min( 100*dt, Math.abs( dx) )
-                    
-                    const targetX2 = targetX+(this.player.flightUnits.length+this.units.length)*9/2
-                    const dx2 = targetX2-this.pos.x
-                    this.pos.x += Math.sign( dx2 )*Math.min( 100*dt, Math.abs( dx2) )
+                        const numFlight = this.player.flightUnits.length+this.units.length
+                        const leftMost = -9*(numFlight-1)/2
+                        const targetX = leftMost-this.player.flightUnits[0].pos.x
+                        const dx = targetX-this.player.pos.x
+                        this.player.pos.x += Math.sign( dx )*Math.min( 100*dt, Math.abs( dx) )
+                        
+                        const targetX2 = targetX+(this.player.flightUnits.length+this.units.length)*9/2
+                        const dx2 = targetX2-this.pos.x
+                        this.pos.x += Math.sign( dx2 )*Math.min( 100*dt, Math.abs( dx2) )
 
-                    posXSet = dx==0 && dx2==0
+                        posXSet = dx==0 && dx2==0
+                    }
+
+                    let posYSet = false
+                    while( !posYSet ){
+                        const dt = await this.wait(0)                    
+
+                        const dy = this.player.pos.y-this.pos.y
+                        this.pos.y += Math.sign( dy )*Math.min( 100*dt, Math.abs( dy) )
+
+                        posYSet = dy == 0
+                    }
+
+                    this.visible = false
+
+                    this.player.add( this.units )
+
+                    await this.wait(2)
+
+                }catch(e){
+                }finally{
+                    this.player.invincibleTime = 0
+                    this.player.paused = false
+                    this.player.canShoot = true
+                    this.cooperator.allowFlyOff = true
+                    this.cooperator.invincible = false
+                    this.cooperator.allowEnd = true
+                    this.removeFromManager()
                 }
-
-                let posYSet = false
-                while( !posYSet ){
-                    const dt = await this.wait(0)                    
-
-                    const dy = this.player.pos.y-this.pos.y
-                    this.pos.y += Math.sign( dy )*Math.min( 100*dt, Math.abs( dy) )
-
-                    posYSet = dy == 0
-                }
-
-                this.visible = false
-
-                this.player.add( this.units )
-
-                await this.wait(2)
-
-            }catch(e){
-            }finally{
-                this.player.invincibleTime = 0
-                this.player.paused = false
-                this.player.canShoot = true
-                this.cooperator.allowFlyOff = true
-                this.cooperator.invincible = false
-                this.cooperator.allowEnd = true
-                this.removeFromManager()
             }
         }
     }

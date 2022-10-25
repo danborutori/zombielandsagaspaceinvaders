@@ -96,9 +96,11 @@ namespace zlsSpaceInvader {
                         ){
                             this.flashTime = 0.1
                             b.removeFromManager()
-                            this.hp -= 1
-                            if( this.hp<=0 ){
-                                this.onDie()
+                            if( this.hp>0 ){
+                                this.hp -= 1
+                                if( this.hp<=0 ){
+                                    this.onDie()
+                                }
                             }
                         }
                     }
