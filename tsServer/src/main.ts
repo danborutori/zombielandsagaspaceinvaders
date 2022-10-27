@@ -5,7 +5,7 @@ const LocalStorage = require("node-localstorage").LocalStorage
 const _localStorage: Storage = new LocalStorage('./scratch')
 
 const rootDirectory = "../../html/"
-const portNumber = 3333
+const portNumber = 86
 const appRootPath = "/zlsspaceinvader"
 
 function readJSON( request: any ){
