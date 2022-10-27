@@ -11,50 +11,22 @@
         <meta property="twitter:description" content="サガを救いために" />
         <meta property="twitter:image" content="https://rawcdn.githack.com/danborutori/zombielandsagaspaceinvaders/master/html/preview.png" />
 
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <link rel="stylesheet" href="./css/style.css">
+
         <title>ゾンビランドサガスペースインベーダーズ</title>
         <script src="script/main.js"></script>
     </header>
-    <body style="background-color: black; user-select: none; touch-action: none; overflow: hidden;">
+    <body style="background-color: black; user-select: none; touch-action: none;">
         <center>
             <table>
+                <tr><td><input id="audioButton" type="button" value="SOUND OFF" /></td></tr>
                 <tr>
-                    <td style="vertical-align: top;">
-                        <!-- placeholder -->
-                        <table style="color: black; font-family: Trebuchet MS;">
-                            <tr><th colspan="2">How to Play:</th></tr>
-                            <tr>
-                                <td>Move</td>
-                                <td>Left/Right Arrow</td>
-                            </tr>
-                            <tr>
-                                <td>Fire</td>
-                                <td>Up Arrow</td>
-                            </tr>
-                        </table>
-                    </td>
                     <td>
                         <div style="position: relative;">
                             <canvas id="mainCanvas" width="360" height="360" style="width: 720; height: 720; image-rendering: pixelated;"></canvas>
                             <div id="loadingLabel" style="position: absolute; top: 360; left: 360; transform: translate(-50%, -50%); color: white; font-family: Trebuchet MS;">LOADING</div>
                         </div>
-                    </td>
-                    <td style="vertical-align: top;">
-                        <table style="color: white; font-family: Trebuchet MS;">
-                            <tr>
-                                <td colspan="2">
-                                    <input id="audioButton" type="button" value="SOUND OFF" />
-                                </td>
-                            </tr>
-                            <tr><th colspan="2">How to Play:</th></tr>
-                            <tr>
-                                <td>Move</td>
-                                <td>Left/Right Arrow</td>
-                            </tr>
-                            <tr>
-                                <td>Fire</td>
-                                <td>Up Arrow</td>
-                            </tr>
-                        </table>
                     </td>
                 </tr>
                 <tr id="onScreenController">
@@ -67,10 +39,45 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3" style="color: white; font-family: Trebuchet MS; text-align: center;">
-                        v1.2 AUTHOR Twitter <a href="https://twitter.com/lamylanmc" target="_new">@lamylanmc</a> <a href="https://twitter.com/danborutori" target="_new">@danborutori</a>
+                    <td style="vertical-align: top;">
+                        <center>
+                        <table style="color: white; font-family: Trebuchet MS;">
+                            <tr><th colspan="2">How to Play:</th></tr>
+                            <tr>
+                                <td>Move</td>
+                                <td>Left/Right Arrow</td>
+                            </tr>
+                            <tr>
+                                <td>Fire</td>
+                                <td>Up Arrow</td>
+                            </tr>
+                            <tr>
+                                <td style="height: 32;"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <center>
+                                    CREDIT:<br/><br/>
+                                    - Sound Effect -<br/>
+                                    <a href="https://www.classicgaming.cc/classics/space-invaders/sounds">Classic Gaming.cc</a><br/>
+                                    <a href="http://soundfxcenter.com/sound_effect/search.php?sfx=Galaga">Sound FX Center</a><br/>
+                                    <br/>
+                                    - Sprites -<br/>
+                                    Capture Beam&nbsp;&nbsp;<a href="https://www.spriters-resource.com/arcade/galaga/sheet/26482/">The Sprites Resource</a><br/>
+                                    </center>
+                                </td><td style="vertical-align: top;">
+                                    AUTHOR <br/>
+                                    - Twitter -<br/>
+                                    <a href="https://twitter.com/lamylanmc" target="_new">@lamylanmc</a><br/>
+                                    <a href="https://twitter.com/danborutori" target="_new">@danborutori</a><br/>
+                                    <br/>
+                                    v1.2<br/>
+                                </td>
+                            </tr>
+                        </table>
+                        </center>
                     </td>
-                </tr>                
+                </tr>
             </table>
         </center>
     </body>
@@ -81,6 +88,8 @@
             onScreenController.remove()
         }else{
             zlsSpaceInvader.Input.shared.init(leftButton, rightButton, fireButton)
+            document.body.style.zoom = window.innerWidth/728
+            console.log(document.body.style.zoom)
         }
 
         const main = new zlsSpaceInvader.Main()
@@ -92,6 +101,5 @@
         audioButton.onclick = e=>{
             main.onMute(audioButton)
         }
-
     </script>
 </html>

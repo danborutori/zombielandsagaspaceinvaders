@@ -62,5 +62,5 @@ Sound Effect from Classic Gaming.cc
 https://www.classicgaming.cc/classics/space-invaders/sounds
 Sound Effect from Sound FX Center
 http://soundfxcenter.com/sound_effect/search.php?sfx=Galaga
-Sprites from The Sprites Resource
+Capture Beam Sprites from The Sprites Resource
 https://www.spriters-resource.com/arcade/galaga/sheet/26482/
