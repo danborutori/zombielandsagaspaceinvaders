@@ -4,6 +4,8 @@ namespace zlsSpaceInvader {
 
         private time = 0
 
+        readonly leaderboard = new LeaderboardScreen()
+
         constructor(
             readonly onStart: ()=>void
         ){
@@ -19,7 +21,8 @@ namespace zlsSpaceInvader {
 
             if( Input.shared.pressAnyKey && this.time>=1 ){
                 this.onStart()
-                this.removeFromManager()
+                this.removeFromManager()                
+                this.leaderboard.removeFromManager()
             }
         }
 

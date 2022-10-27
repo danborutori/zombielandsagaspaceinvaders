@@ -96,6 +96,7 @@ namespace zlsSpaceInvader {
                 this.enemyCooperator.paused = false
             })
             this.gameObjectManager.add( startScreen )
+            this.gameObjectManager.add( startScreen.leaderboard )
         }
 
         private resetEnemies(

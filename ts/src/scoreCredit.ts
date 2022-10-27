@@ -38,6 +38,23 @@ namespace zlsSpaceInvader {
             super()
             this.renderOrder = 1
             this.renderHalf = false
+
+            this.checkOnlineHiScore()
+        }
+
+        private async checkOnlineHiScore(){
+            try{
+                const records = await Leaderboard.shared.getRecords()
+
+                if( records.length>0 &&
+                    records[0].score>this.hiScore
+                ){                    
+                    this._hiScore = records[0].score
+                    localStorage.setItem(hiScoreItemKey,`${this._hiScore}`)
+                }
+            }catch(e){
+                console.log(e)
+            }
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

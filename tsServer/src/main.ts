@@ -68,6 +68,7 @@ http.createServer(function (request: any, response: any) {
 interface LeaderboardRecord {
     name: string
     score: number
+    wave: number
     time: number
 }
 
@@ -86,24 +87,34 @@ class Leaderboard{
             response.end(JSON.stringify(this.records))
             break
         case "POST":
-            readJSON(request).then((json: any)=>{
-                if( typeof(json.name) == "string" &&
-                    typeof(json.score) == "number"
-                ){
-                    this.postRecord({
-                        name: json.name,
-                        score: json.score,
-                        time: Date.now()
-                    })
-                    response.writeHead(200)
-                    response.end(JSON.stringify({state:"OK"}))
-                }else{
-                    response.writeHead(400)
-                    response.end(JSON.stringify({state:"FAIL"}))
-                }
-            })
+            this.handlePostRecord(request,response)
             break
         }
+    }
+
+    private handlePostRecord( request: any, response: any ){
+        readJSON(request).then((json: any)=>{
+            const name = json.name
+            const score = json.score
+            const wave = json.wave
+            if( typeof(name) == "string" &&
+                typeof(score) == "number" &&
+                name.match(/[A-Z]{3}/i) &&
+                name.length==3
+            ){
+                this.postRecord({
+                    name: name,
+                    score: score,
+                    wave: wave,
+                    time: Date.now()
+                })
+                response.writeHead(200)
+                response.end(JSON.stringify({state:"OK"}))
+            }else{
+                response.writeHead(400)
+                response.end(JSON.stringify({state:"FAIL"}))
+            }
+        })
     }
 
     private postRecord( record: LeaderboardRecord ){

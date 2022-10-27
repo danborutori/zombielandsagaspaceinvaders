@@ -1,9 +1,9 @@
 namespace zlsSpaceInvader {
 
-    interface LeaderboardRecord {
+    export interface LeaderboardRecord {
         name: string
         score: number
-        time: number
+        wave: number
     }
 
     export class Leaderboard {
@@ -14,12 +14,13 @@ namespace zlsSpaceInvader {
             return request.json()
         }
 
-        async post( name: string, score: number ){
+        async post( name: string, score: number, wave: number ){
             const request = await fetch("leaderboard", {
                 method: "POST",
                 body: JSON.stringify({
                     name: name,
-                    score: score
+                    score: score,
+                    wave: wave
                 })
             })
             const json = await request.json()
