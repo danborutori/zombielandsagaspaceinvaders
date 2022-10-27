@@ -98,7 +98,7 @@ class Leaderboard{
                     response.writeHead(200)
                     response.end(JSON.stringify({state:"OK"}))
                 }else{
-                    response.writeHead(200)
+                    response.writeHead(400)
                     response.end(JSON.stringify({state:"FAIL"}))
                 }
             })
