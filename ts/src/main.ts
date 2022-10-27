@@ -232,8 +232,7 @@ namespace zlsSpaceInvader {
         }
 
         private showHighestScore( scoreAndCredit: ScoreAndCredit ){
-            const hiScoreScr = new HiScoreScreen( scoreAndCredit.hiScore )
-            this.gameObjectManager.add( hiScoreScr )
+            this.gameObjectManager.add( new LeaderboardScreen() )
         }
 
         onMute( button: HTMLInputElement ){
