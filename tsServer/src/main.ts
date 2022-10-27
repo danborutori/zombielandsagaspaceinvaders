@@ -1,10 +1,27 @@
 const fs = require('fs')
 const http = require('http')
 const mime = require('mime-types')
+const LocalStorage = require("node-localstorage").LocalStorage
+const _localStorage: Storage = new LocalStorage('./scratch')
 
 const rootDirectory = "../../html/"
 const portNumber = 3333
 const appRootPath = "/zlsspaceinvader"
+
+function readJSON( request: any ){
+    return new Promise( (resolve, reject)=>{
+        let data = ""
+        request.on( "data", (chunk: any)=>{
+            data += chunk.toString()
+        })
+        request.on("end",()=>{
+            resolve( JSON.parse(data))
+        })
+        request.on("error",(e: Error)=>{
+            reject(e)
+        })
+    })
+}
 
 http.createServer(function (request: any, response: any) {
     let url: string = request.url
@@ -20,11 +37,9 @@ http.createServer(function (request: any, response: any) {
             </head>
             `)
             break
-        // case "/api/asset/list":
-        //     AssetManager.shared.list().then( json=>{
-        //         response.end(JSON.stringify(json))
-        //     })
-        //     break
+        case "/leaderboard":
+            Leaderboard.shared.handle( request, response )
+            break
         default:
             // The filename is simple the local directory and tacks on the requested url
             const filename = rootDirectory+decodeURI(url)
@@ -49,3 +64,54 @@ http.createServer(function (request: any, response: any) {
         response.end("Unknown app.")
     }
 }).listen(portNumber)   
+
+interface LeaderboardRecord {
+    name: string
+    score: number
+    time: number
+}
+
+class Leaderboard{
+    static readonly maxRecord = 500
+    static recordsKey = "Leaderboard.records"
+
+    static shared = new Leaderboard()
+
+    private records:LeaderboardRecord[] = JSON.parse( _localStorage.getItem(Leaderboard.recordsKey) || "[]" )
+
+    handle( request: any, response: any ){
+        switch(request.method.toUpperCase()){
+        case "GET":
+            response.writeHead(200)
+            response.end(JSON.stringify(this.records))
+            break
+        case "POST":
+            readJSON(request).then((json: any)=>{
+                if( typeof(json.name) == "string" &&
+                    typeof(json.score) == "number"
+                ){
+                    this.postRecord({
+                        name: json.name,
+                        score: json.score,
+                        time: Date.now()
+                    })
+                    response.writeHead(200)
+                    response.end(JSON.stringify({state:"OK"}))
+                }else{
+                    response.writeHead(200)
+                    response.end(JSON.stringify({state:"FAIL"}))
+                }
+            })
+            break
+        }
+    }
+
+    private postRecord( record: LeaderboardRecord ){
+        this.records.push( record )
+        this.records.sort((a,b)=>b.score-a.score)
+        if( this.records.length>Leaderboard.maxRecord )
+            this.records.length = Leaderboard.maxRecord
+
+        _localStorage.setItem(Leaderboard.recordsKey, JSON.stringify(this.records))
+    }
+}
