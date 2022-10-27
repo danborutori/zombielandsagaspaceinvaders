@@ -949,6 +949,148 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    var Leaderboard = /** @class */ (function () {
+        function Leaderboard() {
+        }
+        Leaderboard.prototype.getRecords = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    return [2 /*return*/, new zlsSpaceInvader.APIRequest("leaderboard").get()];
+                });
+            });
+        };
+        Leaderboard.prototype.post = function (name, score, wave) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, new zlsSpaceInvader.APIRequest("leaderboard").post({
+                                name: name,
+                                score: score,
+                                wave: wave
+                            })];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        Leaderboard.shared = new Leaderboard();
+        return Leaderboard;
+    }());
+    zlsSpaceInvader.Leaderboard = Leaderboard;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var headline = "- BEST 8 -";
+    var columns = "RANK  SCORE WAVE INT";
+    var LeaderboardScreen = /** @class */ (function (_super) {
+        __extends(LeaderboardScreen, _super);
+        function LeaderboardScreen() {
+            var _this = _super.call(this) || this;
+            _this.records = [];
+            _this.renderHalf = false;
+            _this.renderOrder = 1;
+            zlsSpaceInvader.Leaderboard.shared.getRecords().then(function (records) {
+                _this.records = records;
+            });
+            return _this;
+        }
+        LeaderboardScreen.prototype.render = function (deltaTime, ctx) {
+            _super.prototype.render.call(this, deltaTime, ctx);
+            ctx.save();
+            ctx.translate(0, -50);
+            zlsSpaceInvader.TextDrawer.shared.drawTextOutline(headline, -zlsSpaceInvader.TextDrawer.shared.measure(headline) / 2, 0, ctx);
+            zlsSpaceInvader.TextDrawer.shared.drawTextOutline(columns, -zlsSpaceInvader.TextDrawer.shared.measure(columns) / 2, 7, ctx);
+            ctx.translate(0, 14);
+            for (var i = 0, end = Math.min(8, this.records.length); i < end; i++) {
+                var r = this.records[i];
+                var rank = i == 0 ? "1ST" : i == 1 ? "2ND" : i == 2 ? "3RD" : i + 1 + "TH";
+                var txt = " " + rank + " " + zlsSpaceInvader.addLeadingZero(r.score, 6) + "  " + zlsSpaceInvader.addLeadingZero(r.wave || 0, 3) + " " + r.name;
+                zlsSpaceInvader.TextDrawer.shared.drawTextOutline(txt, -zlsSpaceInvader.TextDrawer.shared.measure(txt) / 2, 0, ctx);
+                ctx.translate(0, 7);
+            }
+            ctx.restore();
+        };
+        return LeaderboardScreen;
+    }(zlsSpaceInvader.GameObject));
+    zlsSpaceInvader.LeaderboardScreen = LeaderboardScreen;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
+    var secret = "ZTIwZmI0OTI3YmI1NjU4MjZlMjE5NDY0OTA1MjI5ZDA=";
+    function sha256(message) {
+        return __awaiter(this, void 0, void 0, function () {
+            var msgBuffer, hashBuffer, hashArray, hashHex;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        msgBuffer = new TextEncoder().encode(message);
+                        return [4 /*yield*/, crypto.subtle.digest('SHA-256', msgBuffer)];
+                    case 1:
+                        hashBuffer = _a.sent();
+                        hashArray = Array.from(new Uint8Array(hashBuffer));
+                        hashHex = hashArray.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+                        return [2 /*return*/, hashHex];
+                }
+            });
+        });
+    }
+    var APIRequest = /** @class */ (function () {
+        function APIRequest(url) {
+            this.url = url;
+        }
+        APIRequest.prototype.get = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var request;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, fetch(this.url)];
+                        case 1:
+                            request = _a.sent();
+                            return [2 /*return*/, request.json()];
+                    }
+                });
+            });
+        };
+        APIRequest.prototype.post = function (body) {
+            return __awaiter(this, void 0, void 0, function () {
+                var payload, salt, digest, request, json;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            payload = JSON.stringify(body);
+                            salt = "" + (Math.random() + Date.now());
+                            return [4 /*yield*/, sha256(payload + salt + atob(secret))];
+                        case 1:
+                            digest = _a.sent();
+                            return [4 /*yield*/, fetch(this.url, {
+                                    method: "POST",
+                                    body: JSON.stringify({
+                                        payload: payload,
+                                        digest: digest,
+                                        salt: salt
+                                    })
+                                })];
+                        case 2:
+                            request = _a.sent();
+                            return [4 /*yield*/, request.json()];
+                        case 3:
+                            json = _a.sent();
+                            if (json.state != "OK") {
+                                throw new Error(json);
+                            }
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        return APIRequest;
+    }());
+    zlsSpaceInvader.APIRequest = APIRequest;
+})(zlsSpaceInvader || (zlsSpaceInvader = {}));
+var zlsSpaceInvader;
+(function (zlsSpaceInvader) {
     function loadAudio(url) {
         return new Promise(function (resolve, reject) {
             var dom = document.createElement("audio");
@@ -1357,34 +1499,6 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
-    var HiScoreScreen = /** @class */ (function (_super) {
-        __extends(HiScoreScreen, _super);
-        function HiScoreScreen(score) {
-            var _this = _super.call(this) || this;
-            _this.score = score;
-            _this.time = 0;
-            _this.renderOrder = 1;
-            _this.renderHalf = false;
-            return _this;
-        }
-        HiScoreScreen.prototype.update = function (deltaTime) {
-            _super.prototype.update.call(this, deltaTime);
-            this.time += deltaTime;
-            if (zlsSpaceInvader.Input.shared.pressAnyKey && this.time >= 1) {
-                location.reload();
-            }
-        };
-        HiScoreScreen.prototype.render = function (deltaTime, ctx) {
-            _super.prototype.render.call(this, deltaTime, ctx);
-            var txt = "HI-SCORE " + zlsSpaceInvader.addLeadingZero(this.score, 6);
-            zlsSpaceInvader.TextDrawer.shared.drawText(txt, Math.floor(-zlsSpaceInvader.TextDrawer.shared.measure(txt) / 2), -2, ctx);
-        };
-        return HiScoreScreen;
-    }(zlsSpaceInvader.GameObject));
-    zlsSpaceInvader.HiScoreScreen = HiScoreScreen;
-})(zlsSpaceInvader || (zlsSpaceInvader = {}));
-var zlsSpaceInvader;
-(function (zlsSpaceInvader) {
     var maimaiKeySequence = [
         "ArrowUp",
         "ArrowUp",
@@ -1641,6 +1755,7 @@ var zlsSpaceInvader;
                 _this.enemyCooperator.paused = false;
             });
             this.gameObjectManager.add(startScreen);
+            this.gameObjectManager.add(startScreen.leaderboard);
         };
         Main.prototype.resetEnemies = function (playerFlight, scoreAndCredit) {
             var _this = this;
@@ -1756,9 +1871,47 @@ var zlsSpaceInvader;
                 this.gameObjectManager.add(t);
             }
         };
-        Main.prototype.showHighestScore = function (scoreAndCredit) {
-            var hiScoreScr = new zlsSpaceInvader.HiScoreScreen(scoreAndCredit.hiScore);
-            this.gameObjectManager.add(hiScoreScr);
+        Main.prototype.showHighestScore = function (scorer) {
+            return __awaiter(this, void 0, void 0, function () {
+                var records, canPostScore, int, b, e_4;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            _a.trys.push([0, 8, , 9]);
+                            return [4 /*yield*/, zlsSpaceInvader.Leaderboard.shared.getRecords()];
+                        case 1:
+                            records = _a.sent();
+                            canPostScore = records.length == 0 || scorer.score >= records[Math.min(records.length, 7)].score;
+                            if (!canPostScore) return [3 /*break*/, 7];
+                            _a.label = 2;
+                        case 2:
+                            if (!true) return [3 /*break*/, 7];
+                            int = window.prompt("POST YOU SCORE ON LEADERBOARD. PLEASE ENTER YOU INITIAL( 3 CAPITAL LETTERS):");
+                            if (!(int == undefined)) return [3 /*break*/, 3];
+                            b = window.confirm("DON'T POST YOU SCORE?");
+                            if (b)
+                                return [3 /*break*/, 7];
+                            return [3 /*break*/, 6];
+                        case 3:
+                            if (!(int.length != 3 || !int.match(/[A-Z]{3}/))) return [3 /*break*/, 4];
+                            window.alert("INITIAL MUST BE 3 CAPITAL LETTERS (A-Z)");
+                            return [3 /*break*/, 6];
+                        case 4: return [4 /*yield*/, zlsSpaceInvader.Leaderboard.shared.post(int, scorer.score, this.wave)];
+                        case 5:
+                            _a.sent();
+                            return [3 /*break*/, 7];
+                        case 6: return [3 /*break*/, 2];
+                        case 7: return [3 /*break*/, 9];
+                        case 8:
+                            e_4 = _a.sent();
+                            console.error(e_4);
+                            return [3 /*break*/, 9];
+                        case 9:
+                            this.gameObjectManager.add(new zlsSpaceInvader.LeaderboardScreen());
+                            return [2 /*return*/];
+                    }
+                });
+            });
         };
         Main.prototype.onMute = function (button) {
             if (zlsSpaceInvader.Audio.volume != 0) {
@@ -1958,6 +2111,7 @@ var zlsSpaceInvader;
             _this.credit = 10;
             _this.renderOrder = 1;
             _this.renderHalf = false;
+            _this.checkOnlineHiScore();
             return _this;
         }
         Object.defineProperty(ScoreAndCredit.prototype, "score", {
@@ -1981,6 +2135,31 @@ var zlsSpaceInvader;
             enumerable: true,
             configurable: true
         });
+        ScoreAndCredit.prototype.checkOnlineHiScore = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var records, e_5;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            _a.trys.push([0, 2, , 3]);
+                            return [4 /*yield*/, zlsSpaceInvader.Leaderboard.shared.getRecords()];
+                        case 1:
+                            records = _a.sent();
+                            if (records.length > 0 &&
+                                records[0].score > this.hiScore) {
+                                this._hiScore = records[0].score;
+                                localStorage.setItem(hiScoreItemKey, "" + this._hiScore);
+                            }
+                            return [3 /*break*/, 3];
+                        case 2:
+                            e_5 = _a.sent();
+                            console.log(e_5);
+                            return [3 /*break*/, 3];
+                        case 3: return [2 /*return*/];
+                    }
+                });
+            });
+        };
         ScoreAndCredit.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
             var w = this.stage.right - this.stage.left;
@@ -2046,6 +2225,7 @@ var zlsSpaceInvader;
             var _this = _super.call(this) || this;
             _this.onStart = onStart;
             _this.time = 0;
+            _this.leaderboard = new zlsSpaceInvader.LeaderboardScreen();
             _this.renderOrder = 1;
             _this.renderHalf = false;
             return _this;
@@ -2056,6 +2236,7 @@ var zlsSpaceInvader;
             if (zlsSpaceInvader.Input.shared.pressAnyKey && this.time >= 1) {
                 this.onStart();
                 this.removeFromManager();
+                this.leaderboard.removeFromManager();
             }
         };
         StartScreen.prototype.render = function (deltaTime, ctx) {
@@ -2070,7 +2251,7 @@ var zlsSpaceInvader;
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
     var w = 12;
-    var h = 7;
+    var h = 9;
     var characterSpacing = 10;
     var characters = {};
     for (var i = 0; i < 10; i++) {
@@ -2117,10 +2298,39 @@ var zlsSpaceInvader;
         function TextDrawer() {
             this.fontSheet = zlsSpaceInvader.Sprites.shared.images["font"];
         }
+        TextDrawer.prototype.initOutline = function () {
+            if (!this.outlineFontSheet) {
+                this.outlineFontSheet = document.createElement("canvas");
+                this.outlineFontSheet.width = this.fontSheet.width;
+                this.outlineFontSheet.height = this.fontSheet.height;
+                var ctx = this.outlineFontSheet.getContext("2d");
+                ctx.translate(1, 1);
+                ctx.drawImage(this.fontSheet, 1, 0);
+                ctx.drawImage(this.fontSheet, 0, 1);
+                ctx.drawImage(this.fontSheet, -1, 0);
+                ctx.drawImage(this.fontSheet, 0, -1);
+                ctx.drawImage(this.fontSheet, 1, 1);
+                ctx.drawImage(this.fontSheet, -1, -1);
+                ctx.drawImage(this.fontSheet, 1, -1);
+                ctx.drawImage(this.fontSheet, -1, 1);
+                ctx.fillStyle = "black";
+                ctx.globalCompositeOperation = "source-in";
+                ctx.fillRect(0, 0, this.outlineFontSheet.width, this.outlineFontSheet.height);
+                ctx.globalCompositeOperation = "source-over";
+                ctx.drawImage(this.fontSheet, 0, 0);
+            }
+        };
         TextDrawer.prototype.measure = function (text) {
             return text.length * characterSpacing * 0.5;
         };
         TextDrawer.prototype.drawText = function (text, x, y, ctx) {
+            this._drawText(text, x, y, ctx, this.fontSheet);
+        };
+        TextDrawer.prototype.drawTextOutline = function (text, x, y, ctx) {
+            this.initOutline();
+            this._drawText(text, x, y, ctx, this.outlineFontSheet);
+        };
+        TextDrawer.prototype._drawText = function (text, x, y, ctx, fontSheet) {
             ctx.save();
             ctx.translate(x, y);
             ctx.scale(0.5, 0.5);
@@ -2128,7 +2338,7 @@ var zlsSpaceInvader;
                 var c = text_1[_i];
                 var m = characters[c];
                 if (m) {
-                    ctx.drawImage(this.fontSheet, m.x, m.y, w, h, 0, 0, w, h);
+                    ctx.drawImage(fontSheet, m.x, m.y, w, h, 0, 0, w, h);
                 }
                 ctx.translate(characterSpacing, 0);
             }
