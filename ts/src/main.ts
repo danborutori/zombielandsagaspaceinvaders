@@ -34,10 +34,14 @@ namespace zlsSpaceInvader {
                 this.halfRenderContext.imageSmoothingEnabled = false
             }
 
-            await Promise.all([
-                Sprites.shared.load(),
-                Audio.preload()
-            ])
+            try{
+                await Promise.all([
+                    Sprites.shared.load(),
+                    Audio.preload()
+                ])
+            }catch(e){
+                console.log(e)
+            }
             this.initGame()
 
             return this
