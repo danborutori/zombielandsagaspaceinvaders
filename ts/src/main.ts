@@ -204,7 +204,7 @@ namespace zlsSpaceInvader {
                             franchouchou.reset(renewFlights.slice(1))
                             playerFlight.invincibleTime = 1
                         }else{
-                            this.showHighestScore( scoreAndCredit )
+                            this.showHighestScore(scoreAndCredit)
                         }
                     })
                     this.gameObjectManager.add( continueScreen)
@@ -214,7 +214,7 @@ namespace zlsSpaceInvader {
                     for( let e of this.enemies ) e.paused = true
                     this.enemyCooperator.paused = true
                     
-                    this.showHighestScore( scoreAndCredit )
+                    this.showHighestScore(scoreAndCredit)
                 }
             }else{
                 playerFlight.paused = true
@@ -224,14 +224,40 @@ namespace zlsSpaceInvader {
                 const t = new FloatingText(
                     "ALL MEMBERS CAPTURED",
                     ()=>{
-                        this.showHighestScore( scoreAndCredit )
+                        this.showHighestScore(scoreAndCredit)
                     }
                 )
                 this.gameObjectManager.add(t)
             }
         }
 
-        private showHighestScore( scoreAndCredit: ScoreAndCredit ){
+        private async showHighestScore(scorer: ScoreAndCredit){
+            try{
+                const records = await Leaderboard.shared.getRecords()
+                const canPostScore = records.length==0 || scorer.score>=records[Math.min(records.length,7)].score
+
+                if( canPostScore ){
+                    while( true ){
+                        const int = window.prompt("POST YOU SCORE ON LEADERBOARD. PLEASE ENTER YOU INITIAL( A-Z 3 CHARACTERS):")
+
+                        if( int==undefined ){
+                            const b = window.confirm("DON'T POST YOU SCORE?")
+                            if( b )
+                                break
+                        }else if( int.length!=3 || !int.match(/[A-Z]{3}/) ){
+                            window.alert("INITIAL MUST BE 3 LETTERS CONTAINS ONLY A-Z")
+                        }else{
+
+                            await Leaderboard.shared.post(int,scorer.score,this.wave)
+
+                            break
+                        }
+                    }
+                }
+            }catch(e){
+                console.error(e)
+            }
+
             this.gameObjectManager.add( new LeaderboardScreen() )
         }
 
