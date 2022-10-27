@@ -93,10 +93,13 @@ class Leaderboard{
     }
 
     private handlePostRecord( request: any, response: any ){
-        readJSON(request).then((json: any)=>{
-            const name = json.name
-            const score = json.score
-            const wave = json.wave
+        readJSON(request).then(async (json: any)=>{
+
+            const body = await API.getBody(json)
+
+            const name = body.name
+            const score = body.score
+            const wave = body.wave
             if( typeof(name) == "string" &&
                 typeof(score) == "number" &&
                 name.match(/[A-Z]{3}/i) &&
