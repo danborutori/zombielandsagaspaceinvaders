@@ -97,8 +97,6 @@ namespace zlsSpaceInvader {
             })
             this.gameObjectManager.add( startScreen )
             this.gameObjectManager.add( startScreen.leaderboard )
-
-            this.showHighestScore(scoreAndCredit)
         }
 
         private resetEnemies(
@@ -236,7 +234,6 @@ namespace zlsSpaceInvader {
         private async showHighestScore(scorer: ScoreAndCredit){
             try{
                 const records = await Leaderboard.shared.getRecords()
-                scorer.score = 1002
                 const canPostScore = records.length==0 || scorer.score>=records[Math.min(records.length,7)].score
 
                 if( canPostScore ){
