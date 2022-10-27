@@ -327,9 +327,11 @@ var zlsSpaceInvader;
                             v.y < 5.5) {
                             this.flashTime = 0.1;
                             b.removeFromManager();
-                            this.hp -= 1;
-                            if (this.hp <= 0) {
-                                this.onDie();
+                            if (this.hp > 0) {
+                                this.hp -= 1;
+                                if (this.hp <= 0) {
+                                    this.onDie();
+                                }
                             }
                         }
                     }
@@ -571,7 +573,7 @@ var zlsSpaceInvader;
                             this.cooperator.allowFlyOff = false;
                             this.state = "stop";
                             this.beamTime = 0;
-                            this.enemy.invincible = true;
+                            this.cooperator.invincible = true;
                             rotFlight = new RotatingPlayerFlight(player, player.flightUnits, this.enemy, this.cooperator);
                             this.enemy.manager.add(rotFlight);
                             this.enemy.kidnapped = rotFlight;
@@ -613,7 +615,7 @@ var zlsSpaceInvader;
                             player.paused = false;
                             player.flightUnits.length = 0;
                             player.next = true;
-                            this.enemy.invincible = false;
+                            this.cooperator.invincible = false;
                             return [7 /*endfinally*/];
                         case 8: return [2 /*return*/];
                     }
@@ -712,6 +714,7 @@ var zlsSpaceInvader;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
+                            if (!(this.state != "free")) return [3 /*break*/, 12];
                             this.state = "free";
                             this.player.invincibleTime = 9000; // large enough number
                             this.player.canShoot = false;
