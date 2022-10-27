@@ -238,14 +238,14 @@ namespace zlsSpaceInvader {
 
                 if( canPostScore ){
                     while( true ){
-                        const int = window.prompt("POST YOU SCORE ON LEADERBOARD. PLEASE ENTER YOU INITIAL( A-Z 3 CHARACTERS):")
+                        const int = window.prompt("POST YOU SCORE ON LEADERBOARD. PLEASE ENTER YOU INITIAL( 3 CAPITAL LETTERS):")
 
                         if( int==undefined ){
                             const b = window.confirm("DON'T POST YOU SCORE?")
                             if( b )
                                 break
                         }else if( int.length!=3 || !int.match(/[A-Z]{3}/) ){
-                            window.alert("INITIAL MUST BE 3 LETTERS CONTAINS ONLY A-Z")
+                            window.alert("INITIAL MUST BE 3 CAPITAL LETTERS (A-Z)")
                         }else{
 
                             await Leaderboard.shared.post(int,scorer.score,this.wave)
