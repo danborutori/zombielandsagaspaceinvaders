@@ -1,3 +1,4 @@
 capture/
 asset_src/
 tsServer/node_modules/
+tsServer/build/scratch/
