@@ -22,6 +22,9 @@ Build instruction
 ```
 cd ts
 build.bat
+
+cd tsServer
+build.bat
 ```
 
 ### Executing program
@@ -29,12 +32,13 @@ build.bat
 * How to run the program
 * Step-by-step bullets
 ```
-cd html
-npx lite-server
+cd tsServer/build
+npm install
+node main.js
 ```
 
 ### Live Demo
-Live Demo: https://rawcdn.githack.com/danborutori/zombielandsagaspaceinvaders/r1.2/html/index.html
+Live Demo: https://danborutori.com:86/zlsspaceinvader
 
 ## Authors
 
@@ -47,6 +51,10 @@ ANMC
 
 ## Version History
 
+* 1.3
+    * add leaderboard
+    * add member capture
+    * add member combine
 * 1.2
     * add on screen button
 * 1.1
