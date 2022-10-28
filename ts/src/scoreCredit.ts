@@ -18,10 +18,7 @@ namespace zlsSpaceInvader {
         }
         set score( n: number ){
             this._score = n
-            if( n>this._hiScore ){
-                this._hiScore = n
-                localStorage.setItem(hiScoreItemKey,`${n}`)    
-            }
+            this.updateHiScore(n)
         }
         private _hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0")
         get hiScore(){
@@ -38,6 +35,13 @@ namespace zlsSpaceInvader {
             super()
             this.renderOrder = 1
             this.renderHalf = false
+        }
+
+        updateHiScore( score: number ){
+            if( score>this.hiScore ){                    
+                this._hiScore = score
+                localStorage.setItem(hiScoreItemKey,`${this._hiScore}`)
+            }
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

@@ -4,10 +4,14 @@ namespace zlsSpaceInvader {
 
         private time = 0
 
+        readonly leaderboard: LeaderboardScreen
+
         constructor(
+            scorer: ScoreAndCredit,
             readonly onStart: ()=>void
         ){
             super()
+            this.leaderboard = new LeaderboardScreen(scorer)
             this.renderOrder = 1
             this.renderHalf = false
         }
@@ -19,7 +23,8 @@ namespace zlsSpaceInvader {
 
             if( Input.shared.pressAnyKey && this.time>=1 ){
                 this.onStart()
-                this.removeFromManager()
+                this.removeFromManager()                
+                this.leaderboard.removeFromManager()
             }
         }
 

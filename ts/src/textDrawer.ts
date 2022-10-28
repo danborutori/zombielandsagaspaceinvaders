@@ -1,7 +1,7 @@
 namespace zlsSpaceInvader {
 
     const w = 12
-    const h = 7
+    const h = 9
     const characterSpacing = 10
 
     const characters: {[s: string]: {
@@ -60,12 +60,45 @@ namespace zlsSpaceInvader {
         static readonly shared = new TextDrawer()
 
         private fontSheet = Sprites.shared.images["font"]
+        private outlineFontSheet!: HTMLCanvasElement
+
+        private initOutline(){
+            if(!this.outlineFontSheet){
+                this.outlineFontSheet = document.createElement("canvas")
+                this.outlineFontSheet.width = this.fontSheet.width
+                this.outlineFontSheet.height = this.fontSheet.height
+                const ctx = this.outlineFontSheet.getContext("2d")!
+                ctx.translate(1,1)
+                ctx.drawImage( this.fontSheet, 1, 0)
+                ctx.drawImage( this.fontSheet, 0, 1)
+                ctx.drawImage( this.fontSheet, -1, 0)
+                ctx.drawImage( this.fontSheet, 0, -1)
+                ctx.drawImage( this.fontSheet, 1, 1)
+                ctx.drawImage( this.fontSheet, -1, -1)
+                ctx.drawImage( this.fontSheet, 1, -1)
+                ctx.drawImage( this.fontSheet, -1, 1)
+                ctx.fillStyle = "black"
+                ctx.globalCompositeOperation = "source-in"
+                ctx.fillRect(0,0,this.outlineFontSheet.width,this.outlineFontSheet.height)
+                ctx.globalCompositeOperation = "source-over"
+                ctx.drawImage( this.fontSheet, 0, 0)
+            }
+        }
 
         measure( text: string ){
             return text.length*characterSpacing*0.5
         }
 
         drawText( text: string, x: number, y: number, ctx: CanvasRenderingContext2D ){
+            this._drawText( text, x, y, ctx, this.fontSheet)
+        }
+
+        drawTextOutline( text: string, x: number, y: number, ctx: CanvasRenderingContext2D ){
+            this.initOutline()
+            this._drawText( text, x, y, ctx, this.outlineFontSheet)
+        }
+
+        private _drawText( text: string, x: number, y: number, ctx: CanvasRenderingContext2D, fontSheet: HTMLImageElement | HTMLCanvasElement ){
             ctx.save()
             ctx.translate(x, y)
             ctx.scale(0.5,0.5)
@@ -73,7 +106,7 @@ namespace zlsSpaceInvader {
                 const m = characters[c]
                 if( m ){
                     ctx.drawImage(
-                        this.fontSheet,
+                        fontSheet,
                         m.x, m.y,w, h,
                         0, 0, w, h
                     )

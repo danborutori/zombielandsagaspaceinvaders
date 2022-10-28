@@ -1,4 +1,21 @@
 namespace zlsSpaceInvader {
+
+    function generateUUID() { // Public Domain/MIT
+        var d = new Date().getTime();//Timestamp
+        var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16;//random number between 0 and 16
+            if(d > 0){//Use timestamp until depleted
+                r = (d + r)%16 | 0;
+                d = Math.floor(d/16);
+            } else {//Use microseconds since page-load if supported
+                r = (d2 + r)%16 | 0;
+                d2 = Math.floor(d2/16);
+            }
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
+
     export class Main{
 
         private allowUpdate = true
@@ -90,12 +107,13 @@ namespace zlsSpaceInvader {
             playerFlight.paused = true
             for( let e of this.enemies ) e.paused = true
             this.enemyCooperator.paused = true
-            const startScreen = new StartScreen(()=>{
+            const startScreen = new StartScreen(scoreAndCredit,()=>{
                 playerFlight.paused = false
                 for( let e of this.enemies ) e.paused = false
                 this.enemyCooperator.paused = false
             })
             this.gameObjectManager.add( startScreen )
+            this.gameObjectManager.add( startScreen.leaderboard )
         }
 
         private resetEnemies(
@@ -203,7 +221,7 @@ namespace zlsSpaceInvader {
                             franchouchou.reset(renewFlights.slice(1))
                             playerFlight.invincibleTime = 1
                         }else{
-                            this.showHighestScore( scoreAndCredit )
+                            this.showHighestScore(scoreAndCredit)
                         }
                     })
                     this.gameObjectManager.add( continueScreen)
@@ -213,7 +231,7 @@ namespace zlsSpaceInvader {
                     for( let e of this.enemies ) e.paused = true
                     this.enemyCooperator.paused = true
                     
-                    this.showHighestScore( scoreAndCredit )
+                    this.showHighestScore(scoreAndCredit)
                 }
             }else{
                 playerFlight.paused = true
@@ -223,16 +241,44 @@ namespace zlsSpaceInvader {
                 const t = new FloatingText(
                     "ALL MEMBERS CAPTURED",
                     ()=>{
-                        this.showHighestScore( scoreAndCredit )
+                        this.showHighestScore(scoreAndCredit)
                     }
                 )
                 this.gameObjectManager.add(t)
             }
         }
 
-        private showHighestScore( scoreAndCredit: ScoreAndCredit ){
-            const hiScoreScr = new HiScoreScreen( scoreAndCredit.hiScore )
-            this.gameObjectManager.add( hiScoreScr )
+        private async showHighestScore(scorer: ScoreAndCredit){
+            try{
+                const records = await Leaderboard.shared.getRecords()
+                const canPostScore = records.length==0 || scorer.score>=records[Math.min(records.length,7)].score
+
+                if( canPostScore ){
+                    while( true ){
+                        const int = window.prompt("POST YOU SCORE ON LEADERBOARD. PLEASE ENTER YOU INITIAL( 3 CAPITAL LETTERS):")
+
+                        if( int==undefined ){
+                            const b = window.confirm("DON'T POST YOU SCORE?")
+                            if( b )
+                                break
+                        }else if( int.length!=3 || !int.match(/[A-Z]{3}/) ){
+                            window.alert("INITIAL MUST BE 3 CAPITAL LETTERS (A-Z)")
+                        }else{
+
+                            await Leaderboard.shared.post(int,scorer.score,this.wave,generateUUID())
+
+                            break
+                        }
+                    }
+                }
+            }catch(e){
+                console.error(e)
+            }
+
+            const leaderboard = new LeaderboardScreen(scorer, ()=>{
+                location.reload()
+            })
+            this.gameObjectManager.add( leaderboard )
         }
 
         onMute( button: HTMLInputElement ){
