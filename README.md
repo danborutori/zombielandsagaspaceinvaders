@@ -64,6 +64,17 @@ ANMC
 
 This project is licensed under the MIT License - see the LICENSE.md file for details
 
+## Copyright (c) 2016 Egor Tensin
+
+This project is free software.  There is no warranty; not even for
+merchantability or fitness for a particular purpose.
+
+You may use, copy, modify and redistribute all files included in this
+distribution, individually or in aggregate, subject to the terms and conditions
+of the MIT license.  See License section.
+
+In addition, all right of assets borrowed from other creators are belong to their original creators. See Acknowledgement section for those assets.
+
 ## Acknowledgement
 
 Sound Effect from Classic Gaming.cc
