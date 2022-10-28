@@ -107,7 +107,7 @@ namespace zlsSpaceInvader {
             playerFlight.paused = true
             for( let e of this.enemies ) e.paused = true
             this.enemyCooperator.paused = true
-            const startScreen = new StartScreen(()=>{
+            const startScreen = new StartScreen(scoreAndCredit,()=>{
                 playerFlight.paused = false
                 for( let e of this.enemies ) e.paused = false
                 this.enemyCooperator.paused = false
@@ -275,7 +275,10 @@ namespace zlsSpaceInvader {
                 console.error(e)
             }
 
-            this.gameObjectManager.add( new LeaderboardScreen() )
+            const leaderboard = new LeaderboardScreen(scorer, ()=>{
+                location.reload()
+            })
+            this.gameObjectManager.add( leaderboard )
         }
 
         onMute( button: HTMLInputElement ){

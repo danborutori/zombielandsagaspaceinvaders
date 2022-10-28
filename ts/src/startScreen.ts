@@ -4,12 +4,14 @@ namespace zlsSpaceInvader {
 
         private time = 0
 
-        readonly leaderboard = new LeaderboardScreen()
+        readonly leaderboard: LeaderboardScreen
 
         constructor(
+            scorer: ScoreAndCredit,
             readonly onStart: ()=>void
         ){
             super()
+            this.leaderboard = new LeaderboardScreen(scorer)
             this.renderOrder = 1
             this.renderHalf = false
         }

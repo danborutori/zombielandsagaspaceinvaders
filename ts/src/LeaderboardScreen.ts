@@ -6,15 +6,31 @@ namespace zlsSpaceInvader {
     export class LeaderboardScreen extends GameObject {
 
         private records: LeaderboardRecord[] = []
+        private time = 0
 
-        constructor(){
+        constructor(
+            scorer: ScoreAndCredit,
+            readonly onKeyPress: ()=>void = ()=>{}
+        ){
             super()
             this.renderHalf = false
             this.renderOrder = 1
 
             Leaderboard.shared.getRecords().then(records=>{
                 this.records = records
+                if( this.records.length>0 )
+                    scorer.updateHiScore(this.records[0].score)
             })
+        }
+
+        update(deltaTime: number): void {
+            super.update( deltaTime )
+
+            this.time += deltaTime
+
+            if( this.time>=1 && Input.shared.pressAnyKey ){
+                this.onKeyPress()
+            }
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

@@ -18,10 +18,7 @@ namespace zlsSpaceInvader {
         }
         set score( n: number ){
             this._score = n
-            if( n>this._hiScore ){
-                this._hiScore = n
-                localStorage.setItem(hiScoreItemKey,`${n}`)    
-            }
+            this.updateHiScore(n)
         }
         private _hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0")
         get hiScore(){
@@ -38,22 +35,12 @@ namespace zlsSpaceInvader {
             super()
             this.renderOrder = 1
             this.renderHalf = false
-
-            this.checkOnlineHiScore()
         }
 
-        private async checkOnlineHiScore(){
-            try{
-                const records = await Leaderboard.shared.getRecords()
-
-                if( records.length>0 &&
-                    records[0].score>this.hiScore
-                ){                    
-                    this._hiScore = records[0].score
-                    localStorage.setItem(hiScoreItemKey,`${this._hiScore}`)
-                }
-            }catch(e){
-                console.log(e)
+        updateHiScore( score: number ){
+            if( score>this.hiScore ){                    
+                this._hiScore = score
+                localStorage.setItem(hiScoreItemKey,`${this._hiScore}`)
             }
         }
 
