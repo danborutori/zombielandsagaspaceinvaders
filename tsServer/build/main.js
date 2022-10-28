@@ -62,7 +62,7 @@ var http = require('http');
 var mime = require('mime-types');
 var LocalStorage = require("node-localstorage").LocalStorage;
 var _localStorage = new LocalStorage('./scratch');
-var rootDirectory = "../../html/";
+var rootDirectory = "./html/";
 var portNumber = 86;
 var appRootPath = "/zlsspaceinvader";
 function readJSON(request) {
