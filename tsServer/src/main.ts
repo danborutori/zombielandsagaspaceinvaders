@@ -25,8 +25,11 @@ function readJSON( request: any ){
 
 http.createServer(function (request: any, response: any) {
     let url: string = request.url
-    if( url.startsWith(appRootPath)){
-        url = url.substring(appRootPath.length)
+    if( url.startsWith(appRootPath) || 
+        url == "/favicon.ico"
+    ){
+        if( url.startsWith(appRootPath) )
+            url = url.substring(appRootPath.length)
 
         switch(url){
         case "":
