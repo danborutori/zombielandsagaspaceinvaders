@@ -398,7 +398,7 @@ var zlsSpaceInvader;
             this.direction = new zlsSpaceInvader.Vector2(0, -1);
             this.state = "homing";
             this.time = 0;
-            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shipFly, 1);
+            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.shipFly);
         }
         EnemyFlyOff.prototype.update = function (deltaTime, playerFlight) {
             this.time += deltaTime;
@@ -514,7 +514,7 @@ var zlsSpaceInvader;
                             wave.pos.copy(this.enemy.pos);
                             wave.pos.y += 4.5;
                             this.enemy.manager.add(wave);
-                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam, 1);
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam);
                             _b.label = 1;
                         case 1:
                             _b.trys.push([1, 10, 11, 12]);
@@ -577,8 +577,8 @@ var zlsSpaceInvader;
                             rotFlight = new RotatingPlayerFlight(player, player.flightUnits, this.enemy, this.cooperator);
                             this.enemy.manager.add(rotFlight);
                             this.enemy.kidnapped = rotFlight;
-                            zlsSpaceInvader.Audio.stop(1);
-                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam2, 2);
+                            zlsSpaceInvader.Audio.stop(zlsSpaceInvader.Audio.sounds.captureBeam);
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.captureBeam2);
                             player.invincibleTime = 9000; // large enough interval
                             player.visible = false;
                             player.paused = true;
@@ -598,7 +598,7 @@ var zlsSpaceInvader;
                             _a.sent();
                             this.kidnapBeamState = "beamEnd";
                             this.state = "regroup";
-                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess, 2);
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess);
                             txt = new zlsSpaceInvader.FloatingText("MEMBER CAPTURED");
                             this.enemy.manager.add(txt);
                             return [4 /*yield*/, this.enemy.wait(5)];
@@ -721,7 +721,7 @@ var zlsSpaceInvader;
                             this.cooperator.allowFlyOff = false;
                             this.cooperator.invincible = true;
                             this.cooperator.allowEnd = false;
-                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess, 2);
+                            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.capturedSuccess);
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 10, 11, 12]);
@@ -1104,21 +1104,17 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    var soundAudios = {};
     function loadAudio(url) {
         return new Promise(function (resolve, reject) {
             var dom = document.createElement("audio");
             dom.src = url;
             dom.autoplay = false;
+            dom.volume = zlsSpaceInvader.Constant.volume;
             dom.oncanplay = function () { return resolve(); };
             dom.onerror = function (e) { return reject(e); };
+            soundAudios[url] = dom;
         });
-    }
-    var channels = new Array(3);
-    for (var i = 0; i < channels.length; i++) {
-        var dom = document.createElement("audio");
-        dom.volume = zlsSpaceInvader.Constant.volume;
-        dom.autoplay = true;
-        channels[i] = dom;
     }
     var Audio = /** @class */ (function () {
         function Audio() {
@@ -1130,21 +1126,20 @@ var zlsSpaceInvader;
             }
             return Promise.all(urls.map(function (url) { return loadAudio(url); }));
         };
-        Audio.play = function (sound, channel) {
-            if (channel === void 0) { channel = 0; }
-            channels[channel].src = sound;
+        Audio.play = function (sound) {
+            soundAudios[sound].currentTime = 0;
+            soundAudios[sound].play();
         };
-        Audio.stop = function (channel) {
-            channels[channel].pause();
+        Audio.stop = function (sound) {
+            soundAudios[sound].pause();
         };
         Object.defineProperty(Audio, "volume", {
             get: function () {
-                return channels[0].volume;
+                return soundAudios[this.sounds.bonus].volume;
             },
             set: function (n) {
-                for (var _i = 0, channels_1 = channels; _i < channels_1.length; _i++) {
-                    var a = channels_1[_i];
-                    a.volume = n;
+                for (var name_1 in soundAudios) {
+                    soundAudios[name_1].volume = n;
                 }
             },
             enumerable: true,
@@ -1382,7 +1377,7 @@ var zlsSpaceInvader;
         function Explosion() {
             var _this = _super.call(this, zlsSpaceInvader.Sprites.shared.images["explod"]) || this;
             _this.lifeTime = 0;
-            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.invaderkilled, 1);
+            zlsSpaceInvader.Audio.play(zlsSpaceInvader.Audio.sounds.invaderkilled);
             return _this;
         }
         Explosion.prototype.update = function (deltaTime) {
