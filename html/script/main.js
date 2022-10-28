@@ -959,14 +959,15 @@ var zlsSpaceInvader;
                 });
             });
         };
-        Leaderboard.prototype.post = function (name, score, wave) {
+        Leaderboard.prototype.post = function (name, score, wave, uuid) {
             return __awaiter(this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, new zlsSpaceInvader.APIRequest("leaderboard").post({
                                 name: name,
                                 score: score,
-                                wave: wave
+                                wave: wave,
+                                uuid: uuid
                             })];
                         case 1:
                             _a.sent();
@@ -986,16 +987,28 @@ var zlsSpaceInvader;
     var columns = "RANK  SCORE WAVE INT";
     var LeaderboardScreen = /** @class */ (function (_super) {
         __extends(LeaderboardScreen, _super);
-        function LeaderboardScreen() {
+        function LeaderboardScreen(scorer, onKeyPress) {
+            if (onKeyPress === void 0) { onKeyPress = function () { }; }
             var _this = _super.call(this) || this;
+            _this.onKeyPress = onKeyPress;
             _this.records = [];
+            _this.time = 0;
             _this.renderHalf = false;
             _this.renderOrder = 1;
             zlsSpaceInvader.Leaderboard.shared.getRecords().then(function (records) {
                 _this.records = records;
+                if (_this.records.length > 0)
+                    scorer.updateHiScore(_this.records[0].score);
             });
             return _this;
         }
+        LeaderboardScreen.prototype.update = function (deltaTime) {
+            _super.prototype.update.call(this, deltaTime);
+            this.time += deltaTime;
+            if (this.time >= 1 && zlsSpaceInvader.Input.shared.pressAnyKey) {
+                this.onKeyPress();
+            }
+        };
         LeaderboardScreen.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
             ctx.save();
@@ -1669,6 +1682,22 @@ var zlsSpaceInvader;
 })(zlsSpaceInvader || (zlsSpaceInvader = {}));
 var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
+    function generateUUID() {
+        var d = new Date().getTime(); //Timestamp
+        var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0; //Time in microseconds since page-load or 0 if unsupported
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16; //random number between 0 and 16
+            if (d > 0) { //Use timestamp until depleted
+                r = (d + r) % 16 | 0;
+                d = Math.floor(d / 16);
+            }
+            else { //Use microseconds since page-load if supported
+                r = (d2 + r) % 16 | 0;
+                d2 = Math.floor(d2 / 16);
+            }
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
     var Main = /** @class */ (function () {
         function Main() {
             this.allowUpdate = true;
@@ -1746,7 +1775,7 @@ var zlsSpaceInvader;
                 e.paused = true;
             }
             this.enemyCooperator.paused = true;
-            var startScreen = new zlsSpaceInvader.StartScreen(function () {
+            var startScreen = new zlsSpaceInvader.StartScreen(scoreAndCredit, function () {
                 playerFlight.paused = false;
                 for (var _i = 0, _a = _this.enemies; _i < _a.length; _i++) {
                     var e = _a[_i];
@@ -1873,7 +1902,7 @@ var zlsSpaceInvader;
         };
         Main.prototype.showHighestScore = function (scorer) {
             return __awaiter(this, void 0, void 0, function () {
-                var records, canPostScore, int, b, e_4;
+                var records, canPostScore, int, b, e_4, leaderboard;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1896,7 +1925,7 @@ var zlsSpaceInvader;
                             if (!(int.length != 3 || !int.match(/[A-Z]{3}/))) return [3 /*break*/, 4];
                             window.alert("INITIAL MUST BE 3 CAPITAL LETTERS (A-Z)");
                             return [3 /*break*/, 6];
-                        case 4: return [4 /*yield*/, zlsSpaceInvader.Leaderboard.shared.post(int, scorer.score, this.wave)];
+                        case 4: return [4 /*yield*/, zlsSpaceInvader.Leaderboard.shared.post(int, scorer.score, this.wave, generateUUID())];
                         case 5:
                             _a.sent();
                             return [3 /*break*/, 7];
@@ -1907,7 +1936,10 @@ var zlsSpaceInvader;
                             console.error(e_4);
                             return [3 /*break*/, 9];
                         case 9:
-                            this.gameObjectManager.add(new zlsSpaceInvader.LeaderboardScreen());
+                            leaderboard = new zlsSpaceInvader.LeaderboardScreen(scorer, function () {
+                                location.reload();
+                            });
+                            this.gameObjectManager.add(leaderboard);
                             return [2 /*return*/];
                     }
                 });
@@ -2111,7 +2143,6 @@ var zlsSpaceInvader;
             _this.credit = 10;
             _this.renderOrder = 1;
             _this.renderHalf = false;
-            _this.checkOnlineHiScore();
             return _this;
         }
         Object.defineProperty(ScoreAndCredit.prototype, "score", {
@@ -2120,10 +2151,7 @@ var zlsSpaceInvader;
             },
             set: function (n) {
                 this._score = n;
-                if (n > this._hiScore) {
-                    this._hiScore = n;
-                    localStorage.setItem(hiScoreItemKey, "" + n);
-                }
+                this.updateHiScore(n);
             },
             enumerable: true,
             configurable: true
@@ -2135,30 +2163,11 @@ var zlsSpaceInvader;
             enumerable: true,
             configurable: true
         });
-        ScoreAndCredit.prototype.checkOnlineHiScore = function () {
-            return __awaiter(this, void 0, void 0, function () {
-                var records, e_5;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, zlsSpaceInvader.Leaderboard.shared.getRecords()];
-                        case 1:
-                            records = _a.sent();
-                            if (records.length > 0 &&
-                                records[0].score > this.hiScore) {
-                                this._hiScore = records[0].score;
-                                localStorage.setItem(hiScoreItemKey, "" + this._hiScore);
-                            }
-                            return [3 /*break*/, 3];
-                        case 2:
-                            e_5 = _a.sent();
-                            console.log(e_5);
-                            return [3 /*break*/, 3];
-                        case 3: return [2 /*return*/];
-                    }
-                });
-            });
+        ScoreAndCredit.prototype.updateHiScore = function (score) {
+            if (score > this.hiScore) {
+                this._hiScore = score;
+                localStorage.setItem(hiScoreItemKey, "" + this._hiScore);
+            }
         };
         ScoreAndCredit.prototype.render = function (deltaTime, ctx) {
             _super.prototype.render.call(this, deltaTime, ctx);
@@ -2221,11 +2230,11 @@ var zlsSpaceInvader;
 (function (zlsSpaceInvader) {
     var StartScreen = /** @class */ (function (_super) {
         __extends(StartScreen, _super);
-        function StartScreen(onStart) {
+        function StartScreen(scorer, onStart) {
             var _this = _super.call(this) || this;
             _this.onStart = onStart;
             _this.time = 0;
-            _this.leaderboard = new zlsSpaceInvader.LeaderboardScreen();
+            _this.leaderboard = new zlsSpaceInvader.LeaderboardScreen(scorer);
             _this.renderOrder = 1;
             _this.renderHalf = false;
             return _this;

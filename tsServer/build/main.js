@@ -81,8 +81,10 @@ function readJSON(request) {
 }
 http.createServer(function (request, response) {
     var url = request.url;
-    if (url.startsWith(appRootPath)) {
-        url = url.substring(appRootPath.length);
+    if (url.startsWith(appRootPath) ||
+        url == "/favicon.ico") {
+        if (url.startsWith(appRootPath))
+            url = url.substring(appRootPath.length);
         switch (url) {
             case "":
             case "/":
@@ -131,7 +133,7 @@ var Leaderboard = /** @class */ (function () {
     Leaderboard.prototype.handlePostRecord = function (request, response) {
         var _this = this;
         readJSON(request).then(function (json) { return __awaiter(_this, void 0, void 0, function () {
-            var body, name, score, wave;
+            var body, name, score, wave, uuid;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, API.getBody(json)];
@@ -140,14 +142,17 @@ var Leaderboard = /** @class */ (function () {
                         name = body.name;
                         score = body.score;
                         wave = body.wave;
+                        uuid = body.uuid;
                         if (typeof (name) == "string" &&
                             typeof (score) == "number" &&
+                            typeof (uuid) == "string" &&
                             name.match(/[A-Z]{3}/i) &&
                             name.length == 3) {
                             this.postRecord({
                                 name: name,
                                 score: score,
                                 wave: wave,
+                                uuid: uuid,
                                 time: Date.now()
                             });
                             response.writeHead(200);
@@ -163,11 +168,13 @@ var Leaderboard = /** @class */ (function () {
         }); });
     };
     Leaderboard.prototype.postRecord = function (record) {
-        this.records.push(record);
-        this.records.sort(function (a, b) { return b.score - a.score; });
-        if (this.records.length > Leaderboard.maxRecord)
-            this.records.length = Leaderboard.maxRecord;
-        _localStorage.setItem(Leaderboard.recordsKey, JSON.stringify(this.records));
+        if (this.records.findIndex(function (r) { return r.uuid == record.uuid; }) < 0) { // resubmission check
+            this.records.push(record);
+            this.records.sort(function (a, b) { return b.score - a.score; });
+            if (this.records.length > Leaderboard.maxRecord)
+                this.records.length = Leaderboard.maxRecord;
+            _localStorage.setItem(Leaderboard.recordsKey, JSON.stringify(this.records));
+        }
     };
     Leaderboard.maxRecord = 500;
     Leaderboard.recordsKey = "Leaderboard.records";
