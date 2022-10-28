@@ -38,7 +38,7 @@ node main.js
 ```
 
 ### Live Demo
-Live Demo: https://danborutori.com:86/zlsspaceinvader
+Live Demo: https://www.danborutori.com:86/zlsspaceinvader
 
 ## Authors
 
