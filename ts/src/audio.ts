@@ -1,25 +1,20 @@
 namespace zlsSpaceInvader {
 
+    const soundAudios: {[name:string]: HTMLAudioElement} = {}
+
     function loadAudio( url: string ){
         return new Promise<void>( (resolve, reject)=>{
             const dom = document.createElement("audio")
 
             dom.src = url
             dom.autoplay = false
+            dom.volume = Constant.volume
             dom.oncanplay = ()=>resolve()
             dom.onerror = e=>reject(e)
+
+            soundAudios[url] = dom
         })
     }
-
-    const channels: HTMLAudioElement[] = new Array(3)
-    for( let i=0; i<channels.length; i++ ){
-        const dom = document.createElement("audio")
-        dom.volume = Constant.volume
-        dom.autoplay = true
-    
-        channels[i] = dom
-    }
-
 
     export class Audio {
         static sounds = {
@@ -45,24 +40,26 @@ namespace zlsSpaceInvader {
         }
 
         static play(
-            sound: string,
-            channel: number = 0
+            sound: string
         ){
-            channels[channel].src = sound
+            soundAudios[sound].currentTime = 0
+            soundAudios[sound].play()
         }
 
         static stop(
-            channel: number
+            sound: string
         ){
-            channels[channel].pause()
+            soundAudios[sound].pause()
         }
 
         static get volume(){
-            return channels[0].volume
+            return soundAudios[this.sounds.bonus].volume
         }
 
         static set volume( n: number ){
-            for( let a of channels ) a.volume = n
+            for( let name in soundAudios ){
+                soundAudios[name].volume = n
+            }
         }
     }
 

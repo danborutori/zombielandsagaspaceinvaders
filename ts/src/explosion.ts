@@ -7,7 +7,7 @@ namespace zlsSpaceInvader {
         constructor(){
             super( Sprites.shared.images["explod"])
 
-            Audio.play( Audio.sounds.invaderkilled, 1 )
+            Audio.play( Audio.sounds.invaderkilled )
         }
 
         update(deltaTime: number): void {

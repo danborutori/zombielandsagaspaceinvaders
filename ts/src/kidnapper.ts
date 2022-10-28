@@ -48,7 +48,7 @@ namespace zlsSpaceInvader {
                 wave.pos.y += 4.5
                 this.enemy.manager.add(wave)
 
-                Audio.play( Audio.sounds.captureBeam, 1 )
+                Audio.play( Audio.sounds.captureBeam )
 
                 try {
                     await this.enemy.wait(1)
@@ -100,8 +100,8 @@ namespace zlsSpaceInvader {
                 this.enemy.manager.add( rotFlight )
                 this.enemy.kidnapped = rotFlight
 
-                Audio.stop(1)
-                Audio.play( Audio.sounds.captureBeam2, 2 )
+                Audio.stop( Audio.sounds.captureBeam )
+                Audio.play( Audio.sounds.captureBeam2 )
 
                 player.invincibleTime = 9000 // large enough interval
                 player.visible = false
@@ -120,7 +120,7 @@ namespace zlsSpaceInvader {
 
                     this.kidnapBeamState = "beamEnd"
                     this.state = "regroup"
-                    Audio.play( Audio.sounds.capturedSuccess, 2 )
+                    Audio.play( Audio.sounds.capturedSuccess )
 
                     const txt = new FloatingText("MEMBER CAPTURED")
                     this.enemy.manager.add(txt)
@@ -258,7 +258,7 @@ namespace zlsSpaceInvader {
                 this.cooperator.invincible = true
                 this.cooperator.allowEnd = false
 
-                Audio.play( Audio.sounds.capturedSuccess, 2 )
+                Audio.play( Audio.sounds.capturedSuccess )
 
                 try{
                     await this.wait(3)
