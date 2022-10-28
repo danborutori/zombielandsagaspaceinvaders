@@ -52,6 +52,11 @@ ANMC
 * 1.1
     * Initial Release
 
+## TODO
+* score uuid, prevent repost
+* special pair bullet
+* publish on itchio
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details

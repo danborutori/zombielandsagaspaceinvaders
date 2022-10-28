@@ -13,11 +13,12 @@ namespace zlsSpaceInvader {
             return new APIRequest("leaderboard").get()
         }
 
-        async post( name: string, score: number, wave: number ){
+        async post( name: string, score: number, wave: number, uuid: string ){
             await new APIRequest("leaderboard").post({
                 name: name,
                 score: score,
-                wave: wave
+                wave: wave,
+                uuid: uuid
             })
         }
     }

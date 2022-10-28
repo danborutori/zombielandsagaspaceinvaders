@@ -72,6 +72,7 @@ interface LeaderboardRecord {
     name: string
     score: number
     wave: number
+    uuid: string
     time: number
 }
 
@@ -103,8 +104,10 @@ class Leaderboard{
             const name = body.name
             const score = body.score
             const wave = body.wave
+            const uuid = body.uuid
             if( typeof(name) == "string" &&
                 typeof(score) == "number" &&
+                typeof(uuid) == "string" &&
                 name.match(/[A-Z]{3}/i) &&
                 name.length==3
             ){
@@ -112,6 +115,7 @@ class Leaderboard{
                     name: name,
                     score: score,
                     wave: wave,
+                    uuid: uuid,
                     time: Date.now()
                 })
                 response.writeHead(200)
@@ -124,11 +128,14 @@ class Leaderboard{
     }
 
     private postRecord( record: LeaderboardRecord ){
-        this.records.push( record )
-        this.records.sort((a,b)=>b.score-a.score)
-        if( this.records.length>Leaderboard.maxRecord )
-            this.records.length = Leaderboard.maxRecord
+        if( this.records.findIndex( r=>r.uuid==record.uuid )<0 ){ // resubmission check
 
-        _localStorage.setItem(Leaderboard.recordsKey, JSON.stringify(this.records))
+            this.records.push( record )
+            this.records.sort((a,b)=>b.score-a.score)
+            if( this.records.length>Leaderboard.maxRecord )
+                this.records.length = Leaderboard.maxRecord
+
+            _localStorage.setItem(Leaderboard.recordsKey, JSON.stringify(this.records))
+        }
     }
 }
