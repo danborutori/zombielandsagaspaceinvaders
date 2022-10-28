@@ -58,7 +58,7 @@ var API = /** @class */ (function () {
     return API;
 }());
 var fs = require('fs');
-var http = require('http');
+var https = require('https');
 var mime = require('mime-types');
 var LocalStorage = require("node-localstorage").LocalStorage;
 var _localStorage = new LocalStorage('./scratch');
@@ -79,7 +79,10 @@ function readJSON(request) {
         });
     });
 }
-http.createServer(function (request, response) {
+https.createServer({
+    key: fs.readFileSync("key.pem"),
+    cert: fs.readFileSync("cert.crt")
+}, function (request, response) {
     var url = request.url;
     if (url.startsWith(appRootPath) ||
         url == "/favicon.ico") {
@@ -88,7 +91,7 @@ http.createServer(function (request, response) {
         switch (url) {
             case "":
             case "/":
-                response.end("\n            <head>\n                <meta http-equiv=\"Refresh\" content=\"0; URL=".concat(appRootPath, "/index.html\">\n            </head>\n            "));
+                response.end("\n                <head>\n                    <meta http-equiv=\"Refresh\" content=\"0; URL=".concat(appRootPath, "/index.html\">\n                </head>\n                "));
                 break;
             case "/leaderboard":
                 Leaderboard.shared.handle(request, response);
