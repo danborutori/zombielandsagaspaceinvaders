@@ -1905,7 +1905,7 @@ var zlsSpaceInvader;
                             return [4 /*yield*/, zlsSpaceInvader.Leaderboard.shared.getRecords()];
                         case 1:
                             records = _a.sent();
-                            canPostScore = records.length == 0 || scorer.score >= records[Math.min(records.length, 7)].score;
+                            canPostScore = records.length < 8 || scorer.score >= records[7].score;
                             if (!canPostScore) return [3 /*break*/, 7];
                             _a.label = 2;
                         case 2:
