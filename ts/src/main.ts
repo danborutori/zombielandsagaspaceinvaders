@@ -251,7 +251,7 @@ namespace zlsSpaceInvader {
         private async showHighestScore(scorer: ScoreAndCredit){
             try{
                 const records = await Leaderboard.shared.getRecords()
-                const canPostScore = records.length==0 || scorer.score>=records[Math.min(records.length,7)].score
+                const canPostScore = records.length<8 || scorer.score>=records[7].score
 
                 if( canPostScore ){
                     while( true ){
