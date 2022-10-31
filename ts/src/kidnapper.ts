@@ -9,20 +9,19 @@ namespace zlsSpaceInvader {
             "shootingBeam" |
             "beamEnd"
             = "canShot"
-        private beamTime = 0
 
         constructor(
             readonly cooperator: EnemyCooperator,
             enemy: Kidnapper,
-            regroupPos: Vector2
+            regroupPos: Vector2,
+            shootInterval: number,
+            bulletCount: number
         ){
-            super(enemy, regroupPos)
+            super(enemy, regroupPos, shootInterval, bulletCount)
         }
 
         update(deltaTime: number, playerFlight: PlayerFlight): void {
             super.update( deltaTime, playerFlight )
-
-            this.beamTime += deltaTime
 
             switch( this.state ){
             case "goStraight":
@@ -42,7 +41,6 @@ namespace zlsSpaceInvader {
 
                 this.state = "stop"
                 this.kidnapBeamState = "shootingBeam"
-                this.beamTime = 0
                 const wave = new CaptureWave()
                 wave.pos.copy( this.enemy.pos )
                 wave.pos.y += 4.5
@@ -74,7 +72,6 @@ namespace zlsSpaceInvader {
 
                         this.kidnapBeamState = "beamEnd"
                         this.state = "goStraight"
-                        this.beamTime = 0
                     }
 
                 }catch(e){}
@@ -88,7 +85,6 @@ namespace zlsSpaceInvader {
             if( this.enemy.manager ){
                 this.cooperator.allowFlyOff = false
                 this.state = "stop"
-                this.beamTime = 0
                 this.cooperator.invincible = true
     
                 const rotFlight = new RotatingPlayerFlight(
@@ -319,12 +315,28 @@ namespace zlsSpaceInvader {
 
         kidnapped?: RotatingPlayerFlight
 
-        startFlyOff( cooperator: EnemyCooperator, regroupPos: Vector2): void {
+        startFlyOff(
+            cooperator: EnemyCooperator,
+            regroupPos: Vector2,
+            shootInterval: number,
+            bulletCount: number
+        ): void {
             if( !this.flyOff ){
                 if( !this.kidnapped )
-                    this.flyOff = new KidnapperFlyOff(cooperator, this, regroupPos )
+                    this.flyOff = new KidnapperFlyOff(
+                        cooperator,
+                        this,
+                        regroupPos,
+                        shootInterval,
+                        bulletCount
+                    )
                 else
-                    super.startFlyOff(cooperator, regroupPos )
+                    super.startFlyOff(
+                        cooperator,
+                        regroupPos,
+                        shootInterval,
+                        bulletCount
+                    )
             }
         }
 

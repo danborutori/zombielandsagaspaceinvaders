@@ -30,8 +30,8 @@ namespace zlsSpaceInvader {
             bottom : 0
         }
         private enemies: EnemyFlight[] = []
-        private enemyCooperator: EnemyCooperator = new EnemyCooperator(this.stage,[],()=>{})
-        private wave = 1
+        private enemyCooperator: EnemyCooperator = new EnemyCooperator(1,this.stage,[],()=>{})
+        private wave = 0
 
         constructor(){}
 
@@ -139,6 +139,7 @@ namespace zlsSpaceInvader {
 
                 for( let j=0; j<enemyRows.length; j++ ){
                     const e = new enemyRows[j](
+                        this.enemyCooperator.difficultyProfile.hp,
                         scoreAndCredit,
                         (e, p, i)=>{
                             p.remove( i )
@@ -173,6 +174,7 @@ namespace zlsSpaceInvader {
             }
 
             this.enemyCooperator = new EnemyCooperator(
+                this.wave,
                 this.stage,
                 this.enemies,
                 waveEnd

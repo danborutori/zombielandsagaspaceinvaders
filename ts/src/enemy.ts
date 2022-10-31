@@ -7,7 +7,6 @@ namespace zlsSpaceInvader {
         private flashTime = 0
         private origSprite: HTMLImageElement
         private flashingSprite: HTMLCanvasElement
-        private hp = 3
         readonly vel = new Vector2
         protected flyOff?: EnemyFlyOff<EnemyFlight>
         rotate = 0
@@ -17,6 +16,7 @@ namespace zlsSpaceInvader {
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
             readonly score: number = 100,
+            private hp: number,
             readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(sprite)
@@ -32,9 +32,19 @@ namespace zlsSpaceInvader {
             ctx.drawImage( sprite, 0, 0 )
         }
 
-        startFlyOff( cooperator: EnemyCooperator, regroupPos: Vector2 ){
+        startFlyOff(
+            cooperator: EnemyCooperator,
+            regroupPos: Vector2,
+            shootInterval: number,
+            bulletCount: number
+        ){
             if( !this.flyOff ){
-                this.flyOff = new EnemyFlyOff(this, regroupPos )
+                this.flyOff = new EnemyFlyOff(
+                    this,
+                    regroupPos,
+                    shootInterval,
+                    bulletCount
+                )
             }
         }
 

@@ -11,11 +11,12 @@ namespace zlsSpaceInvader {
         protected state: "homing" | "goStraight" | "regroup" | "stop" = "homing"
         protected time = 0
         private shootCooldown = 0
-        private bulletCount = 3
 
         constructor(
             readonly enemy: T,
-            readonly regroupPos: Vector2
+            readonly regroupPos: Vector2,
+            readonly shootInterval: number,
+            private bulletCount: number
         ){
             Audio.play( Audio.sounds.shipFly )
         }
@@ -34,7 +35,7 @@ namespace zlsSpaceInvader {
                     this.bulletCount>0
                 ){
                     this.enemy.shoot(playerFlight)
-                    this.shootCooldown += 0.5
+                    this.shootCooldown += this.shootInterval
                     this.bulletCount--
                 }
                 break
