@@ -156,6 +156,7 @@ namespace zlsSpaceInvader {
             const waveEnd = ()=>{
                 this.resetEnemies( playerFlight, scoreAndCredit)
                 playerFlight.paused = true
+                playerFlight.invincibleTime = 9000 // a large enough number
                 for( let e of this.enemies ) e.paused = true
                 this.enemyCooperator.paused = true
     
@@ -163,6 +164,7 @@ namespace zlsSpaceInvader {
                     ++this.wave,
                     ()=>{
                         playerFlight.paused = false
+                        playerFlight.invincibleTime = 0
                         for( let e of this.enemies ) e.paused = false
                         this.enemyCooperator.paused = false
                     }

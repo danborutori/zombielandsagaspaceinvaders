@@ -10,7 +10,8 @@ namespace zlsSpaceInvader {
         protected direction = new Vector2( 0, -1 )
         protected state: "homing" | "goStraight" | "regroup" | "stop" = "homing"
         protected time = 0
-        
+        private shootCooldown = 0
+        private bulletCount = 3
 
         constructor(
             readonly enemy: T,
@@ -22,12 +23,20 @@ namespace zlsSpaceInvader {
         update( deltaTime: number, playerFlight: PlayerFlight ){
 
             this.time += deltaTime
+            this.shootCooldown -= deltaTime
 
             let targetPos: Vector2 | undefined
 
             switch( this.state ){
             case "homing":
                 targetPos = playerFlight.pos
+                if( this.shootCooldown<=0 &&
+                    this.bulletCount>0
+                ){
+                    this.enemy.shoot(playerFlight)
+                    this.shootCooldown += 0.5
+                    this.bulletCount--
+                }
                 break
             case "regroup":
                 targetPos = this.regroupPos

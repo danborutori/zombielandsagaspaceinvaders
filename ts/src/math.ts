@@ -33,9 +33,22 @@ namespace zlsSpaceInvader {
             return this
         }
 
-        add( v: Vector2Like ){
-            this.x += v.x
-            this.y += v.y
+        floor(){
+            this.x = Math.floor(this.x)
+            this.y = Math.floor(this.y)
+            return this
+        }
+
+        add( v1: Vector2Like, v2: Vector2Like ): this
+        add( v1: Vector2Like ): this
+        add( v1: Vector2Like, v2?:  Vector2Like ){
+            if( !v2 ){
+                this.x += v1.x
+                this.y += v1.y
+            }else{
+                this.x = v1.x+v2.x
+                this.y = v1.y+v2.y
+            }
 
             return this
         }

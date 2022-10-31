@@ -72,7 +72,7 @@ namespace zlsSpaceInvader {
                 this.next = false
             }else if( Input.shared.fire && this.bulletCooldown<=0 && this.manager && this.canShoot ){
                 for( let u of this.flightUnits ){
-                    const b = new Bullet(this.stage, u.bulletColor)
+                    const b = new PlayerBullet(this.stage, u.bulletColor)
                     b.pos.copy(this.pos)
                     b.pos.x += u.pos.x
                     b.pos.y -= 6
