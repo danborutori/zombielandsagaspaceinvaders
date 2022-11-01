@@ -38,10 +38,14 @@ namespace zlsSpaceInvader {
 
             this.invincibleTime -= deltaTime
 
-            if( Input.shared.left )
-                this.pos.x -= Constant.playerMoveSpeed*deltaTime
-            if( Input.shared.right )
-                this.pos.x += Constant.playerMoveSpeed*deltaTime
+            if( this.pos.y>this.stage.bottom-35 ){
+                this.pos.y = Math.max(this.pos.y-100*deltaTime,this.stage.bottom-35)
+            }else{
+                if( Input.shared.left )
+                    this.pos.x -= Constant.playerMoveSpeed*deltaTime
+                if( Input.shared.right )
+                    this.pos.x += Constant.playerMoveSpeed*deltaTime
+            }
 
             const padding = this.flightUnits.length*9/2
 
@@ -51,23 +55,7 @@ namespace zlsSpaceInvader {
             this.bulletCooldown -= deltaTime
 
             if( this.next ){
-                const m = this.nextMember()
-                if( m ){
-                    for( let u of this.flightUnits ){
-                        this.removedUnits.push(u)
-                    }
-                    this.flightUnits = [
-                        new FlightUnit(
-                            m.sprite,
-                            m.bulletColor
-                        )
-                    ]
-                    this.visible = true
-                    this.pos.x = 0
-                    this.invincibleTime = invincibleInterval
-                }else{
-                    this.allMemberRunOut()
-                }
+                this.doNextMember()
 
                 this.next = false
             }else if( Input.shared.fire && this.bulletCooldown<=0 && this.manager && this.canShoot ){
@@ -82,6 +70,33 @@ namespace zlsSpaceInvader {
                 Audio.play( Audio.sounds.shoot )
             }
 
+        }
+
+        private async doNextMember(){
+            this.invincibleTime = 3
+            this.canShoot = false
+            await this.wait(2)
+
+            const m = this.nextMember()
+            if( m ){
+                for( let u of this.flightUnits ){
+                    this.removedUnits.push(u)
+                }
+                this.flightUnits = [
+                    new FlightUnit(
+                        m.sprite,
+                        m.bulletColor
+                    )
+                ]
+
+                this.visible = true
+                this.pos.x = 0
+                this.pos.y = this.stage.bottom
+                this.invincibleTime = invincibleInterval
+            }else{
+                this.allMemberRunOut()
+            }
+            this.canShoot = true
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
@@ -102,7 +117,7 @@ namespace zlsSpaceInvader {
             ]
             this.removedUnits.length = 0
             this.visible = true
-            this.pos.x = 0
+            this.pos.set(0,this.stage.bottom)
         }
 
         add( units: FlightUnit[] ){
@@ -116,7 +131,7 @@ namespace zlsSpaceInvader {
             this.pos.x += leftMostPos-this.flightUnits[0].pos.x
         }
 
-        remove( index: number ){            
+        remove( index: number ){
             if( this.flightUnits.length>1 ){
                 const positioningUnit = this.flightUnits[index==0?1:0]
                 const leftMostPos = positioningUnit.pos.x
@@ -128,6 +143,7 @@ namespace zlsSpaceInvader {
                 this.pos.x += leftMostPos-positioningUnit.pos.x
                 this.invincibleTime = 1
             }else{
+                this.visible = false
                 this.next = true
             }
         }
