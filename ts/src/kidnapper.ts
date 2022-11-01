@@ -121,18 +121,21 @@ namespace zlsSpaceInvader {
                     const txt = new FloatingText("MEMBER CAPTURED")
                     this.enemy.manager.add(txt)
 
-                    await this.enemy.wait(5)
+                    await this.enemy.wait(3)
     
                 }catch(e){
                     throw e
                 }finally{
-                    this.cooperator.allowFlyOff = true
 
                     player.invincibleTime = 0
                     // player.visible = true
                     player.paused = false
                     player.flightUnits.length = 0
                     player.next = true
+
+                    await this.enemy.wait(2)
+
+                    this.cooperator.allowFlyOff = true
                     this.cooperator.invincible = false
                 }
             }
