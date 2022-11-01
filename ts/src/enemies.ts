@@ -50,8 +50,12 @@ namespace zlsSpaceInvader {
                 hp,
                 onHitPlayer
             )
+            this.bulletCountDelta = -1
         }
 
+        protected bulletFactoty(direction: Vector2): EnemyBullet {
+            return new Grenade( this.scorer.stage, direction, this )
+        }
     }
 
     export class Dog extends EnemyFlight {

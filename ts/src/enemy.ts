@@ -11,6 +11,7 @@ namespace zlsSpaceInvader {
         protected flyOff?: EnemyFlyOff<EnemyFlight>
         rotate = 0
         invincible = false
+        bulletCountDelta = 0
 
         constructor(
             sprite: HTMLImageElement,
@@ -100,13 +101,17 @@ namespace zlsSpaceInvader {
             this.collidePlayerFlight( deltaTime )
         }
 
+        protected bulletFactoty( direction: Vector2 ){
+            return new EnemyBullet(
+                this.scorer.stage,
+                direction,
+                this
+            )
+        }
+
         shoot( playerFlight: PlayerFlight ){
             if( this.manager ){
-                const b = new EnemyBullet(
-                    this.scorer.stage,
-                    v.sub( playerFlight.pos, this.pos ).normalize(),
-                    this
-                )
+                const b = this.bulletFactoty(v.sub( playerFlight.pos, this.pos ).normalize())
                 b.pos.copy(this.pos)
                 
                 this.manager.add( b )

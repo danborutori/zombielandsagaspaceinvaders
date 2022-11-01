@@ -162,7 +162,7 @@ namespace zlsSpaceInvader {
                 this.enemyCooperator.paused = true
     
                 const waveScreen = new WaveScreen(
-                    ++this.wave,
+                    ++this.wave+1,
                     ()=>{
                         playerFlight.paused = false
                         playerFlight.invincibleTime = 0
@@ -269,7 +269,7 @@ namespace zlsSpaceInvader {
                             window.alert("INITIAL MUST BE 3 CAPITAL LETTERS (A-Z)")
                         }else{
 
-                            await Leaderboard.shared.post(int,scorer.score,this.wave,generateUUID())
+                            await Leaderboard.shared.post(int,scorer.score,this.wave+1,generateUUID())
 
                             break
                         }

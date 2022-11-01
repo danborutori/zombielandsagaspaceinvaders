@@ -30,7 +30,7 @@ namespace zlsSpaceInvader {
 
         protected constructor(
             readonly stage: Stage,
-            readonly color: string
+            public color: string
         ){
             super()
         }
@@ -73,6 +73,7 @@ namespace zlsSpaceInvader {
 
     export class EnemyBullet extends Bullet {
         readonly isEnemyBullet = true
+        protected canHitPlayer = true
 
         constructor(
             stage: Stage,
@@ -86,13 +87,13 @@ namespace zlsSpaceInvader {
         update(deltaTime: number): void {
             super.update(deltaTime)
 
-            if( this.manager ){
+            if( this.manager && this.canHitPlayer ){
                 for( let playerFlight of this.manager.playerFlights ){
                     if( playerFlight.invincibleTime<=0 ){
                         for( let i=0; i<playerFlight.flightUnits.length; i++ ){
                             const u = playerFlight.flightUnits[i]
                             if(
-                                v1.add(playerFlight.pos, u.pos).distance(this.pos)<3
+                                v1.add(playerFlight.pos, u.pos).distance(this.pos)<1.5
                             ){
                                 this.shooter.onHitPlayer(this.shooter, playerFlight, i)
                                 this.removeFromManager()
@@ -104,5 +105,5 @@ namespace zlsSpaceInvader {
                 }
             }
         }
-   }
+    }
 }

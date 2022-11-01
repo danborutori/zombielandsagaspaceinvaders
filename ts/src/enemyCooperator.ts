@@ -91,7 +91,7 @@ namespace zlsSpaceInvader {
                                 this,
                                 e.targetPos,
                                 this.difficultyProfile.bulletInterval,
-                                this.difficultyProfile.bulletCount
+                                this.difficultyProfile.bulletCount+e.enemy.bulletCountDelta
                             )
                         }
                     }

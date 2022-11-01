@@ -94,6 +94,12 @@ namespace zlsSpaceInvader {
             return this
         }
 
+        dot( v: Vector2Like ){
+            const x = this.x*v.x
+            const y = this.y*v.y
+            return x*x+y*y
+        }
+
         angle(): number
         angle(v: Vector2): number
         angle(v?: Vector2) { 
