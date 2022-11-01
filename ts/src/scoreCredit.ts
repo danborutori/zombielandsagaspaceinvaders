@@ -21,6 +21,7 @@ namespace zlsSpaceInvader {
             this.updateHiScore(n)
             if( this._score>this.nextCredit ){
                 this.credit += 1
+                Audio.play(Audio.sounds.credit)
                 this.nextCredit += 10000
             }
         }

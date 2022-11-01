@@ -113,6 +113,8 @@ namespace zlsSpaceInvader {
             if( this.manager ){
                 const b = this.bulletFactoty(v.sub( playerFlight.pos, this.pos ).normalize())
                 b.pos.copy(this.pos)
+
+                Audio.play(Audio.sounds.enemyShooting)
                 
                 this.manager.add( b )
             }
