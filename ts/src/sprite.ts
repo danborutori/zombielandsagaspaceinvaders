@@ -20,7 +20,8 @@ namespace zlsSpaceInvader {
         font: "./images/font.png",
         captureWave0: "./images/capture_wave0.png",
         captureWave1: "./images/capture_wave1.png",
-        captureWave2: "./images/capture_wave2.png"
+        captureWave2: "./images/capture_wave2.png",
+        grenade: "./images/grenade.png"
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -55,6 +56,7 @@ namespace zlsSpaceInvader {
             captureWave0: new Image,
             captureWave1: new Image,
             captureWave2: new Image,
+            grenade: new Image,
         }
 
         load(){

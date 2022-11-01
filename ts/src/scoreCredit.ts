@@ -19,12 +19,17 @@ namespace zlsSpaceInvader {
         set score( n: number ){
             this._score = n
             this.updateHiScore(n)
+            if( this._score>this.nextCredit ){
+                this.credit += 1
+                this.nextCredit += 10000
+            }
         }
         private _hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0")
         get hiScore(){
             return this._hiScore
         }
-        credit = 10
+        credit = 0
+        private nextCredit = 10000
 
         constructor( 
             readonly stage: Stage,

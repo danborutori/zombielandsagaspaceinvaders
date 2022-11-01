@@ -73,18 +73,28 @@ namespace zlsSpaceInvader {
     }
 
     export class GameObjectManager {
-        gameObjects: GameObject[] = []
+        readonly gameObjects: GameObject[] = []
+        readonly playerBullets: Set<PlayerBullet> = new Set
+        readonly playerFlights: Set<PlayerFlight> = new Set
 
         add( o: GameObject ){
             o.removeFromManager()
             this.gameObjects.push(o)
             o.manager = this
+            if( (o as PlayerBullet).isPlayerBullet ){
+                this.playerBullets.add(o as PlayerBullet)
+            }else if( (o as PlayerFlight).isPlayerFlight ){
+                this.playerFlights.add(o as PlayerFlight)
+            }
         }
 
         remove( o: GameObject ){
-            if( o.manager===this ){
-                this.gameObjects = this.gameObjects.filter(_o=>_o!==o)
+            const i = this.gameObjects.indexOf(o)
+            if( i>=0 ){
+                this.gameObjects.splice( i, 1 )
                 o.manager = undefined
+                this.playerBullets.delete( o as PlayerBullet )
+                this.playerFlights.delete(o as PlayerFlight)
             }
         }
 

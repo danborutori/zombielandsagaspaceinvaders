@@ -30,8 +30,8 @@ namespace zlsSpaceInvader {
             bottom : 0
         }
         private enemies: EnemyFlight[] = []
-        private enemyCooperator: EnemyCooperator = new EnemyCooperator(this.stage,[],()=>{})
-        private wave = 1
+        private enemyCooperator: EnemyCooperator = new EnemyCooperator(1,this.stage,[],()=>{})
+        private wave = 0
 
         constructor(){}
 
@@ -139,6 +139,7 @@ namespace zlsSpaceInvader {
 
                 for( let j=0; j<enemyRows.length; j++ ){
                     const e = new enemyRows[j](
+                        this.enemyCooperator.difficultyProfile.hp,
                         scoreAndCredit,
                         (e, p, i)=>{
                             p.remove( i )
@@ -156,13 +157,15 @@ namespace zlsSpaceInvader {
             const waveEnd = ()=>{
                 this.resetEnemies( playerFlight, scoreAndCredit)
                 playerFlight.paused = true
+                playerFlight.invincibleTime = 9000 // a large enough number
                 for( let e of this.enemies ) e.paused = true
                 this.enemyCooperator.paused = true
     
                 const waveScreen = new WaveScreen(
-                    ++this.wave,
+                    ++this.wave+1,
                     ()=>{
                         playerFlight.paused = false
+                        playerFlight.invincibleTime = 0
                         for( let e of this.enemies ) e.paused = false
                         this.enemyCooperator.paused = false
                     }
@@ -171,6 +174,7 @@ namespace zlsSpaceInvader {
             }
 
             this.enemyCooperator = new EnemyCooperator(
+                this.wave,
                 this.stage,
                 this.enemies,
                 waveEnd
@@ -265,7 +269,7 @@ namespace zlsSpaceInvader {
                             window.alert("INITIAL MUST BE 3 CAPITAL LETTERS (A-Z)")
                         }else{
 
-                            await Leaderboard.shared.post(int,scorer.score,this.wave,generateUUID())
+                            await Leaderboard.shared.post(int,scorer.score,this.wave+1,generateUUID())
 
                             break
                         }

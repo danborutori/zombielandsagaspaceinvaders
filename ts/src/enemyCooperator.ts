@@ -18,12 +18,17 @@ namespace zlsSpaceInvader {
             for( let e of this.enemies ) e.enemy.invincible = b
         }
 
+        readonly difficultyProfile: DifficultyProfile
+
         constructor(
+            wave: number,
             readonly stage: Stage,
             enemies: EnemyFlight[],
             readonly waveEnd: ()=>void
         ){
             super()
+
+            this.difficultyProfile = DifficultyManager.shared.getProfile(wave)
 
             this.enemies = enemies.map(e=>{
                 return {
@@ -43,7 +48,7 @@ namespace zlsSpaceInvader {
                 const lifeEnemyRatio = this.enemies.reduce((a,b)=>a+(b.enemy.manager?1:0),0)/(this.enemies.length-1)
                 const interval = (0.01+0.49*lifeEnemyRatio)/0.6
                 const enemyMoveSpeed = (3+(1-lifeEnemyRatio)*6)*0.6
-                const flyOffRate = 0.005+(1-lifeEnemyRatio)*0.1
+                const flyOffRate = 0.005+(1-lifeEnemyRatio)*0.1+this.difficultyProfile.extraFlyOffRate
 
                 let deltaX = 0
                 switch( this.moveDir ){
@@ -82,7 +87,12 @@ namespace zlsSpaceInvader {
                         if( !e.enemy.isFlyingOff &&
                             Math.random()<flyOffRate
                         ){
-                            e.enemy.startFlyOff( this, e.targetPos )
+                            e.enemy.startFlyOff(
+                                this,
+                                e.targetPos,
+                                this.difficultyProfile.bulletInterval,
+                                this.difficultyProfile.bulletCount+e.enemy.bulletCountDelta
+                            )
                         }
                     }
                 }

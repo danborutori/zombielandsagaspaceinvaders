@@ -7,16 +7,17 @@ namespace zlsSpaceInvader {
         private flashTime = 0
         private origSprite: HTMLImageElement
         private flashingSprite: HTMLCanvasElement
-        private hp = 3
         readonly vel = new Vector2
         protected flyOff?: EnemyFlyOff<EnemyFlight>
         rotate = 0
         invincible = false
+        bulletCountDelta = 0
 
         constructor(
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
             readonly score: number = 100,
+            private hp: number,
             readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
         ){
             super(sprite)
@@ -32,9 +33,19 @@ namespace zlsSpaceInvader {
             ctx.drawImage( sprite, 0, 0 )
         }
 
-        startFlyOff( cooperator: EnemyCooperator, regroupPos: Vector2 ){
+        startFlyOff(
+            cooperator: EnemyCooperator,
+            regroupPos: Vector2,
+            shootInterval: number,
+            bulletCount: number
+        ){
             if( !this.flyOff ){
-                this.flyOff = new EnemyFlyOff(this, regroupPos )
+                this.flyOff = new EnemyFlyOff(
+                    this,
+                    regroupPos,
+                    shootInterval,
+                    bulletCount
+                )
             }
         }
 
@@ -86,46 +97,74 @@ namespace zlsSpaceInvader {
                 }
             }
 
+            this.collidePlayerBullets()
+            this.collidePlayerFlight( deltaTime )
+        }
+
+        protected bulletFactoty( direction: Vector2 ){
+            return new EnemyBullet(
+                this.scorer.stage,
+                direction,
+                this
+            )
+        }
+
+        shoot( playerFlight: PlayerFlight ){
             if( this.manager ){
-                if( !this.invincible ){
-                    const bs = this.manager.gameObjects.filter(b=>(b as Bullet).isBullet)
-                    for( let b of bs ){
-                        v.sub(this.pos, b.pos).abs()
-                        if( v.x<5 &&
-                            v.y<5.5
-                        ){
-                            this.flashTime = 0.1
-                            b.removeFromManager()
-                            if( this.hp>0 ){
-                                this.hp -= 1
-                                if( this.hp<=0 ){
-                                    this.onDie()
-                                }
+                const b = this.bulletFactoty(v.sub( playerFlight.pos, this.pos ).normalize())
+                b.pos.copy(this.pos)
+                
+                this.manager.add( b )
+            }
+        }
+
+        private collidePlayerBullets(){
+            if( this.manager &&
+                !this.invincible
+            ){
+                const bs = Array.from(this.manager.playerBullets)
+                for( let b of bs ){
+                    v.sub(this.pos, b.pos).abs()
+                    if( v.x<5 &&
+                        v.y<5.5
+                    ){
+                        this.flashTime = 0.1
+                        b.removeFromManager()
+                        if( this.hp>0 ){
+                            this.hp -= 1
+                            if( this.hp<=0 ){
+                                this.onDie()
                             }
                         }
                     }
                 }
+            }
+        }
 
-                const playerFlight = this.manager && this.manager.gameObjects.filter(o=>(o as PlayerFlight).isPlayerFlight)[0] as PlayerFlight
-                if( playerFlight ){
-                    if( this.flyOff ){
-                        this.flyOff.update( deltaTime, playerFlight )
-                    }else{
-                        this.rotate -= Math.sign(this.rotate)*Math.min(Math.abs(this.rotate),deltaTime*Math.PI*2)
-                    }
+        private collidePlayerFlight( deltaTime: number ){
+            if( this.manager ){
+                for( let playerFlight of Array.from(this.manager.playerFlights)){
+                    if( playerFlight ){
 
-                    if( playerFlight.invincibleTime<=0 ){
-                        for( let i=0; i<playerFlight.flightUnits.length; i++ ){
-                            const u = playerFlight.flightUnits[i]
-                            v.sub(this.pos, playerFlight.pos)
-                            .sub(u.pos)
-                            .abs()
-                            if( 
-                                v.x<9 &&
-                                v.y<9
-                            ){
-                                this.onHitPlayer(this,playerFlight as PlayerFlight, i)
-                                break
+                        if( this.flyOff ){
+                            this.flyOff.update( deltaTime, playerFlight )
+                        }else{
+                            this.rotate -= Math.sign(this.rotate)*Math.min(Math.abs(this.rotate),deltaTime*Math.PI*2)
+                        }
+
+                        if( playerFlight.invincibleTime<=0 ){
+                            for( let i=0; i<playerFlight.flightUnits.length; i++ ){
+                                const u = playerFlight.flightUnits[i]
+                                v.sub(this.pos, playerFlight.pos)
+                                .sub(u.pos)
+                                .abs()
+                                if( 
+                                    v.x<9 &&
+                                    v.y<9
+                                ){
+                                    this.onHitPlayer(this,playerFlight as PlayerFlight, i)
+                                    break
+                                }
                             }
                         }
                     }
