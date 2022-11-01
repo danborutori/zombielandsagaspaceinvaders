@@ -142,6 +142,9 @@ namespace zlsSpaceInvader {
                         this.enemyCooperator.difficultyProfile.hp,
                         scoreAndCredit,
                         (e, p, i)=>{
+                            const ex = new MemberExplosion()
+                            ex.pos.add( p.pos, p.flightUnits[i].pos )
+                            this.gameObjectManager.add(ex)
                             p.remove( i )
                             Audio.play( Audio.sounds.explosion )
                         }
