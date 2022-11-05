@@ -9,6 +9,7 @@ namespace zlsSpaceInvader {
     }
 
     const hiScoreItemKey = "hiscore"
+    export const highestScoreDisplay = 999999
 
     export class ScoreAndCredit extends GameObject {
 
@@ -56,9 +57,9 @@ namespace zlsSpaceInvader {
             const w = this.stage.right-this.stage.left
             const h = this.stage.bottom-this.stage.top
 
-            TextDrawer.shared.drawText(`SCORE ${addLeadingZero(this.score,6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9), ctx )
+            TextDrawer.shared.drawText(`SCORE ${addLeadingZero(Math.min(highestScoreDisplay,this.score),6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9), ctx )
 
-            const hiScoreTxt = `HI-SCORE ${addLeadingZero(this.hiScore,6)}`
+            const hiScoreTxt = `HI-SCORE ${addLeadingZero(Math.min(highestScoreDisplay,this.hiScore),6)}`
             TextDrawer.shared.drawText(hiScoreTxt,Math.floor(w/2-2-TextDrawer.shared.measure(hiScoreTxt)), Math.floor(-h/2+9),ctx)
 
             const creditTxt = `CREDIT ${addLeadingZero(Math.min(this.credit,99),2)}`

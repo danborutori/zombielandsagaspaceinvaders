@@ -44,7 +44,7 @@ namespace zlsSpaceInvader {
             for( let i=0, end=Math.min(8,this.records.length); i<end; i++ ){
                 const r = this.records[i]
                 const rank = i==0?"1ST":i==1?"2ND":i==2?"3RD":`${i+1}TH`
-                const txt = ` ${rank} ${addLeadingZero(r.score, 6)}  ${addLeadingZero(r.wave || 0, 3)} ${r.name}`
+                const txt = ` ${rank} ${addLeadingZero(Math.min(highestScoreDisplay,r.score), 6)}  ${addLeadingZero(r.wave || 0, 3)} ${r.name}`
 
                 TextDrawer.shared.drawTextOutline(txt, -TextDrawer.shared.measure(txt)/2, 0, ctx)
                 ctx.translate(0,7)
