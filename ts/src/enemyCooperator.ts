@@ -90,7 +90,7 @@ namespace zlsSpaceInvader {
                             e.enemy.startFlyOff(
                                 this,
                                 e.targetPos,
-                                this.difficultyProfile.bulletInterval,
+                                this.difficultyProfile.bulletInterval*e.enemy.bulletIntervalScale,
                                 this.difficultyProfile.bulletCount+e.enemy.bulletCountDelta
                             )
                         }

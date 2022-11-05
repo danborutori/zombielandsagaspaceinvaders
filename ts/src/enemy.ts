@@ -12,6 +12,9 @@ namespace zlsSpaceInvader {
         rotate = 0
         invincible = false
         bulletCountDelta = 0
+        bulletIntervalScale = 1
+        bulletShootAngle = 5*Math.PI/180
+        homingTime = 2
 
         constructor(
             sprite: HTMLImageElement,
@@ -109,9 +112,11 @@ namespace zlsSpaceInvader {
             )
         }
 
-        shoot( playerFlight: PlayerFlight ){
+        shoot( playerFlight: PlayerFlight, phase: number ){
             if( this.manager ){
-                const b = this.bulletFactoty(v.sub( playerFlight.pos, this.pos ).normalize())
+                v.sub( playerFlight.pos, this.pos ).normalize()
+                v.rotateAround( Math.cos(phase*Math.PI*2)*this.bulletShootAngle )
+                const b = this.bulletFactoty( v )
                 b.pos.copy(this.pos)
 
                 Audio.play(Audio.sounds.enemyShooting)

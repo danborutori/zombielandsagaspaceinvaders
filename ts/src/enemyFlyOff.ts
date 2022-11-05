@@ -11,6 +11,7 @@ namespace zlsSpaceInvader {
         protected state: "homing" | "goStraight" | "regroup" | "stop" = "homing"
         protected time = 0
         private shootCooldown = 0
+        private initBulletCount: number
 
         constructor(
             readonly enemy: T,
@@ -18,6 +19,7 @@ namespace zlsSpaceInvader {
             readonly shootInterval: number,
             private bulletCount: number
         ){
+            this.initBulletCount = bulletCount
             Audio.play( Audio.sounds.shipFly )
         }
 
@@ -34,7 +36,7 @@ namespace zlsSpaceInvader {
                 if( this.shootCooldown<=0 &&
                     this.bulletCount>0
                 ){
-                    this.enemy.shoot(playerFlight)
+                    this.enemy.shoot(playerFlight, this.bulletCount/this.initBulletCount)
                     this.shootCooldown += this.shootInterval
                     this.bulletCount--
                 }
@@ -50,7 +52,7 @@ namespace zlsSpaceInvader {
             if( targetPos ){
                 v.sub( targetPos, this.enemy.pos )
                 if(
-                    this.time<2.5 ||
+                    this.time<this.enemy.homingTime ||
                     this.state==="regroup" ||
                     this.state==="stop"
                 ){
