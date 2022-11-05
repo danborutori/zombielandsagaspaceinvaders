@@ -184,14 +184,10 @@ namespace zlsSpaceInvader {
             )
             this.gameObjectManager.add( this.enemyCooperator )
 
-            let pInPlayer = playerFlight.flightUnits.reduce((a,b)=>{
-                return a || b.sprite===Sprites.shared.images["p"]
-            }, false)
-            
-            if( !pInPlayer )
+            if( missingMembers.length>0 && (this.wave%5)==3 )
                 (this.enemies[enemyRows.length*4] as Zombie1).setCapture(
                     playerFlight,
-                    new FlightUnit( Sprites.shared.images["p"], Palette.BulletColor1 ),
+                    missingMembers.splice(0,1)[0],
                     this.enemyCooperator
                 )
         }
@@ -201,16 +197,8 @@ namespace zlsSpaceInvader {
             playerFlight: PlayerFlight,
             franchouchou: Franchouchou
         ){
-            const renewFlights = Array.from( playerFlight.flightUnits )
-            for( let u of playerFlight.removedUnits ){
-                if(
-                    u.sprite!==Sprites.shared.images["p"]
-                )
-                    renewFlights.push(u)
-            }
-
-            if( renewFlights.length>0 ){
-                if( scoreAndCredit.credit>0 && renewFlights.length>0 ){
+            if( knockdownMembers.length>0 ){
+                if( scoreAndCredit.credit>0 ){
 
                     playerFlight.paused = true
                     for( let e of this.enemies ) e.paused = true
@@ -224,8 +212,9 @@ namespace zlsSpaceInvader {
                             for( let e of this.enemies ) e.paused = false
                             this.enemyCooperator.paused = false
 
-                            playerFlight.reset(renewFlights[0])
-                            franchouchou.reset(renewFlights.slice(1))
+                            playerFlight.reset(knockdownMembers[0])
+                            franchouchou.reset(knockdownMembers.slice(1))
+                            knockdownMembers.length = 0
                             playerFlight.invincibleTime = 1
                         }else{
                             this.showHighestScore(scoreAndCredit)
