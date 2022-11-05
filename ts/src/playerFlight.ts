@@ -15,22 +15,16 @@ namespace zlsSpaceInvader {
         invincibleTime = 0
         canShoot = true
 
-        flightUnits: FlightUnit[]
-        removedUnits: FlightUnit[] = []
+        flightUnits: FlightUnit[] = []
 
         constructor(            
             readonly stage: Stage,
-            readonly nextMember: ()=>Member|null,
+            readonly nextMember: ()=>FlightUnit|null,
             readonly allMemberRunOut: ()=>void
         ){
             super()
 
-            this.flightUnits = [
-                new FlightUnit(
-                    Sprites.shared.images[1],
-                    Palette.BulletColor1
-                )
-            ]
+            this.reset(initMember)
         }
 
         update(deltaTime: number): void {
@@ -80,18 +74,9 @@ namespace zlsSpaceInvader {
             const m = this.nextMember()
             if( m ){
                 for( let u of this.flightUnits ){
-                    this.removedUnits.push(u)
+                    knockdownMembers.push(u)
                 }
-                this.flightUnits = [
-                    new FlightUnit(
-                        m.sprite,
-                        m.bulletColor
-                    )
-                ]
-
-                this.visible = true
-                this.pos.x = 0
-                this.pos.y = this.stage.bottom
+                this.reset(m)
                 this.invincibleTime = invincibleInterval
             }else{
                 this.allMemberRunOut()
@@ -115,7 +100,6 @@ namespace zlsSpaceInvader {
             this.flightUnits = [
                 flightUnit
             ]
-            this.removedUnits.length = 0
             this.visible = true
             this.pos.set(0,this.stage.bottom)
         }
@@ -135,7 +119,7 @@ namespace zlsSpaceInvader {
             if( this.flightUnits.length>1 ){
                 const positioningUnit = this.flightUnits[index==0?1:0]
                 const leftMostPos = positioningUnit.pos.x
-                this.removedUnits.push( this.flightUnits.splice(index, 1)[0] )
+                knockdownMembers.push( this.flightUnits.splice(index, 1)[0] )
                 for( let i=0; i<this.flightUnits.length; i++ ){
                     const u = this.flightUnits[i]
                     u.pos.x = (i-(this.flightUnits.length-1)/2)*9

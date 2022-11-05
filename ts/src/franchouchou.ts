@@ -1,41 +1,54 @@
 namespace zlsSpaceInvader {
 
-    const memberList = [
-        {
-            no: 5,
-            bulletColor: Palette.BulletColor5
-        },
-        {
-            no: 6,
-            bulletColor: Palette.BulletColor6
-        },
-        {
-            no: 4,
-            bulletColor: Palette.BulletColor4
-        },
-        {
-            no: 2,
-            bulletColor: Palette.BulletColor2
-        },
-        {
-            no: 3,
-            bulletColor: Palette.BulletColor3
-        },
-        {
-            no: 0,
-            bulletColor: Palette.BulletColor0
-        },
-        {
-            no: 7,
-            bulletColor: Palette.BulletColor7
-        }
+    export const initMember = new FlightUnit(
+        Sprites.shared.images["1"],
+        Palette.BulletColor1
+    )
+
+    const foundMembers = [
+        new FlightUnit(
+            Sprites.shared.images["5"],
+            Palette.BulletColor5
+        ),
+        new FlightUnit(
+            Sprites.shared.images["6"],
+            Palette.BulletColor6
+        )
     ]
+
+    export const missingMembers = [        
+        new FlightUnit(
+            Sprites.shared.images["4"],
+            Palette.BulletColor4
+        ),
+        new FlightUnit(
+            Sprites.shared.images["2"],
+            Palette.BulletColor2
+        ),
+        new FlightUnit(
+            Sprites.shared.images["3"],
+            Palette.BulletColor3
+        ),
+        new FlightUnit(
+            Sprites.shared.images["0"],
+            Palette.BulletColor0
+        ),
+        new FlightUnit(
+            Sprites.shared.images["p"],
+            Palette.BulletColor1
+        )
+    ]
+
+    export const knockdownMembers: FlightUnit[] = []
+
+    let special: FlightUnit | undefined = new FlightUnit(
+        Sprites.shared.images["7"],
+        Palette.BulletColor7
+    )
 
     export class Franchouchou extends GameObject {
 
         private units: FlightUnit[] = []
-
-        private canCallMaiMai = true
 
         get remainingMember(){
             return this.units.length
@@ -55,12 +68,7 @@ namespace zlsSpaceInvader {
         ){
             super()
             this.renderOrder = 1
-            this.reset(memberList.slice(0,6).map( m=>
-                new FlightUnit(
-                    Sprites.shared.images[`${m.no}`],
-                    m.bulletColor
-                )
-            ))
+            this.reset(foundMembers)
         }
 
         update( deltaTime: number ){
@@ -68,15 +76,12 @@ namespace zlsSpaceInvader {
 
             if(
                 Input.shared.maimai &&
-                this.canCallMaiMai
+                special
             ){
                 this.units.push(
-                    new FlightUnit(
-                        Sprites.shared.images[`${memberList[6].no}`],
-                        memberList[6].bulletColor
-                    )    
+                    special
                 )
-                this.canCallMaiMai = false
+                special = undefined
             }
         }
 
