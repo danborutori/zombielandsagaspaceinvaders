@@ -32,6 +32,8 @@ namespace zlsSpaceInvader {
                 hp,
                 onHitPlayer
             )
+            this.bulletIntervalScale = 0.5
+            this.bulletShootAngle = 15*Math.PI/180
         }
 
     }
@@ -72,6 +74,7 @@ namespace zlsSpaceInvader {
                 hp,
                 onHitPlayer
             )
+            this.homingTime = 2.5
         }
 
     }
