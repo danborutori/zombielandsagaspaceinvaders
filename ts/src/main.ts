@@ -29,8 +29,8 @@ namespace zlsSpaceInvader {
             top: 0,
             bottom : 0
         }
-        private enemies: EnemyFlight[] = []
-        private enemyCooperator: EnemyCooperator = new EnemyCooperator(1,this.stage,[],()=>{})
+        
+        private enemyWave?: IEnemyWave
         private wave = 0
 
         constructor(){}
@@ -105,12 +105,10 @@ namespace zlsSpaceInvader {
             this.gameObjectManager.add( scoreAndCredit )
 
             playerFlight.paused = true
-            for( let e of this.enemies ) e.paused = true
-            this.enemyCooperator.paused = true
+            this.enemyWave && (this.enemyWave.pause = true)
             const startScreen = new StartScreen(scoreAndCredit,()=>{
                 playerFlight.paused = false
-                for( let e of this.enemies ) e.paused = false
-                this.enemyCooperator.paused = false
+                this.enemyWave && (this.enemyWave.pause = false)
             })
             this.gameObjectManager.add( startScreen )
             this.gameObjectManager.add( startScreen.leaderboard )
@@ -121,75 +119,29 @@ namespace zlsSpaceInvader {
             scoreAndCredit: ScoreAndCredit
         ){
             //clear old enemies
-            for( let e of this.enemies ) e.removeFromManager()
-            this.enemies.length = 0
-            this.enemyCooperator.removeFromManager()
+            this.enemyWave && this.enemyWave.clear()
 
-            const enemyColumn = 9
-            const enemySpacing = 14
-            const enemyRows = [
-                Zombie1,
-                Zombie2,
-                Hand,
-                Dog
-            ]
-            const enemyYOffset = -46
-            
-            for( let i=0; i<enemyColumn; i++ ){
-
-                for( let j=0; j<enemyRows.length; j++ ){
-                    const e = new enemyRows[j](
-                        this.enemyCooperator.difficultyProfile.hp,
-                        scoreAndCredit,
-                        (e, p, i)=>{
-                            const ex = new MemberExplosion()
-                            ex.pos.add( p.pos, p.flightUnits[i].pos )
-                            this.gameObjectManager.add(ex)
-                            p.remove( i )
-                            Audio.play( Audio.sounds.explosion )
-                        }
-                    )
-                    e.pos.x = (-enemyColumn/2+i+0.5)*enemySpacing
-                    e.pos.y = j*enemySpacing+enemyYOffset
-                    this.gameObjectManager.add( e )
-                    this.enemies.push(e)
-                }
-
-            }
-
-            const waveEnd = ()=>{
-                this.resetEnemies( playerFlight, scoreAndCredit)
-                playerFlight.paused = true
-                playerFlight.invincibleTime = 9000 // a large enough number
-                for( let e of this.enemies ) e.paused = true
-                this.enemyCooperator.paused = true
-    
-                const waveScreen = new WaveScreen(
-                    ++this.wave+1,
-                    ()=>{
-                        playerFlight.paused = false
-                        playerFlight.invincibleTime = 0
-                        for( let e of this.enemies ) e.paused = false
-                        this.enemyCooperator.paused = false
-                    }
-                )    
-                this.gameObjectManager.add(waveScreen)
-            }
-
-            this.enemyCooperator = new EnemyCooperator(
-                this.wave,
+            this.enemyWave = new EnemyWave(
                 this.stage,
-                this.enemies,
-                waveEnd
+                this.wave,
+                ()=>{
+                    this.resetEnemies( playerFlight, scoreAndCredit)
+                    playerFlight.paused = true
+                    playerFlight.invincibleTime = 9000 // a large enough number
+                    this.enemyWave && (this.enemyWave.pause = true)
+        
+                    const waveScreen = new WaveScreen(
+                        ++this.wave+1,
+                        ()=>{
+                            playerFlight.paused = false
+                            playerFlight.invincibleTime = 0
+                            this.enemyWave && (this.enemyWave.pause = false)
+                        }
+                    )    
+                    this.gameObjectManager.add(waveScreen)
+                }
             )
-            this.gameObjectManager.add( this.enemyCooperator )
-
-            if( missingMembers.length>0 && (this.wave%5)==3 )
-                (this.enemies[enemyRows.length*4] as Zombie1).setCapture(
-                    playerFlight,
-                    missingMembers.splice(0,1)[0],
-                    this.enemyCooperator
-                )
+            this.enemyWave.init(scoreAndCredit,this.gameObjectManager,playerFlight)
         }
 
         private showContinue(
@@ -201,16 +153,14 @@ namespace zlsSpaceInvader {
                 if( scoreAndCredit.credit>0 ){
 
                     playerFlight.paused = true
-                    for( let e of this.enemies ) e.paused = true
-                    this.enemyCooperator.paused = true
+                    this.enemyWave && (this.enemyWave.pause = true)
 
                     const continueScreen =  new ContinueScreen(b=>{
                         if( b ){
                             scoreAndCredit.credit--
 
                             playerFlight.paused = false
-                            for( let e of this.enemies ) e.paused = false
-                            this.enemyCooperator.paused = false
+                            this.enemyWave && (this.enemyWave.pause = false)
 
                             playerFlight.reset(knockdownMembers[0])
                             franchouchou.reset(knockdownMembers.slice(1))
@@ -224,15 +174,13 @@ namespace zlsSpaceInvader {
 
                 }else{
                     playerFlight.paused = true
-                    for( let e of this.enemies ) e.paused = true
-                    this.enemyCooperator.paused = true
+                    this.enemyWave && (this.enemyWave.pause = true)
                     
                     this.showHighestScore(scoreAndCredit)
                 }
             }else{
                 playerFlight.paused = true
-                for( let e of this.enemies ) e.paused = true
-                this.enemyCooperator.paused = true
+                this.enemyWave && (this.enemyWave.pause = true)
 
                 const t = new FloatingText(
                     "ALL MEMBERS CAPTURED",
