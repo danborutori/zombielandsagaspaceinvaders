@@ -4,6 +4,8 @@ namespace zlsSpaceInvader {
     const v2 = new Vector2
     const v3 = new Vector2
 
+    const collisioShape = new ColliderBox(v1.set(1,3))
+
     function drawLine(
         from: Vector2,
         to: Vector2,
@@ -27,6 +29,7 @@ namespace zlsSpaceInvader {
 
         readonly isBullet = true
         readonly velocity = new Vector2
+        readonly collisionShape = collisioShape
 
         protected constructor(
             readonly stage: Stage,

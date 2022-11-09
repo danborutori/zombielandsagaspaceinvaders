@@ -6,13 +6,27 @@ namespace zlsSpaceInvader {
         clear(): void
     }
 
-    export class EnemyWave implements IEnemyWave {
-
-        private enemies: EnemyFlight[] = []
-        private enemyCooperator: EnemyCooperator
+    export abstract class BaseEnemyWave implements IEnemyWave {
+        protected enemies: EnemyFlight[] = []
 
         set pause(b: boolean){
             for( let e of this.enemies ) e.paused = b
+        }
+
+        abstract init( scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight ): void
+
+        clear(){
+            //clear old enemies
+            for( let e of this.enemies ) e.removeFromManager()
+        }
+    }
+
+    export class EnemyWave extends BaseEnemyWave {
+
+        private enemyCooperator: EnemyCooperator
+
+        set pause(b: boolean){
+            super.pause = b
             this.enemyCooperator.paused = b
         }
 
@@ -21,6 +35,7 @@ namespace zlsSpaceInvader {
             readonly wave: number,
             readonly onWaveEnd: ()=>void
         ){
+            super()
             this.enemyCooperator = new EnemyCooperator(1,stage,[],()=>{})
         }
 
@@ -74,9 +89,7 @@ namespace zlsSpaceInvader {
         }
 
         clear(){
-            //clear old enemies
-            for( let e of this.enemies ) e.removeFromManager()
-            this.enemies.length = 0
+            super.clear()
             this.enemyCooperator.removeFromManager()
         }
     }

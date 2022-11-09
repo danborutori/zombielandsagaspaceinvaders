@@ -2,6 +2,8 @@ namespace zlsSpaceInvader {
 
     const v = new Vector2
 
+    const collisioBox = new ColliderBox(v.set(9,9))
+
     export class EnemyFlight extends SpriteObject {
 
         private flashTime = 0
@@ -15,6 +17,7 @@ namespace zlsSpaceInvader {
         bulletIntervalScale = 1
         bulletShootAngle = 5*Math.PI/180
         homingTime = 2
+        protected collisionShape: ColliderShape = collisioBox
 
         constructor(
             sprite: HTMLImageElement,
@@ -61,7 +64,7 @@ namespace zlsSpaceInvader {
             this.vel.set(0,0)
         }
 
-        private wrapAround(){
+        protected wrapAround(){
             const padding = 9
             const w = this.scorer.stage.right-this.scorer.stage.left+padding*2
             const h = this.scorer.stage.bottom-this.scorer.stage.top+padding*2
@@ -131,9 +134,13 @@ namespace zlsSpaceInvader {
             ){
                 const bs = Array.from(this.manager.playerBullets)
                 for( let b of bs ){
-                    v.sub(this.pos, b.pos).abs()
-                    if( v.x<5 &&
-                        v.y<5.5
+                    if( 
+                        CollisionChecker.intersect(
+                            this.collisionShape,
+                            this.pos,
+                            b.collisionShape,
+                            b.pos
+                        )
                     ){
                         this.flashTime = 0.1
                         b.removeFromManager()
