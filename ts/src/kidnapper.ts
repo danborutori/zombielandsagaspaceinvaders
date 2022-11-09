@@ -325,7 +325,9 @@ namespace zlsSpaceInvader {
             bulletCount: number
         ): void {
             if( !this.flyOff ){
-                if( !this.kidnapped )
+                if( !this.kidnapped &&
+                    Math.random()>0.5
+                )
                     this.flyOff = new KidnapperFlyOff(
                         cooperator,
                         this,
