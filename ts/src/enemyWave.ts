@@ -55,14 +55,7 @@ namespace zlsSpaceInvader {
                 for( let j=0; j<enemyRows.length; j++ ){
                     const e = new enemyRows[j](
                         this.enemyCooperator.difficultyProfile.hp,
-                        scoreAndCredit,
-                        (e, p, i)=>{
-                            const ex = new MemberExplosion()
-                            ex.pos.add( p.pos, p.flightUnits[i].pos )
-                            gameObjectManager.add(ex)
-                            p.remove( i )
-                            Audio.play( Audio.sounds.explosion )
-                        }
+                        scoreAndCredit
                     )
                     e.pos.x = (-enemyColumn/2+i+0.5)*enemySpacing
                     e.pos.y = j*enemySpacing+enemyYOffset

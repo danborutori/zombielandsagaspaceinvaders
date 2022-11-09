@@ -133,9 +133,12 @@ namespace zlsSpaceInvader {
         }
     }
 
+    const collisionShape = new ColliderBox(new Vector2(9,9))
+
     export class FlightUnit {
 
         readonly pos = new Vector2
+        readonly collisionShape = collisionShape
 
         constructor(
             readonly sprite: HTMLImageElement,

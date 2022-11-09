@@ -26,10 +26,7 @@ namespace zlsSpaceInvader {
                 Sprites.shared.images.bigZombie,
                 scorer,
                 10000,
-                10000,
-                ()=>{
-                    // never collide player
-                }
+                10000
             )
 
             this.collisionShape = collisionShape

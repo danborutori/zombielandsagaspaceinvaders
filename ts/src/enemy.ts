@@ -23,8 +23,7 @@ namespace zlsSpaceInvader {
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
             readonly score: number = 100,
-            private hp: number,
-            readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
+            private hp: number
         ){
             super(sprite)
 
@@ -169,14 +168,15 @@ namespace zlsSpaceInvader {
                         if( playerFlight.invincibleTime<=0 ){
                             for( let i=0; i<playerFlight.flightUnits.length; i++ ){
                                 const u = playerFlight.flightUnits[i]
-                                v.sub(this.pos, playerFlight.pos)
-                                .sub(u.pos)
-                                .abs()
                                 if( 
-                                    v.x<9 &&
-                                    v.y<9
+                                    CollisionChecker.intersect(
+                                        this.collisionShape,
+                                        this.pos,
+                                        u.collisionShape,
+                                        v.add(playerFlight.pos, u.pos)
+                                    )
                                 ){
-                                    this.onHitPlayer(this,playerFlight as PlayerFlight, i)
+                                    this.onHitPlayer(playerFlight,i,this.manager)
                                     break
                                 }
                             }
@@ -184,6 +184,14 @@ namespace zlsSpaceInvader {
                     }
                 }
             }
+        }
+
+        onHitPlayer( playerFlight: PlayerFlight, unitIndex: number, gameObjectManager: GameObjectManager ){
+            const ex = new MemberExplosion()
+            ex.pos.add( playerFlight.pos, playerFlight.flightUnits[unitIndex].pos )
+            gameObjectManager.add(ex)
+            playerFlight.remove(unitIndex )
+            Audio.play( Audio.sounds.explosion )
         }
 
         protected onDie(){

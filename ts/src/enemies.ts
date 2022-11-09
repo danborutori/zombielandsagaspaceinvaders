@@ -4,15 +4,13 @@ namespace zlsSpaceInvader {
 
         constructor(
             hp: number,
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
+            scorer: ScoreAndCredit
         ){
             super(
                 Sprites.shared.images["zombie1"],
                 scorer,
                 100,
-                hp,
-                onHitPlayer
+                hp
             )
         }
 
@@ -22,15 +20,13 @@ namespace zlsSpaceInvader {
 
         constructor(
             hp: number,
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
+            scorer: ScoreAndCredit
         ){
             super(
                 Sprites.shared.images["zombie2"],
                 scorer,
                 100,
-                hp,
-                onHitPlayer
+                hp
             )
             this.bulletIntervalScale = 0.5
             this.bulletShootAngle = 15*Math.PI/180
@@ -42,15 +38,13 @@ namespace zlsSpaceInvader {
 
         constructor(
             hp: number,
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
+            scorer: ScoreAndCredit
         ){
             super(
                 Sprites.shared.images["hand"],
                 scorer,
                 100,
-                hp,
-                onHitPlayer
+                hp
             )
             this.bulletCountDelta = -1
         }
@@ -64,15 +58,13 @@ namespace zlsSpaceInvader {
 
         constructor(
             hp: number,
-            scorer: ScoreAndCredit,
-            onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
+            scorer: ScoreAndCredit
         ){
             super(
                 Sprites.shared.images["dog"],
                 scorer,
                 100,
-                hp,
-                onHitPlayer
+                hp
             )
             this.homingTime = 2.5
         }

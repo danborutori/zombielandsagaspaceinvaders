@@ -98,7 +98,7 @@ namespace zlsSpaceInvader {
                             if(
                                 v1.add(playerFlight.pos, u.pos).distance(this.pos)<1.5
                             ){
-                                this.shooter.onHitPlayer(this.shooter, playerFlight, i)
+                                this.shooter.onHitPlayer(playerFlight, i, this.manager)
                                 this.removeFromManager()
                                 break
                             }
