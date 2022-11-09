@@ -1,0 +1,44 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "start server",
+            "type": "shell",            
+            "command": "node main.js",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "isBackground": true            
+        },
+        {
+            "label": "build client",
+            "type": "shell",            
+            "command": "build.bat",
+            "options": {
+                "cwd": "${workspaceFolder}/ts",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/d", "/c"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "build server",
+            "type": "shell",            
+            "command": "build.bat",
+            "options": {
+                "cwd": "${workspaceFolder}/tsServer",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/d", "/c"
+                    ]
+                }
+            }
+        }
+    ]
+}
