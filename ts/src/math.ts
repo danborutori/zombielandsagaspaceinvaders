@@ -132,6 +132,37 @@ namespace zlsSpaceInvader {
             return this;
     
         }
+
+        apply( transform: Transform ){
+            return this.rotateAround(transform.rotation).add(transform.translation)
+        }
     }
 
+    const zero2 = new Vector2(0,0)
+    const v1 = new Vector2
+
+    export class Transform {
+        readonly translation = new Vector2
+
+        constructor(
+            public rotation: number = 0,
+            translation: Vector2 = zero2
+        ){
+            this.translation.copy( translation)
+        }
+
+        multiply( t: Transform ){
+            this.rotation += t.rotation
+            this.translation.rotateAround(t.rotation).add(
+                t.translation
+            )
+
+            return this
+        }
+
+        copy( t: Transform ){
+            this.rotation = t.rotation
+            this.translation.copy(t.translation)
+        }
+    }
 }

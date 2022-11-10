@@ -1,44 +1,105 @@
 namespace zlsSpaceInvader {
 
     const v1 = new Vector2
+    const zero2 = new Vector2(0,0)
+    const unitY = new Vector2(0,1)
+    const t1 = new Transform
+
+    const identity = new Transform()    
 
     export interface ShotCtx{
         stop(): void
     }
 
+    interface OutputNode {
+        update( time: number, shooter: EnemyFlight, transform: Transform ): void
+    }
+
+    interface Input<T> {
+        getValue(time: number, shooter: EnemyFlight): T
+    }
+
+    export class ConstantNode<T> implements Input<T>{
+        constructor( readonly value: T){}
+
+        getValue(time: number, shooter: EnemyFlight): T {
+            return this.value
+        }
+    }
+
+    export class IntervalNode implements OutputNode {
+        private cooldown = 0
+
+        constructor(
+            readonly interval: Input<number>,
+            readonly next: OutputNode
+        ){}
+
+        update(time: number, shooter: EnemyFlight, transform: Transform ): void {
+            while( time-this.cooldown>=this.interval.getValue(time, shooter) ){
+                this.next.update( time, shooter, transform )
+                this.cooldown += this.interval.getValue(time, shooter)
+            }
+        }
+    }
+
+    export class EnemyBulletNode implements OutputNode {
+        constructor(
+            readonly offset: Input<Vector2> = {getValue: ()=>zero2},
+            readonly directon: Input<Vector2> = {getValue: ()=>unitY}
+        ){}
+
+        update( deltaTime: number, shooter: EnemyFlight, transform: Transform ){
+            if( shooter.manager ){
+                const b = new EnemyBullet(
+                    shooter.scorer.stage,
+                    v1.copy(this.directon.getValue( deltaTime, shooter)).rotateAround(transform.rotation),
+                    shooter
+                )
+                b.pos.add( shooter.pos, this.offset.getValue( deltaTime, shooter)).add(transform.translation)
+                shooter.manager.add(b)
+            }
+        }
+    }
+    
+    export class RingNode implements OutputNode {
+        private t = new Transform
+
+        constructor(
+            readonly radius: Input<number>,
+            readonly segment: Input<number>,
+            readonly next: OutputNode
+        ){}
+
+        update(time: number, shooter: EnemyFlight, transform: Transform): void {            
+            for( let i=0, end=this.segment.getValue(time, shooter); i<end; i++ ){
+                this.t.rotation = Math.PI*2*i/end
+                this.t.translation.set(0,this.radius.getValue(time,shooter)).rotateAround(this.t.rotation)
+                this.t.multiply( transform )
+                this.next.update( time, shooter, this.t )
+            }
+        }
+    }
+
     export class FlightShootPatternControl {
 
-        static shootRing(
-            flight: EnemyFlight,
-            offset: Vector2,
-            radius: number,
-            segment: number,
-            interval: number
+        static shoot(
+            enemyFlight: EnemyFlight,
+            root: OutputNode
         ): ShotCtx {
+
             let stop = false
 
             const coroutine = async ()=>{
-                let cooldown = 0
-                while(!stop){
-                    const deltaTime = await flight.wait(0)
-                    cooldown -= deltaTime
+                try{
+                    let time = 0
+                    while( !stop ){                    
+                        time += await enemyFlight.wait(0)
 
-                    if( cooldown<=0 ){
-                        for( let i=0; i<segment; i++ ){
-                            v1.set(1,0).rotateAround( Math.PI*2*i/segment )
-
-                            const b = new EnemyBullet(
-                                flight.scorer.stage,
-                                v1,
-                                flight
-                            )
-                            b.pos.add(flight.pos, offset).add(v1.multiply(radius))
-                            flight.manager && flight.manager.add(b)
-                        }
-
-                        cooldown += interval
+                        root && root.update( time, enemyFlight, identity )
                     }
-                }
+                }catch(e){}
+                finally{}
             }
             coroutine()
 
@@ -48,7 +109,6 @@ namespace zlsSpaceInvader {
                 }
             }
         }
-
     }
 
 }

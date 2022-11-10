@@ -57,12 +57,18 @@ namespace zlsSpaceInvader {
                 )
                 await this.wait(3)
 
-                shotCtx = FlightShootPatternControl.shootRing(
+                shotCtx = FlightShootPatternControl.shoot(
                     this,
-                    new Vector2(0,-33),
-                    5,
-                    16,
-                    0.3
+                    new IntervalNode(
+                        new ConstantNode(0.3),
+                        new RingNode(
+                            new ConstantNode(5),
+                            new ConstantNode(16),
+                            new EnemyBulletNode(
+                                new ConstantNode(new Vector2(0,-33))
+                            )
+                        )
+                    )
                 )
 
                 for( let i=0; true; i++  ){
