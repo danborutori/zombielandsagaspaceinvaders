@@ -43,6 +43,7 @@ namespace zlsSpaceInvader {
         async playAttackSequence(){
             const v = new Vector2
             const stage = this.scorer.stage
+            let shotCtx: ShotCtx | undefined
             try{
 
                 // on stage
@@ -55,6 +56,14 @@ namespace zlsSpaceInvader {
                     50
                 )
                 await this.wait(3)
+
+                shotCtx = FlightShootPatternControl.shootRing(
+                    this,
+                    new Vector2(0,-33),
+                    5,
+                    16,
+                    0.3
+                )
 
                 for( let i=0; true; i++  ){
                     await FlightMotionControl.moveTo(
@@ -98,10 +107,9 @@ namespace zlsSpaceInvader {
                     await this.wait(3)
                 }
 
-
             }catch(e){}
             finally{
-
+                shotCtx && shotCtx.stop()
             }
         }
     }

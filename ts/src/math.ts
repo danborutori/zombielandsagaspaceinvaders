@@ -76,6 +76,7 @@ namespace zlsSpaceInvader {
         multiply( n: number ){
             this.x *= n
             this.y *= n
+            return this
         }
 
         abs(){
