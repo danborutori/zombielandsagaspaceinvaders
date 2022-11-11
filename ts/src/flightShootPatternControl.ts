@@ -60,6 +60,8 @@ namespace zlsSpaceInvader {
                 )
                 b.pos.add( shooter.pos, this.offset.getValue( time, shooter)).add(transform.translation)
                 shooter.manager.add(b)
+
+                Audio.play(Audio.sounds.enemyShooting)
             }
         }
     }
