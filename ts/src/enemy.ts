@@ -149,6 +149,7 @@ namespace zlsSpaceInvader {
                                 this.onDie()
                             }
                         }
+                        this.scorer.score += 1
                     }
                 }
             }
