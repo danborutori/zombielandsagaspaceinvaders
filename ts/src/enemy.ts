@@ -23,7 +23,7 @@ namespace zlsSpaceInvader {
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
             readonly score: number = 100,
-            private hp: number
+            protected hp: number
         ){
             super(sprite)
 

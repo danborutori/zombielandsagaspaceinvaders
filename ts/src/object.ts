@@ -20,8 +20,8 @@ namespace zlsSpaceInvader {
             for( let w of Array.from(this.waitPromises) ){
                 w.time -= deltaTime
                 if( w.time<=0 ){
-                    w.resolve(-w.time)
                     w.resolved = true
+                    w.resolve(-w.time)
                 }
             }
             this.waitPromises = this.waitPromises.filter(w=>!w.resolved)
@@ -50,6 +50,13 @@ namespace zlsSpaceInvader {
             }else{
                 return Promise.reject(new Error("Manager is undefined"))
             }
+        }
+
+        terminateAllWaiting(){
+            for( let w of this.waitPromises.filter(w=>!w.resolved) ){
+                w.reject(new Error("Terminated"))
+            }
+            this.waitPromises.length = 0
         }
     }
 

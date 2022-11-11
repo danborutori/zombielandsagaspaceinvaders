@@ -81,10 +81,11 @@ namespace zlsSpaceInvader {
         constructor(
             stage: Stage,
             direction: Vector2,
-            readonly shooter: EnemyFlight
+            readonly shooter: EnemyFlight,
+            speed = Constant.bulletSpeed*0.5
         ){
             super( stage, "white" )
-            this.velocity.copy(direction).multiply(Constant.bulletSpeed*0.5)
+            this.velocity.copy(direction).multiply(speed)
         }
 
         update(deltaTime: number): void {

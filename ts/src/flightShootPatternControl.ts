@@ -45,18 +45,20 @@ namespace zlsSpaceInvader {
 
     export class EnemyBulletNode implements OutputNode {
         constructor(
-            readonly offset: Input<Vector2> = {getValue: ()=>zero2},
-            readonly directon: Input<Vector2> = {getValue: ()=>unitY}
+            readonly offset: Input<Vector2> = new ConstantNode(zero2),
+            readonly directon: Input<Vector2> = new ConstantNode(unitY),
+            readonly speed?: Input<number>
         ){}
 
-        update( deltaTime: number, shooter: EnemyFlight, transform: Transform ){
+        update( time: number, shooter: EnemyFlight, transform: Transform ){
             if( shooter.manager ){
                 const b = new EnemyBullet(
                     shooter.scorer.stage,
-                    v1.copy(this.directon.getValue( deltaTime, shooter)).rotateAround(transform.rotation),
-                    shooter
+                    v1.copy(this.directon.getValue( time, shooter)).rotateAround(transform.rotation),
+                    shooter,
+                    this.speed && this.speed.getValue(time, shooter)
                 )
-                b.pos.add( shooter.pos, this.offset.getValue( deltaTime, shooter)).add(transform.translation)
+                b.pos.add( shooter.pos, this.offset.getValue( time, shooter)).add(transform.translation)
                 shooter.manager.add(b)
             }
         }
@@ -79,6 +81,27 @@ namespace zlsSpaceInvader {
                 this.next.update( time, shooter, this.t )
             }
         }
+    }
+
+    export class SineNode implements Input<Vector2> {
+        private v1 = new  Vector2
+
+        constructor(
+            readonly period: Input<number>,
+            readonly angle: Input<number>,
+            readonly phase: Input<number> = new ConstantNode(0)
+        ){}
+
+        getValue(time: number, shooter: EnemyFlight) {
+            let angle = this.angle.getValue(time, shooter)*
+                Math.cos(
+                    time/this.period.getValue(time,shooter)+
+                    this.phase.getValue(time,shooter)
+                )
+
+            return this.v1.set(0,1).rotateAround(angle)
+        }
+
     }
 
     export class FlightShootPatternControl {
