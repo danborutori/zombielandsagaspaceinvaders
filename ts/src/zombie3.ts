@@ -46,7 +46,7 @@ namespace zlsSpaceInvader {
         //     super.update(deltaTime*10)
         // }
 
-        async playAttackSequence(){
+        async playAttackSequence(enemies: EnemyFlight[]){
             const v = new Vector2
             
             try{
@@ -64,7 +64,7 @@ namespace zlsSpaceInvader {
 
                 await Promise.all([
                     this.phase1(),
-                    this.phase2()
+                    this.phase2(enemies)
                 ])
 
             }catch(e){}
@@ -164,7 +164,7 @@ namespace zlsSpaceInvader {
             }
         }
 
-        async phase2(){
+        async phase2(enemies: EnemyFlight[]){
             const v = new Vector2
             
             while( this.hp>defalutMaxHp*phase2HpRatio ){
@@ -187,6 +187,7 @@ namespace zlsSpaceInvader {
                 const newZombie3 = new Zombie3(this.scorer, defalutMaxHp*phase2HpRatio, totalScore/4)
                 newZombie3.pos.copy( this.pos )
                 this.manager && this.manager.add( newZombie3 )
+                enemies.push(newZombie3)
 
                 await FlightMotionControl.moveTo(
                     newZombie3,
@@ -258,7 +259,6 @@ namespace zlsSpaceInvader {
     }
 
     export class Zombie3Wave extends BaseEnemyWave {
-
         constructor(readonly onWaveEnd: ()=>void){
             super()
         }
@@ -270,7 +270,7 @@ namespace zlsSpaceInvader {
             this.enemies.push( boss )
             gameObjectManager.add( boss )
 
-            boss.playAttackSequence().then(()=>{
+            boss.playAttackSequence(this.enemies).then(()=>{
                 this.onWaveEnd()
             })
         }
