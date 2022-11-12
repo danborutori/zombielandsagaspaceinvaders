@@ -36,7 +36,7 @@ namespace zlsSpaceInvader {
             readonly onWaveEnd: ()=>void
         ){
             super()
-            this.enemyCooperator = new EnemyCooperator(1,stage,[],()=>{})
+            this.enemyCooperator = new EnemyCooperator(wave,stage,[],()=>{})
         }
 
         init( scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight ){
