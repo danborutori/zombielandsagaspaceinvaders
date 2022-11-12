@@ -30,7 +30,7 @@ namespace zlsSpaceInvader {
             bottom : 0
         }
         
-        private enemyWave?: IEnemyWave
+        private waveManager = new WaveManager()
         private wave = 0
 
         constructor(){}
@@ -105,10 +105,10 @@ namespace zlsSpaceInvader {
             this.gameObjectManager.add( scoreAndCredit )
 
             playerFlight.paused = true
-            this.enemyWave && (this.enemyWave.pause = true)
+            this.waveManager.pause = true
             const startScreen = new StartScreen(scoreAndCredit,()=>{
                 playerFlight.paused = false
-                this.enemyWave && (this.enemyWave.pause = false)
+                this.waveManager.pause = false
             })
             this.gameObjectManager.add( startScreen )
             this.gameObjectManager.add( startScreen.leaderboard )
@@ -118,30 +118,29 @@ namespace zlsSpaceInvader {
             playerFlight: PlayerFlight,
             scoreAndCredit: ScoreAndCredit
         ){
-            //clear old enemies
-            this.enemyWave && this.enemyWave.clear()
-
-            this.enemyWave = new EnemyWave(
-                this.stage,
+            this.waveManager.init(
                 this.wave,
+                scoreAndCredit,
+                this.gameObjectManager,
+                playerFlight,
                 ()=>{
-                    this.resetEnemies( playerFlight, scoreAndCredit)
+                    this.wave += 1
+                    this.resetEnemies( playerFlight, scoreAndCredit )
                     playerFlight.paused = true
                     playerFlight.invincibleTime = 9000 // a large enough number
-                    this.enemyWave && (this.enemyWave.pause = true)
+                    this.waveManager.pause = true
         
                     const waveScreen = new WaveScreen(
-                        ++this.wave+1,
+                        this.wave+1,
                         ()=>{
                             playerFlight.paused = false
                             playerFlight.invincibleTime = 0
-                            this.enemyWave && (this.enemyWave.pause = false)
+                            this.waveManager.pause = false
                         }
                     )    
                     this.gameObjectManager.add(waveScreen)
                 }
             )
-            this.enemyWave.init(scoreAndCredit,this.gameObjectManager,playerFlight)
         }
 
         private showContinue(
@@ -153,14 +152,14 @@ namespace zlsSpaceInvader {
                 if( scoreAndCredit.credit>0 ){
 
                     playerFlight.paused = true
-                    this.enemyWave && (this.enemyWave.pause = true)
+                    this.waveManager.pause = true
 
                     const continueScreen =  new ContinueScreen(b=>{
                         if( b ){
                             scoreAndCredit.credit--
 
                             playerFlight.paused = false
-                            this.enemyWave && (this.enemyWave.pause = false)
+                            this.waveManager.pause = false
 
                             playerFlight.reset(knockdownMembers[0])
                             franchouchou.reset(knockdownMembers.slice(1))
@@ -174,13 +173,13 @@ namespace zlsSpaceInvader {
 
                 }else{
                     playerFlight.paused = true
-                    this.enemyWave && (this.enemyWave.pause = true)
+                    this.waveManager.pause = true
                     
                     this.showHighestScore(scoreAndCredit)
                 }
             }else{
                 playerFlight.paused = true
-                this.enemyWave && (this.enemyWave.pause = true)
+                this.waveManager.pause = true
 
                 const t = new FloatingText(
                     "ALL MEMBERS CAPTURED",
