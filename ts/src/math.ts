@@ -39,10 +39,14 @@ namespace zlsSpaceInvader {
             return this
         }
 
+        add( v1: number ): this
         add( v1: Vector2Like, v2: Vector2Like ): this
         add( v1: Vector2Like ): this
-        add( v1: Vector2Like, v2?:  Vector2Like ){
-            if( !v2 ){
+        add( v1: Vector2Like | number, v2?:  Vector2Like ){
+            if( typeof(v1)==="number" ){
+                this.x += v1
+                this.y += v1
+            }else if( !v2 ){
                 this.x += v1.x
                 this.y += v1.y
             }else{
@@ -116,6 +120,12 @@ namespace zlsSpaceInvader {
                 return this.angle()-v.angle()
 
             }    
+        }
+
+        random(){
+            this.x = Math.random()
+            this.y = Math.random()
+            return this
         }
 
         // FROM: https://github.com/mrdoob/three.js/blob/dev/src/math/Vector2.js

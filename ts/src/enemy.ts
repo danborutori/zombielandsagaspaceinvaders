@@ -195,15 +195,19 @@ namespace zlsSpaceInvader {
             Audio.play( Audio.sounds.explosion )
         }
 
-        protected onDie(){
+        protected playExplosionAnimation(){
             if( this.manager ){
                 const ex = new Explosion
                 ex.pos.copy(this.pos)
                 this.manager.add(ex)
-                this.removeFromManager()
-                this.flyOff && this.flyOff.onDie()
-                this.scorer.score += this.score
             }
+        }
+
+        protected onDie(){
+            this.playExplosionAnimation()
+            this.removeFromManager()
+            this.flyOff && this.flyOff.onDie()
+            this.scorer.score += this.score
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

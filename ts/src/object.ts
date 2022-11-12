@@ -79,6 +79,35 @@ namespace zlsSpaceInvader {
         }
     }
 
+    export class AnimatedSpriteObject extends SpriteObject {
+
+        private time = 0
+
+        constructor(
+            readonly sprites: HTMLImageElement[],
+            readonly secondPerSprite: number,
+            readonly duration?: number
+        ){
+            super(sprites[0])
+        }
+
+        update(deltaTime: number): void {
+            super.update(deltaTime)
+
+            this.time += deltaTime
+
+            const i =  Math.floor((this.time/this.secondPerSprite)*this.sprites.length)
+            if( i<this.sprites.length ){
+                this.sprite = this.sprites[i]
+            }else if( this.duration===undefined){
+                this.removeFromManager()
+            }
+            if( this.duration!==undefined && this.time>=this.duration ){
+                this.removeFromManager()
+            }
+        }
+    }
+
     export class GameObjectManager {
         readonly gameObjects: GameObject[] = []
         readonly playerBullets: Set<PlayerBullet> = new Set

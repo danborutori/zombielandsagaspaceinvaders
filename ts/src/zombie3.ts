@@ -18,7 +18,7 @@ namespace zlsSpaceInvader {
         pos: new Vector2(0,-13)
     })
 
-    const defalutMaxHp = 500
+    const defalutMaxHp = 50
     const phase2HpRatio = 0.2
     const totalScore = 10000
 
@@ -40,6 +40,15 @@ namespace zlsSpaceInvader {
 
         protected wrapAround(){
             // don't wrapAround
+        }
+
+        protected playExplosionAnimation(): void {
+            if( this.manager ){
+                const bs = new BloodStainOverAnyWhere()
+                bs.pos.copy(this.pos)
+                this.manager.add(bs)
+                bs.drop(80)
+            }
         }
 
         // update(deltaTime: number): void {
@@ -189,26 +198,32 @@ namespace zlsSpaceInvader {
                 this.manager && this.manager.add( newZombie3 )
                 enemies.push(newZombie3)
 
-                await FlightMotionControl.moveTo(
-                    newZombie3,
-                    new Vector2(
-                        this.pos.x+30*(i==0?1:-1),
-                        this.pos.y
-                    ),
-                    10
-                )
+                try{
+                    await FlightMotionControl.moveTo(
+                        newZombie3,
+                        new Vector2(
+                            this.pos.x+30*(i==0?1:-1),
+                            this.pos.y
+                        ),
+                        10
+                    )
+                }catch(e){}
 
                 return newZombie3
             }))
 
             newZombies.push( this )
 
-            await this.wait(1)
+            try{
+                await this.wait(1)
+            }catch(e){}
 
             await Promise.all(
                 newZombies.map( async (z,i)=>{
-                    await z.wait(i*1)
-                    await z.phase2_2()
+                    try{
+                        await z.wait(i*1)
+                        await z.phase2_2()
+                    }catch(e){}
                 })
             )
         }
@@ -264,13 +279,20 @@ namespace zlsSpaceInvader {
         }
 
         init(scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight): void {
+
+            const waiter = new GameObject()
+            gameObjectManager.add(waiter)
             
             const boss = new Zombie3( scoreAndCredit )
             boss.pos.set( 0, scoreAndCredit.stage.top-40 )
             this.enemies.push( boss )
             gameObjectManager.add( boss )
 
-            boss.playAttackSequence(this.enemies).then(()=>{
+            boss.playAttackSequence(this.enemies).then(async ()=>{
+
+                await waiter.wait(5)
+                waiter.removeFromManager()
+
                 this.onWaveEnd()
             })
         }
