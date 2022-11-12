@@ -2,6 +2,8 @@ namespace zlsSpaceInvader {
 
     const v = new Vector2
 
+    const collisioBox = new ColliderBox(v.set(9,9))
+
     export class EnemyFlight extends SpriteObject {
 
         private flashTime = 0
@@ -15,13 +17,13 @@ namespace zlsSpaceInvader {
         bulletIntervalScale = 1
         bulletShootAngle = 5*Math.PI/180
         homingTime = 2
+        protected collisionShape: ColliderShape = collisioBox
 
         constructor(
             sprite: HTMLImageElement,
             readonly scorer: ScoreAndCredit,
             readonly score: number = 100,
-            private hp: number,
-            readonly onHitPlayer: (e:EnemyFlight, p:PlayerFlight, i: number)=>void
+            protected hp: number
         ){
             super(sprite)
 
@@ -61,7 +63,7 @@ namespace zlsSpaceInvader {
             this.vel.set(0,0)
         }
 
-        private wrapAround(){
+        protected wrapAround(){
             const padding = 9
             const w = this.scorer.stage.right-this.scorer.stage.left+padding*2
             const h = this.scorer.stage.bottom-this.scorer.stage.top+padding*2
@@ -131,9 +133,13 @@ namespace zlsSpaceInvader {
             ){
                 const bs = Array.from(this.manager.playerBullets)
                 for( let b of bs ){
-                    v.sub(this.pos, b.pos).abs()
-                    if( v.x<5 &&
-                        v.y<5.5
+                    if( 
+                        CollisionChecker.intersect(
+                            this.collisionShape,
+                            this.pos,
+                            b.collisionShape,
+                            b.pos
+                        )
                     ){
                         this.flashTime = 0.1
                         b.removeFromManager()
@@ -143,6 +149,7 @@ namespace zlsSpaceInvader {
                                 this.onDie()
                             }
                         }
+                        this.scorer.score += 1
                     }
                 }
             }
@@ -162,14 +169,15 @@ namespace zlsSpaceInvader {
                         if( playerFlight.invincibleTime<=0 ){
                             for( let i=0; i<playerFlight.flightUnits.length; i++ ){
                                 const u = playerFlight.flightUnits[i]
-                                v.sub(this.pos, playerFlight.pos)
-                                .sub(u.pos)
-                                .abs()
                                 if( 
-                                    v.x<9 &&
-                                    v.y<9
+                                    CollisionChecker.intersect(
+                                        this.collisionShape,
+                                        this.pos,
+                                        u.collisionShape,
+                                        v.add(playerFlight.pos, u.pos)
+                                    )
                                 ){
-                                    this.onHitPlayer(this,playerFlight as PlayerFlight, i)
+                                    this.onHitPlayer(playerFlight,i,this.manager)
                                     break
                                 }
                             }
@@ -179,15 +187,27 @@ namespace zlsSpaceInvader {
             }
         }
 
-        protected onDie(){
+        onHitPlayer( playerFlight: PlayerFlight, unitIndex: number, gameObjectManager: GameObjectManager ){
+            const ex = new MemberExplosion()
+            ex.pos.add( playerFlight.pos, playerFlight.flightUnits[unitIndex].pos )
+            gameObjectManager.add(ex)
+            playerFlight.remove(unitIndex )
+            Audio.play( Audio.sounds.explosion )
+        }
+
+        protected playExplosionAnimation(){
             if( this.manager ){
                 const ex = new Explosion
                 ex.pos.copy(this.pos)
                 this.manager.add(ex)
-                this.removeFromManager()
-                this.flyOff && this.flyOff.onDie()
-                this.scorer.score += this.score
             }
+        }
+
+        protected onDie(){
+            this.playExplosionAnimation()
+            this.removeFromManager()
+            this.flyOff && this.flyOff.onDie()
+            this.scorer.score += this.score
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

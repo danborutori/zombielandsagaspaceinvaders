@@ -39,10 +39,14 @@ namespace zlsSpaceInvader {
             return this
         }
 
+        add( v1: number ): this
         add( v1: Vector2Like, v2: Vector2Like ): this
         add( v1: Vector2Like ): this
-        add( v1: Vector2Like, v2?:  Vector2Like ){
-            if( !v2 ){
+        add( v1: Vector2Like | number, v2?:  Vector2Like ){
+            if( typeof(v1)==="number" ){
+                this.x += v1
+                this.y += v1
+            }else if( !v2 ){
                 this.x += v1.x
                 this.y += v1.y
             }else{
@@ -76,6 +80,7 @@ namespace zlsSpaceInvader {
         multiply( n: number ){
             this.x *= n
             this.y *= n
+            return this
         }
 
         abs(){
@@ -117,6 +122,12 @@ namespace zlsSpaceInvader {
             }    
         }
 
+        random(){
+            this.x = Math.random()
+            this.y = Math.random()
+            return this
+        }
+
         // FROM: https://github.com/mrdoob/three.js/blob/dev/src/math/Vector2.js
         rotateAround( angle: number ) {
 
@@ -131,6 +142,37 @@ namespace zlsSpaceInvader {
             return this;
     
         }
+
+        apply( transform: Transform ){
+            return this.rotateAround(transform.rotation).add(transform.translation)
+        }
     }
 
+    const zero2 = new Vector2(0,0)
+    const v1 = new Vector2
+
+    export class Transform {
+        readonly translation = new Vector2
+
+        constructor(
+            public rotation: number = 0,
+            translation: Vector2 = zero2
+        ){
+            this.translation.copy( translation)
+        }
+
+        multiply( t: Transform ){
+            this.rotation += t.rotation
+            this.translation.rotateAround(t.rotation).add(
+                t.translation
+            )
+
+            return this
+        }
+
+        copy( t: Transform ){
+            this.rotation = t.rotation
+            this.translation.copy(t.translation)
+        }
+    }
 }

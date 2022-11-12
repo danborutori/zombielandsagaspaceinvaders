@@ -20,8 +20,8 @@ namespace zlsSpaceInvader {
             for( let w of Array.from(this.waitPromises) ){
                 w.time -= deltaTime
                 if( w.time<=0 ){
-                    w.resolve(-w.time)
                     w.resolved = true
+                    w.resolve(-w.time)
                 }
             }
             this.waitPromises = this.waitPromises.filter(w=>!w.resolved)
@@ -51,6 +51,13 @@ namespace zlsSpaceInvader {
                 return Promise.reject(new Error("Manager is undefined"))
             }
         }
+
+        terminateAllWaiting(){
+            for( let w of this.waitPromises.filter(w=>!w.resolved) ){
+                w.reject(new Error("Terminated"))
+            }
+            this.waitPromises.length = 0
+        }
     }
 
     export class SpriteObject extends GameObject {
@@ -69,6 +76,35 @@ namespace zlsSpaceInvader {
                 Math.floor(this.pos.x-this.sprite.width/2),
                 Math.floor(this.pos.y-this.sprite.height/2)
             )
+        }
+    }
+
+    export class AnimatedSpriteObject extends SpriteObject {
+
+        private time = 0
+
+        constructor(
+            readonly sprites: HTMLImageElement[],
+            readonly secondPerSprite: number,
+            readonly duration?: number
+        ){
+            super(sprites[0])
+        }
+
+        update(deltaTime: number): void {
+            super.update(deltaTime)
+
+            this.time += deltaTime
+
+            const i =  Math.floor((this.time/this.secondPerSprite)*this.sprites.length)
+            if( i<this.sprites.length ){
+                this.sprite = this.sprites[i]
+            }else if( this.duration===undefined){
+                this.removeFromManager()
+            }
+            if( this.duration!==undefined && this.time>=this.duration ){
+                this.removeFromManager()
+            }
         }
     }
 

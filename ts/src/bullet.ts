@@ -4,6 +4,8 @@ namespace zlsSpaceInvader {
     const v2 = new Vector2
     const v3 = new Vector2
 
+    const collisioShape = new ColliderBox(v1.set(1,3))
+
     function drawLine(
         from: Vector2,
         to: Vector2,
@@ -27,6 +29,7 @@ namespace zlsSpaceInvader {
 
         readonly isBullet = true
         readonly velocity = new Vector2
+        readonly collisionShape = collisioShape
 
         protected constructor(
             readonly stage: Stage,
@@ -78,10 +81,11 @@ namespace zlsSpaceInvader {
         constructor(
             stage: Stage,
             direction: Vector2,
-            readonly shooter: EnemyFlight
+            readonly shooter: EnemyFlight,
+            speed = Constant.bulletSpeed*0.5
         ){
             super( stage, "white" )
-            this.velocity.copy(direction).multiply(Constant.bulletSpeed*0.5)
+            this.velocity.copy(direction).multiply(speed)
         }
 
         update(deltaTime: number): void {
@@ -95,7 +99,7 @@ namespace zlsSpaceInvader {
                             if(
                                 v1.add(playerFlight.pos, u.pos).distance(this.pos)<1.5
                             ){
-                                this.shooter.onHitPlayer(this.shooter, playerFlight, i)
+                                this.shooter.onHitPlayer(playerFlight, i, this.manager)
                                 this.removeFromManager()
                                 break
                             }
