@@ -16,7 +16,7 @@ namespace zlsSpaceInvader {
                 extraFlyOffRate: Math.floor(wave/10)*0.01,
                 bulletCount: Math.floor((wave+4)/5),
                 bulletInterval: 1/Math.floor((wave+5)/6),
-                hp: 3+Math.floor(wave/10)
+                hp: 1+Math.floor(wave/5)
             }
         }
 
