@@ -61,6 +61,17 @@ namespace zlsSpaceInvader {
         }
     }
 
+    class PlayerBulletSpark extends AnimatedSpriteObject {
+        constructor(
+            color: string
+        ){
+            super([
+                ColoredSprite.shared.get(color, Sprites.shared.images.heart0),
+                ColoredSprite.shared.get(color, Sprites.shared.images.heart1)
+            ],
+            0.15)
+        }
+    }
 
     export class PlayerBullet extends Bullet {
         readonly isPlayerBullet = true
@@ -71,6 +82,14 @@ namespace zlsSpaceInvader {
         ){
             super( stage, color )
             this.velocity.set(0, -Constant.bulletSpeed )
+        }
+
+        spark(){
+            if( this.manager ){
+                const s = new PlayerBulletSpark(this.color)
+                s.pos.copy(this.pos)
+                this.manager.add(s)
+            }
         }
     }
 

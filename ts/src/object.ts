@@ -84,7 +84,7 @@ namespace zlsSpaceInvader {
         private time = 0
 
         constructor(
-            readonly sprites: HTMLImageElement[],
+            readonly sprites: (HTMLImageElement | HTMLCanvasElement)[],
             readonly secondPerSprite: number,
             readonly duration?: number
         ){

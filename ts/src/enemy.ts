@@ -28,14 +28,7 @@ namespace zlsSpaceInvader {
             super(sprite)
 
             this.origSprite = sprite
-            this.flashingSprite = document.createElement("canvas")
-            this.flashingSprite.width = sprite.width
-            this.flashingSprite.height = sprite.height
-            const ctx = this.flashingSprite.getContext("2d")!
-            ctx.fillStyle = "white"
-            ctx.fillRect(0,0,this.flashingSprite.width,this.flashingSprite.height)
-            ctx.globalCompositeOperation ="destination-in"
-            ctx.drawImage( sprite, 0, 0 )
+            this.flashingSprite = ColoredSprite.shared.get("white", sprite)
         }
 
         startFlyOff(
@@ -142,6 +135,7 @@ namespace zlsSpaceInvader {
                         )
                     ){
                         this.flashTime = 0.1
+                        b.spark()
                         b.removeFromManager()
                         if( this.hp>0 ){
                             this.hp -= 1
