@@ -18,7 +18,7 @@ namespace zlsSpaceInvader {
         pos: new Vector2(0,-13)
     })
 
-    const defalutMaxHp = 50
+    const defalutMaxHp = 500
     const phase2HpRatio = 0.2
     const totalScore = 10000
 

@@ -19,7 +19,7 @@ namespace zlsSpaceInvader {
             this.enemyWave && this.enemyWave.clear()
 
             switch( wave ){
-            case 19:
+            case 14:
                 this.enemyWave = new Zombie3Wave( onWaveEnd )
                 break
             default:
