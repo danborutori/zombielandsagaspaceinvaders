@@ -2,12 +2,14 @@ namespace zlsSpaceInvader {
 
     export interface IEnemyWave{
         pause: boolean
+        readonly isBoss: boolean
         init( scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight ): void
         clear(): void
     }
 
     export abstract class BaseEnemyWave implements IEnemyWave {
         protected enemies: EnemyFlight[] = []
+        abstract readonly isBoss: boolean
 
         set pause(b: boolean){
             for( let e of this.enemies ) e.paused = b
@@ -24,6 +26,7 @@ namespace zlsSpaceInvader {
     export class EnemyWave extends BaseEnemyWave {
 
         private enemyCooperator: EnemyCooperator
+        readonly isBoss = false
 
         set pause(b: boolean){
             super.pause = b

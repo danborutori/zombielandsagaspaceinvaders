@@ -31,6 +31,8 @@ namespace zlsSpaceInvader {
         blood2: "./images/blood2.png",
         heart0: "./images/heart0.png",
         heart1: "./images/heart1.png",
+        bossTitle0: "./images/boss_title0.png",
+        bossTitle1: "./images/boss_title1.png",
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -75,6 +77,8 @@ namespace zlsSpaceInvader {
             blood2: new Image,
             heart0: new Image,
             heart1: new Image,
+            bossTitle0: new Image,
+            bossTitle1: new Image,
         }
 
         load(){
