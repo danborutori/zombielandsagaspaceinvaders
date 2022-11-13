@@ -8,6 +8,10 @@ namespace zlsSpaceInvader {
             this.enemyWave && (this.enemyWave.pause = b)
         }
 
+        get isBoss(){
+            return this.enemyWave ? this.enemyWave.isBoss : false
+        }
+
         init(
             wave: number,
             scoreAndCredit: ScoreAndCredit,

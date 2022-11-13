@@ -274,6 +274,8 @@ namespace zlsSpaceInvader {
     }
 
     export class Zombie3Wave extends BaseEnemyWave {
+        readonly isBoss = true
+
         constructor(readonly onWaveEnd: ()=>void){
             super()
         }
