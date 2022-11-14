@@ -175,4 +175,8 @@ namespace zlsSpaceInvader {
             this.translation.copy(t.translation)
         }
     }
+
+    export function mix( a: number, b: number, alpha: number ){
+        return a*(1-alpha)+b*alpha
+    }
 }
