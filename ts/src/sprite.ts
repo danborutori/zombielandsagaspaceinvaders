@@ -82,11 +82,7 @@ namespace zlsSpaceInvader {
         }
 
         load(){
-            const tasks: Promise<void>[] = []
-            for( let n in paths ){
-                tasks.push( loadImage(this.images[n], paths[n]) )
-            }
-            return Promise.all(tasks)
+            return Promise.all(Object.getOwnPropertyNames(paths).map(n=>loadImage(this.images[n], paths[n])))
         }
     }
 
