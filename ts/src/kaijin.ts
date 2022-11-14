@@ -41,6 +41,10 @@ namespace zlsSpaceInvader {
             // don't wrapAround
         }
 
+        // update(deltaTime: number): void {
+        //     super.update(deltaTime*10)
+        // }
+
         protected playExplosionAnimation(): void {
             if( this.manager ){
                 const bs = new BloodStainOverAnyWhere()
@@ -81,7 +85,7 @@ namespace zlsSpaceInvader {
 
             try{
                 
-                while( true ){
+                for( let k=0; true; k++ ){
 
                     for( let j=0; j<3; j++ ){
                         for( let i=0; i<3; i++ ){
@@ -113,7 +117,11 @@ namespace zlsSpaceInvader {
                         }
                     }
 
-                    await this.dash(stage)
+                    await this.dash(
+                        stage,
+                        (stage.left+40)*Math.sin(k*Math.PI*2/3),
+                        k%2==1
+                    )
                 }
 
             }catch(e){}
@@ -140,35 +148,78 @@ namespace zlsSpaceInvader {
             shotCtx.stop()
         }
 
+        private async throwGrenade(){
+            const shotCtxes = [
+                FlightShootPatternControl.shoot(
+                    this,
+                    new IntervalNode(
+                        new ConstantNode(0.06),
+                        new RingNode(
+                            new ConstantNode(10),
+                            new ConstantNode(6),
+                            new GrendaeNode(
+                                new ConstantNode(new Vector2(-28,-21)),
+                                undefined,
+                                new ConstantNode(50)
+                            )
+                        )
+                    )
+                ),
+                FlightShootPatternControl.shoot(
+                    this,
+                    new IntervalNode(
+                        new ConstantNode(0.06),
+                        new RingNode(
+                            new ConstantNode(10),
+                            new ConstantNode(6),
+                            new GrendaeNode(
+                                new ConstantNode(new Vector2(33,8)),
+                                undefined,
+                                new ConstantNode(50)
+                            )
+                        )
+                    )
+                ),
+            ]
+            await this.wait(0.2)
+            for( let ctx of shotCtxes ) ctx.stop()
+        }
+
         private async dash(
-            stage: Stage
+            stage: Stage,
+            x: number,
+            backoffShot: boolean
         ){
             const v1 = new Vector2
 
             await ObjectMotionControl.moveTo(
                 this,
-                v1.set( 0, -30 ),
+                v1.set( x, -30 ),
                 50
             )
             await this.wait(2)
 
+            this.throwGrenade()
             await ObjectMotionControl.moveTo(
                 this,
-                v1.set( 0, stage.top+40 ),
+                v1.set( x, stage.top+40 ),
                 200
             )
             await this.wait(0.1)
 
             await ObjectMotionControl.moveTo(
                 this,
-                v1.set( 0, stage.bottom-40 ),
+                v1.set( x, stage.bottom-40 ),
                 200
             )
             await this.wait(1)
 
+            if(backoffShot)
+                this.simpleShoot()
+
             await ObjectMotionControl.moveTo(
                 this,
-                v1.set( 0, -30 ),
+                v1.set( x, -30 ),
                 200
             )
             await this.wait(1)

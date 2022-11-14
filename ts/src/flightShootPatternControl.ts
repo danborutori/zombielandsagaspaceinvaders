@@ -65,6 +65,29 @@ namespace zlsSpaceInvader {
             }
         }
     }
+
+    export class GrendaeNode implements OutputNode {
+        constructor(
+            readonly offset: Input<Vector2> = new ConstantNode(zero2),
+            readonly directon: Input<Vector2> = new ConstantNode(unitY),
+            readonly speed?: Input<number>
+        ){}
+
+        update( time: number, shooter: EnemyFlight, transform: Transform ){
+            if( shooter.manager ){
+                const b = new Grenade(
+                    shooter.scorer.stage,
+                    v1.copy(this.directon.getValue( time, shooter)).rotateAround(transform.rotation),
+                    shooter,
+                    this.speed && this.speed.getValue(time, shooter)
+                )
+                b.pos.add( shooter.pos, this.offset.getValue( time, shooter)).add(transform.translation)
+                shooter.manager.add(b)
+
+                Audio.play(Audio.sounds.enemyShooting)
+            }
+        }
+    }
     
     export class RingNode implements OutputNode {
         private t = new Transform
