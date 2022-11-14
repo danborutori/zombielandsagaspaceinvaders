@@ -61,7 +61,7 @@ namespace zlsSpaceInvader {
             try{
 
                 // on stage
-                await FlightMotionControl.moveTo(
+                await ObjectMotionControl.moveTo(
                     this,
                     v.set(
                         0,
@@ -104,7 +104,7 @@ namespace zlsSpaceInvader {
                         )
                     )
 
-                    await FlightMotionControl.moveTo(
+                    await ObjectMotionControl.moveTo(
                         this,
                         v.set(
                             stage.left+20,
@@ -114,7 +114,7 @@ namespace zlsSpaceInvader {
                     )
                     await this.wait(0.5)
 
-                    await FlightMotionControl.moveTo(
+                    await ObjectMotionControl.moveTo(
                         this,
                         v.set(
                             stage.right-20,
@@ -128,7 +128,7 @@ namespace zlsSpaceInvader {
 
                     shotCtx = undefined
 
-                    await FlightMotionControl.moveTo(
+                    await ObjectMotionControl.moveTo(
                         this,
                         v.set(
                             0,
@@ -157,7 +157,7 @@ namespace zlsSpaceInvader {
                         )
                     )
 
-                    await FlightMotionControl.moveCircle(
+                    await ObjectMotionControl.moveCircle(
                         this,
                         v.set(0,0),
                         50,
@@ -183,7 +183,7 @@ namespace zlsSpaceInvader {
 
             await this.wait(2)
 
-            await FlightMotionControl.moveTo(
+            await ObjectMotionControl.moveTo(
                 this,
                 v.set(0,-30),
                 50
@@ -199,7 +199,7 @@ namespace zlsSpaceInvader {
                 enemies.push(newZombie3)
 
                 try{
-                    await FlightMotionControl.moveTo(
+                    await ObjectMotionControl.moveTo(
                         newZombie3,
                         new Vector2(
                             this.pos.x+30*(i==0?1:-1),
@@ -253,7 +253,7 @@ namespace zlsSpaceInvader {
             try{
                 for( let i=0; true; i++ ){
 
-                    await FlightMotionControl.moveCircle(
+                    await ObjectMotionControl.moveCircle(
                         this,
                         v.set(
                             Math.sin(i*Math.PI*2/20)*50,

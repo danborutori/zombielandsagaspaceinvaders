@@ -2,10 +2,10 @@ namespace zlsSpaceInvader {
 
     const epislon = 0.1
 
-    export class FlightMotionControl {
+    export class ObjectMotionControl {
 
         static async moveTo(
-            flight: EnemyFlight,
+            flight: GameObject,
             dst: Vector2,
             speed: number
         ){
