@@ -1,4 +1,5 @@
 namespace zlsSpaceInvader {
+    const v1 = new Vector2
 
     const collisionShape = new ColliderCompoundShape()
     collisionShape.shapes.push({   
@@ -19,6 +20,7 @@ namespace zlsSpaceInvader {
     })
 
     const defalutMaxHp = 500
+    const phase2HpRatio = 0.99//0.2
     const totalScore = 10000
 
     class Kaijin extends EnemyFlight {
@@ -73,7 +75,10 @@ namespace zlsSpaceInvader {
                 )
                 await this.wait(3)
 
-                await this.attackPhase1( stage )
+                await Promise.all([
+                    this.attackPhase1( stage ),
+                    this.attackPhase2( stage )
+                ])
                 
 
             }catch(e){}
@@ -126,6 +131,31 @@ namespace zlsSpaceInvader {
 
             }catch(e){}
 
+        }
+
+        private async attackPhase2(
+            stage: Stage
+        ){
+            const v1 = new Vector2
+
+            try{
+                while( this.hp>=defalutMaxHp*phase2HpRatio){
+                    await this.wait(0)
+                }
+
+                this.terminateAllWaiting()
+
+                ObjectMotionControl.moveTo(
+                    this,
+                    v1.set(0,-30),
+                    50
+                )
+
+                while( true ){
+                    await this.wait(2)
+                    this.shotLaser()
+                }
+            }catch(e){}
         }
 
         private async simpleShoot(){
@@ -185,6 +215,16 @@ namespace zlsSpaceInvader {
             for( let ctx of shotCtxes ) ctx.stop()
         }
 
+        private shotLaser(){
+            if( this.manager ){
+                const l = new Laser()
+                l.pos.copy( this.pos ).add(
+                    v1.set(2,56)
+                )
+                this.manager.add(l)
+            }
+        }
+
         private async dash(
             stage: Stage,
             x: number,
@@ -223,6 +263,32 @@ namespace zlsSpaceInvader {
                 200
             )
             await this.wait(1)
+        }
+    }
+
+    class Laser extends AnimatedSpriteObject {
+        constructor(){
+            super([
+                Sprites.shared.images.laser0,
+                Sprites.shared.images.laser1,
+                Sprites.shared.images.laser2,
+                Sprites.shared.images.laser3,
+                Sprites.shared.images.laser4,
+                Sprites.shared.images.laser5,
+                Sprites.shared.images.laser6,
+                Sprites.shared.images.laser5,
+                Sprites.shared.images.laser6,
+                Sprites.shared.images.laser5,
+                Sprites.shared.images.laser6,
+                Sprites.shared.images.laser5,
+                Sprites.shared.images.laser6,
+                Sprites.shared.images.laser5,
+                Sprites.shared.images.laser6,
+                Sprites.shared.images.laser5,
+                Sprites.shared.images.laser6,
+                Sprites.shared.images.laser7,
+                Sprites.shared.images.laser8,
+            ], 0.05)
         }
     }
 

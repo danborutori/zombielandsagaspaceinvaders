@@ -34,6 +34,15 @@ namespace zlsSpaceInvader {
         bossTitle0: "./images/boss_title0.png",
         bossTitle1: "./images/boss_title1.png",
         kaijin: "./images/kaijin.png",
+        laser0: "./images/laser0.png",
+        laser1: "./images/laser1.png",
+        laser2: "./images/laser2.png",
+        laser3: "./images/laser3.png",
+        laser4: "./images/laser4.png",
+        laser5: "./images/laser5.png",
+        laser6: "./images/laser6.png",
+        laser7: "./images/laser7.png",
+        laser8: "./images/laser8.png",
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -81,6 +90,15 @@ namespace zlsSpaceInvader {
             bossTitle0: new Image,
             bossTitle1: new Image,
             kaijin: new Image,
+            laser0: new Image,
+            laser1: new Image,
+            laser2: new Image,
+            laser3: new Image,
+            laser4: new Image,
+            laser5: new Image,
+            laser6: new Image,
+            laser7: new Image,
+            laser8: new Image,
         }
 
         load(){

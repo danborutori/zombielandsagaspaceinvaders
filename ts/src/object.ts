@@ -106,7 +106,7 @@ namespace zlsSpaceInvader {
 
             this.time += deltaTime
 
-            const i =  Math.floor((this.time/this.secondPerSprite)*this.sprites.length)
+            const i =  Math.floor(this.time/this.secondPerSprite)
             if( i<this.sprites.length ){
                 this.sprite = this.sprites[i]
             }else if( this.duration===undefined){
