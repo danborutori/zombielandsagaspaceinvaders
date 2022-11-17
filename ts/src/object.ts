@@ -10,41 +10,47 @@ namespace zlsSpaceInvader {
         visible = true
 
         private waitPromises: {
+            label?: string
             time: number
+            priority: number
             resolve: (n: number)=>void
             reject: (e: Error)=>void
-            resolved: boolean
+            state: "running" | "resolved" | "rejected"
         }[] = []
 
         update( deltaTime: number ){
-            for( let w of Array.from(this.waitPromises) ){
-                w.time -= deltaTime
-                if( w.time<=0 ){
-                    w.resolved = true
-                    w.resolve(-w.time)
+            for( let w of Array.from(this.waitPromises)
+                .sort((a,b)=>a.priority-b.priority)
+            ){
+                if( w.state=="running" ){
+                    w.time -= deltaTime
+                    if( w.time<=0 ){
+                        w.state = "resolved"
+                        w.resolve(-w.time)
+                    }
                 }
             }
-            this.waitPromises = this.waitPromises.filter(w=>!w.resolved)
+            this.waitPromises = this.waitPromises.filter(w=>w.state=="running")
         }
 
         render( deltaTime: number, ctx: CanvasRenderingContext2D ){}
 
         removeFromManager(){
-            for( let w of this.waitPromises ){
-                w.reject(new Error("Object removed."))
-            }
-            this.waitPromises.length = 0
-            this.manager && this.manager.remove(this)
+            const manager = this.manager
+            manager && manager.remove(this)
+            this.terminateAllWaiting(new Error("Object removed."))
         }
 
-        wait( time: number ){
+        wait( time: number, priority: number = 0, label?: string ){
             if( this.manager ){
                 return new Promise<number>( (resolve, reject)=>{
                     this.waitPromises.push({
+                        label: label,
                         time: time,
+                        priority: priority,
                         resolve: resolve,
                         reject: reject,
-                        resolved: false
+                        state: "running"
                     })
                 })
             }else{
@@ -52,11 +58,15 @@ namespace zlsSpaceInvader {
             }
         }
 
-        terminateAllWaiting(){
-            for( let w of this.waitPromises.filter(w=>!w.resolved) ){
-                w.reject(new Error("Terminated"))
-            }
+        terminateAllWaiting( reason: Error = new Error("Terminated")){
+            const tasks = Array.from(this.waitPromises)
             this.waitPromises.length = 0
+            for( let w of tasks ){
+                if( w.state=="running" ){
+                    w.state = "rejected"
+                    w.reject(reason)
+                }
+            }
         }
     }
 

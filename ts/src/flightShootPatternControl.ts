@@ -119,12 +119,13 @@ namespace zlsSpaceInvader {
                 try{
                     let time = 0
                     while( !stop ){                    
-                        time += await enemyFlight.wait(0)
+                        time += await enemyFlight.wait(0, undefined, "shot")
 
                         root && root.update( time, enemyFlight, identity )
                     }
-                }catch(e){}
-                finally{}
+                }catch(e){
+                    // do nothing
+                }
             }
             coroutine()
 
