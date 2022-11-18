@@ -70,7 +70,8 @@ namespace zlsSpaceInvader {
         constructor(
             readonly offset: Input<Vector2> = new ConstantNode(zero2),
             readonly directon: Input<Vector2> = new ConstantNode(unitY),
-            readonly speed?: Input<number>
+            readonly speed?: Input<number>,
+            readonly phase?: Input<number>
         ){}
 
         update( time: number, shooter: EnemyFlight, transform: Transform ){
@@ -79,7 +80,8 @@ namespace zlsSpaceInvader {
                     shooter.scorer.stage,
                     v1.copy(this.directon.getValue( time, shooter)).rotateAround(transform.rotation),
                     shooter,
-                    this.speed && this.speed.getValue(time, shooter)
+                    this.speed && this.speed.getValue(time, shooter),
+                    this.phase && this.phase.getValue(time, shooter)
                 )
                 b.pos.add( shooter.pos, this.offset.getValue( time, shooter)).add(transform.translation)
                 shooter.manager.add(b)

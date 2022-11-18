@@ -167,10 +167,10 @@ namespace zlsSpaceInvader {
                         if( i%2==1 ){
                             switch( (laserCnt+i)%4 ){
                             case 1:
-                                this.throwGrenade(0.1)
+                                this.throwGrenade(0.15)
                                 break
                             case 3:
-                                this.simpleShoot()
+                                this.simpleShoot(0.4)
                                 break
                             }
                             laserCnt++
@@ -214,7 +214,7 @@ namespace zlsSpaceInvader {
             }
         }
 
-        private async simpleShoot(){
+        private async simpleShoot( duration: number = 0.2 ){
             const shotCtx = FlightShootPatternControl.shoot(
                 this,
                 new IntervalNode(
@@ -230,7 +230,7 @@ namespace zlsSpaceInvader {
                     )
                 )
             )
-            await this.wait(0.2)
+            await this.wait(duration)
             shotCtx.stop()
         }
 
@@ -246,7 +246,12 @@ namespace zlsSpaceInvader {
                             new GrendaeNode(
                                 new ConstantNode(new Vector2(-28,-21)),
                                 undefined,
-                                new ConstantNode(50)
+                                new ConstantNode(50),
+                                {
+                                    getValue: time=>{
+                                        return time/0.06*60*Math.PI/180
+                                    }
+                                }
                             )
                         )
                     )
@@ -261,7 +266,12 @@ namespace zlsSpaceInvader {
                             new GrendaeNode(
                                 new ConstantNode(new Vector2(33,8)),
                                 undefined,
-                                new ConstantNode(50)
+                                new ConstantNode(50),
+                                {
+                                    getValue: time=>{
+                                        return time/0.06*60*Math.PI/180
+                                    }
+                                }
                             )
                         )
                     )
