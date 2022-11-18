@@ -20,7 +20,7 @@ namespace zlsSpaceInvader {
     })
 
     const defalutMaxHp = 500
-    const phase2HpRatio = 0.99//0.2
+    const phase2HpRatio = 0.2
     const totalScore = 10000
 
     class Kaijin extends EnemyFlight {
@@ -184,12 +184,30 @@ namespace zlsSpaceInvader {
                         await this.wait(1)
                     }
 
-                    // await ObjectMotionControl.moveTo(
-                    //     this,
-                    //     v1.set(0,-30),
-                    //     200
-                    // )
-                    // await this.wait(0.5)
+                    if( i>2 ){
+                        if( i%2==0 ){
+                            await ObjectMotionControl.moveTo(
+                                this,
+                                v1.set(10,-30),
+                                100
+                            )
+                            await this.wait(2)
+                            await this.movingLaser(v1.set(
+                                stage.left+40, this.pos.y
+                            ))
+                        }else{
+                            await ObjectMotionControl.moveTo(
+                                this,
+                                v1.set(-10,-30),
+                                100
+                            )
+                            await this.wait(2)
+                            await this.movingLaser(v1.set(
+                                stage.right-40, this.pos.y
+                            ))
+                        }
+                        await this.wait(1)
+                    }
                 }
             }catch(e){
                 // do nothing
@@ -259,12 +277,21 @@ namespace zlsSpaceInvader {
                     this.scorer.stage,
                     this
                 )
-                l.pos.copy( this.pos ).add(
-                    v1.set(2,56)
-                )
                 this.manager.add(l)
                 Audio.play(Audio.sounds.eyeLaser)
             }
+        }
+
+        private async movingLaser(
+            to: Vector2
+        ){
+            this.shotLaser()
+            await this.wait(0.25)
+            await ObjectMotionControl.moveTo(
+                this,
+                to,
+                100
+            )
         }
 
         private async dash(
@@ -361,6 +388,11 @@ namespace zlsSpaceInvader {
             this.animation.removeFromManager = ()=>{
                 this.removeFromManager()
             }
+
+            this.pos.add(
+                this.shooter.pos,
+                v1.set(2,56)
+            )
         }
 
         protected onHitPlayer(): void {}
@@ -368,6 +400,10 @@ namespace zlsSpaceInvader {
         update(deltaTime: number): void {
             super.update( deltaTime )
             this.animation.update( deltaTime )
+            this.pos.add(
+                this.shooter.pos,
+                v1.set(2,56)
+            )
             if( this.animation.frame>=5 && this.animation.frame<17 ){
                 this.collisionShape = laserCollisionShape
             }else{
