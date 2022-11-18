@@ -29,6 +29,7 @@ namespace zlsSpaceInvader {
             capturedSuccess: "./sound/captured_success.mp3",
             credit: "./sound/8d82b5_Galaga_Coin_Sound_Effect.mp3",
             enemyShooting: "./sound/8d82b5_Galaga_Firing_Sound_Effect.mp3",
+            eyeLaser: "./sound/8-bit-cannon-fire-96505.mp3"
         }
 
         static preload(){

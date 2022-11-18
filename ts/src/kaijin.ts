@@ -81,7 +81,9 @@ namespace zlsSpaceInvader {
                 ])
                 
 
-            }catch(e){}
+            }catch(e){
+                // do nothing
+            }
 
         }
 
@@ -129,7 +131,9 @@ namespace zlsSpaceInvader {
                     )
                 }
 
-            }catch(e){}
+            }catch(e){
+                // do nothing
+            }
 
         }
 
@@ -140,22 +144,56 @@ namespace zlsSpaceInvader {
 
             try{
                 while( this.hp>=defalutMaxHp*phase2HpRatio){
-                    await this.wait(0)
+                    await this.wait(0, 1)
                 }
 
                 this.terminateAllWaiting()
 
-                ObjectMotionControl.moveTo(
+                await ObjectMotionControl.moveTo(
                     this,
                     v1.set(0,-30),
                     50
-                )
+                )    
+                await this.wait(2)
 
-                while( true ){
-                    await this.wait(2)
-                    this.shotLaser()
+                let laserCnt = 0
+                for( let i=0; true; i++ ){
+                    for( let v of [
+                        new Vector2(0,this.pos.y),
+                        new Vector2(stage.left+40,this.pos.y),
+                        new Vector2(0,this.pos.y),
+                        new Vector2(stage.right-40,this.pos.y),
+                    ]){
+                        if( i%2==1 ){
+                            switch( (laserCnt+i)%4 ){
+                            case 1:
+                                this.throwGrenade(0.1)
+                                break
+                            case 3:
+                                this.simpleShoot()
+                                break
+                            }
+                            laserCnt++
+                        }
+                        await ObjectMotionControl.moveTo(
+                            this,
+                            v,
+                            200
+                        )
+                        this.shotLaser()
+                        await this.wait(1)
+                    }
+
+                    // await ObjectMotionControl.moveTo(
+                    //     this,
+                    //     v1.set(0,-30),
+                    //     200
+                    // )
+                    // await this.wait(0.5)
                 }
-            }catch(e){}
+            }catch(e){
+                // do nothing
+            }
         }
 
         private async simpleShoot(){
@@ -178,7 +216,7 @@ namespace zlsSpaceInvader {
             shotCtx.stop()
         }
 
-        private async throwGrenade(){
+        private async throwGrenade( duration: number = 0.2 ){
             const shotCtxes = [
                 FlightShootPatternControl.shoot(
                     this,
@@ -211,17 +249,21 @@ namespace zlsSpaceInvader {
                     )
                 ),
             ]
-            await this.wait(0.2)
+            await this.wait(duration)
             for( let ctx of shotCtxes ) ctx.stop()
         }
 
         private shotLaser(){
             if( this.manager ){
-                const l = new Laser()
+                const l = new Laser(
+                    this.scorer.stage,
+                    this
+                )
                 l.pos.copy( this.pos ).add(
                     v1.set(2,56)
                 )
                 this.manager.add(l)
+                Audio.play(Audio.sounds.eyeLaser)
             }
         }
 
@@ -266,9 +308,35 @@ namespace zlsSpaceInvader {
         }
     }
 
-    class Laser extends AnimatedSpriteObject {
-        constructor(){
-            super([
+
+    const laserEmptyCollisionShape = new ColliderCompoundShape()
+    const laserCollisionShape = new ColliderCompoundShape()
+    laserCollisionShape.shapes.push({
+        shape: new ColliderBox(v1.set(7,167)),
+        pos: new Vector2(12,28)
+    })
+    laserCollisionShape.shapes.push({
+        shape: new ColliderBox(v1.set(7,167)),
+        pos: new Vector2(-12,28)
+    })
+
+    class Laser extends EnemyBullet {
+        private animation: AnimatedSpriteObject
+
+        constructor(
+            stage: Stage,
+            shooter: EnemyFlight
+        ){
+            super(
+                stage,
+                v1.set(0,0),
+                shooter,
+                0
+            )
+
+            this.collisionShape = laserEmptyCollisionShape
+
+            this.animation = new AnimatedSpriteObject([
                 Sprites.shared.images.laser0,
                 Sprites.shared.images.laser1,
                 Sprites.shared.images.laser2,
@@ -289,6 +357,27 @@ namespace zlsSpaceInvader {
                 Sprites.shared.images.laser7,
                 Sprites.shared.images.laser8,
             ], 0.05)
+            ;(this.animation as any).pos = this.pos
+            this.animation.removeFromManager = ()=>{
+                this.removeFromManager()
+            }
+        }
+
+        protected onHitPlayer(): void {}
+
+        update(deltaTime: number): void {
+            super.update( deltaTime )
+            this.animation.update( deltaTime )
+            if( this.animation.frame>=5 && this.animation.frame<17 ){
+                this.collisionShape = laserCollisionShape
+            }else{
+                this.collisionShape = laserEmptyCollisionShape
+            }
+        }
+
+        render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
+            super.render( deltaTime, ctx )
+            this.animation.render( deltaTime, ctx )
         }
     }
 

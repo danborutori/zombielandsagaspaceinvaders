@@ -91,7 +91,10 @@ namespace zlsSpaceInvader {
 
     export class AnimatedSpriteObject extends SpriteObject {
 
-        private time = 0
+        time = 0
+        get frame() {
+            return Math.floor(this.time/this.secondPerSprite)
+        }
 
         constructor(
             readonly sprites: (HTMLImageElement | HTMLCanvasElement)[],
@@ -106,7 +109,7 @@ namespace zlsSpaceInvader {
 
             this.time += deltaTime
 
-            const i =  Math.floor(this.time/this.secondPerSprite)
+            const i =  this.frame
             if( i<this.sprites.length ){
                 this.sprite = this.sprites[i]
             }else if( this.duration===undefined){
