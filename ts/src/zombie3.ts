@@ -76,7 +76,9 @@ namespace zlsSpaceInvader {
                     this.phase2(enemies)
                 ])
 
-            }catch(e){}
+            }catch(e){
+                // do nothing
+            }
         }
 
         async phase1(){
@@ -167,7 +169,9 @@ namespace zlsSpaceInvader {
                     )
                     await this.wait(3)
                 }
-            }catch(e){}
+            }catch(e){
+                // do nothing
+            }
             finally{
                 shotCtx && shotCtx.stop()
             }
@@ -177,7 +181,7 @@ namespace zlsSpaceInvader {
             const v = new Vector2
             
             while( this.hp>defalutMaxHp*phase2HpRatio ){
-                await this.wait(0)
+                await this.wait(0, 1)
             }
             this.terminateAllWaiting()
 
@@ -207,7 +211,9 @@ namespace zlsSpaceInvader {
                         ),
                         10
                     )
-                }catch(e){}
+                }catch(e){
+                    // do nothing
+                }
 
                 return newZombie3
             }))
@@ -216,14 +222,18 @@ namespace zlsSpaceInvader {
 
             try{
                 await this.wait(1)
-            }catch(e){}
+            }catch(e){
+                // do nothing
+            }
 
             await Promise.all(
                 newZombies.map( async (z,i)=>{
                     try{
                         await z.wait(i*1)
                         await z.phase2_2()
-                    }catch(e){}
+                    }catch(e){
+                        // do nothing
+                    }
                 })
             )
         }
@@ -266,7 +276,9 @@ namespace zlsSpaceInvader {
                     )
 
                 }
-            }catch(e){}
+            }catch(e){
+                // do nothing
+            }
             finally{
                 shotCtx.stop()
             }

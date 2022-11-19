@@ -29,7 +29,7 @@ namespace zlsSpaceInvader {
 
         readonly isBullet = true
         readonly velocity = new Vector2
-        readonly collisionShape = collisioShape
+        collisionShape: ColliderShape = collisioShape
 
         protected constructor(
             readonly stage: Stage,
@@ -93,6 +93,8 @@ namespace zlsSpaceInvader {
         }
     }
 
+    const playerFlightBulletCheckShape = new ColliderBox(v1.set(1,1))
+
     export class EnemyBullet extends Bullet {
         readonly isEnemyBullet = true
         protected canHitPlayer = true
@@ -107,6 +109,10 @@ namespace zlsSpaceInvader {
             this.velocity.copy(direction).multiply(speed)
         }
 
+        protected onHitPlayer(){
+            this.removeFromManager()
+        }
+
         update(deltaTime: number): void {
             super.update(deltaTime)
 
@@ -116,10 +122,15 @@ namespace zlsSpaceInvader {
                         for( let i=0; i<playerFlight.flightUnits.length; i++ ){
                             const u = playerFlight.flightUnits[i]
                             if(
-                                v1.add(playerFlight.pos, u.pos).distance(this.pos)<1.5
+                                CollisionChecker.intersect(
+                                    this.collisionShape,
+                                    this.pos,
+                                    playerFlightBulletCheckShape,
+                                    v1.add(playerFlight.pos, u.pos)    
+                                )
                             ){
                                 this.shooter.onHitPlayer(playerFlight, i, this.manager)
-                                this.removeFromManager()
+                                this.onHitPlayer()
                                 break
                             }
                         }

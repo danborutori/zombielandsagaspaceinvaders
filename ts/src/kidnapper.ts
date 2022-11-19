@@ -74,7 +74,9 @@ namespace zlsSpaceInvader {
                         this.state = "goStraight"
                     }
 
-                }catch(e){}
+                }catch(e){
+                    // do nothing
+                }
                 finally{
                     wave.removeFromManager()
                 }
@@ -301,6 +303,7 @@ namespace zlsSpaceInvader {
                     await this.wait(2)
 
                 }catch(e){
+                    // do nothing
                 }finally{
                     this.player.invincibleTime = 0
                     this.player.paused = false

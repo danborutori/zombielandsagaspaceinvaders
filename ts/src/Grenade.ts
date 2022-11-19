@@ -8,6 +8,16 @@ namespace zlsSpaceInvader {
         private time = 0
         private playerBullet = false
 
+        constructor(
+            stage: Stage,
+            direction: Vector2,
+            shooter: EnemyFlight,
+            speed?:number,
+            readonly phase: number = 0
+        ){
+            super(stage, direction, shooter, speed)
+        }
+
         update( deltaTime: number ){
             super.update( deltaTime )
             this.time += deltaTime
@@ -29,7 +39,7 @@ namespace zlsSpaceInvader {
 
                 if( this.time>1 ){
                     for( let i=0; i<8; i++ ){
-                        const a = i*Math.PI*2/8
+                        const a = i*Math.PI*2/8+this.phase
                         let b: Bullet
                         if(this.playerBullet){
                             b = new PlayerBullet(

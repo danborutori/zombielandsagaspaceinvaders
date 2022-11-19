@@ -11,7 +11,7 @@ namespace zlsSpaceInvader {
         ){
             const v = new Vector2            
             while( v.sub(dst, flight.pos).length()>epislon ){
-                const deltaTime = await flight.wait(0)
+                const deltaTime = await flight.wait(0, undefined, "move to")
                 const l = v.length()
                 v.normalize().multiply( Math.min(speed*deltaTime,l) )
                 flight.pos.add(v)
