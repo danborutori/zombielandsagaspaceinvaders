@@ -79,6 +79,10 @@ namespace zlsSpaceInvader {
                 this.reset(m)
                 this.invincibleTime = invincibleInterval
             }else{
+                for( let u of this.flightUnits ){
+                    knockdownMembers.push(u)
+                }
+                this.flightUnits.length = 0
                 this.allMemberRunOut()
             }
             this.canShoot = true
