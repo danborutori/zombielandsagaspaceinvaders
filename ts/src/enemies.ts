@@ -9,7 +9,7 @@ namespace zlsSpaceInvader {
             super(
                 Sprites.shared.images["zombie1"],
                 scorer,
-                100,
+                50,
                 hp
             )
         }
@@ -25,7 +25,7 @@ namespace zlsSpaceInvader {
             super(
                 Sprites.shared.images["zombie2"],
                 scorer,
-                100,
+                50,
                 hp
             )
             this.bulletIntervalScale = 0.5
@@ -43,7 +43,7 @@ namespace zlsSpaceInvader {
             super(
                 Sprites.shared.images["hand"],
                 scorer,
-                100,
+                50,
                 hp
             )
             this.bulletCountDelta = -1
@@ -63,7 +63,7 @@ namespace zlsSpaceInvader {
             super(
                 Sprites.shared.images["dog"],
                 scorer,
-                100,
+                50,
                 hp
             )
             this.homingTime = 2.5
