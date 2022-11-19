@@ -83,6 +83,12 @@ namespace zlsSpaceInvader {
             return this
         }
 
+        divide( v: Vector2 ){
+            this.x /= v.x
+            this.y /= v.y
+            return this
+        }
+
         abs(){
             this.x = Math.abs(this.x)
             this.y = Math.abs(this.y)
