@@ -31,6 +31,16 @@ namespace zlsSpaceInvader {
         }
     }
 
+    characters["_"] = {
+        x: 98,
+        y: 28
+    }
+
+    characters["←"] = {
+        x: 158,
+        y: 28
+    }
+
     characters["-"] = {
         x: 182,
         y: 37
@@ -96,6 +106,11 @@ namespace zlsSpaceInvader {
         drawTextOutline( text: string, x: number, y: number, ctx: CanvasRenderingContext2D ){
             this.initOutline()
             this._drawText( text, x, y, ctx, this.outlineFontSheet)
+        }
+
+        drawTextCenteredOutline( text: string, x: number, y: number, ctx: CanvasRenderingContext2D ){
+            this.initOutline()
+            this._drawText( text, x-this.measure(text)/2, y, ctx, this.outlineFontSheet)
         }
 
         private _drawText( text: string, x: number, y: number, ctx: CanvasRenderingContext2D, fontSheet: HTMLImageElement | HTMLCanvasElement ){
