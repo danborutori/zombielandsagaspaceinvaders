@@ -49,7 +49,7 @@ namespace zlsSpaceInvader {
 
             ctx.save()
             ctx.translate(0,-50)
-            TextDrawer.shared.drawTextCenteredOutline("PLEASE ENTER YOU INITIAL:", 0, 0, ctx)
+            TextDrawer.shared.drawTextCenteredOutline("TAP TO ENTER YOU INITIAL:", 0, 0, ctx)
             ctx.scale(2,2)
             const displayInitial = Array.from(this.initial)
             if( Math.floor(this.time/0.1)%2==0 &&
