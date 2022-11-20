@@ -20,6 +20,8 @@ namespace zlsSpaceInvader {
                 this.records = records
                 if( this.records.length>0 )
                     scorer.updateHiScore(this.records[0].score)
+            }).catch(e=>{
+                ErrorHandler.handle(e)
             })
         }
 

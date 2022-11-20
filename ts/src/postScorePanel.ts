@@ -124,28 +124,30 @@ namespace zlsSpaceInvader {
             wave: number,
             canvas: HTMLCanvasElement
         ){
-
-            const records = await Leaderboard.shared.getRecords()
-            const canPostScore = records.length<8 || scorer.score>=records[7].score
+            let canPostScore = false
+            try{
+                const records = await Leaderboard.shared.getRecords()
+                canPostScore = records.length<8 || scorer.score>=records[7].score
+            }catch(e){
+                ErrorHandler.handle(e)
+            }
 
             if( canPostScore ){
 
                 const eventCtx = this.registerPointerEvent(canvas)
+                while( this.inputIndex<this.initial.length ){
+                    await this.wait(0)
+                }
+                eventCtx.unregister()
 
                 try{
 
-                    while( this.inputIndex<this.initial.length ){
-                        await this.wait(0)
-                    }
-
                     const int = this.initial.join("")
-
                     await Leaderboard.shared.post(int,scorer.score,wave,generateUUID())
 
                 }catch(e){
-                    // do nothing
+                    ErrorHandler.handle(e)
                 }finally{
-                    eventCtx.unregister()
                     this.removeFromManager()
                 }
 
