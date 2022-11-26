@@ -9,13 +9,14 @@ namespace zlsSpaceInvader {
 
     export class PlayerFlight extends GameObject {
 
-        private bulletCooldown = 0
         readonly isPlayerFlight = true
         next = false
         invincibleTime = 0
         canShoot = true
 
         flightUnits: FlightUnit[] = []
+
+        private poweredShot = new PlayerPoweredShot()
 
         constructor(            
             readonly stage: Stage,
@@ -46,22 +47,12 @@ namespace zlsSpaceInvader {
             this.pos.x = Math.max(this.pos.x, this.stage.left+padding)
             this.pos.x = Math.min(this.pos.x, this.stage.right-padding)
 
-            this.bulletCooldown -= deltaTime
-
             if( this.next ){
                 this.doNextMember()
 
                 this.next = false
-            }else if( Input.shared.fire && this.bulletCooldown<=0 && this.manager && this.canShoot ){
-                for( let u of this.flightUnits ){
-                    const b = new PlayerBullet(this.stage, u.bulletColor)
-                    b.pos.copy(this.pos)
-                    b.pos.x += u.pos.x
-                    b.pos.y -= 6
-                    this.manager.add(b)
-                }
-                this.bulletCooldown = Constant.playerFireInterval
-                Audio.play( Audio.sounds.shoot )
+            }else{
+                this.poweredShot.update( deltaTime, this )
             }
 
         }
