@@ -67,12 +67,14 @@ namespace zlsSpaceInvader {
         line: ColliderLineSegment,
         linePos: Vector2,
         box: ColliderBox,
-        boxPos: Vector2
+        boxPos: Vector2,
+        hitPoint: Vector2
     ){
         if(
-            isPointInsideBox( v1.add(line.to, linePos), box, boxPos ) ||
+            isPointInsideBox( v1.add(line.to, linePos), box, boxPos ) &&
             isPointInsideBox( v1.add(line.from, linePos), box, boxPos )
         ){
+            hitPoint.add(line.to, line.from).multiply(0.5)
             return true
         }
 
@@ -102,6 +104,7 @@ namespace zlsSpaceInvader {
                 isPointInsideBox( pt, box, boxPos ) &&
                 isPointOnLineInsideSegment( line, linePos, pt )
             ){
+                hitPoint.copy(pt)
                 return true
             }
         }
@@ -115,7 +118,8 @@ namespace zlsSpaceInvader {
             shapeA: ColliderShape,
             posA: Vector2,
             shapeB: ColliderShape,
-            posB: Vector2
+            posB: Vector2,
+            hitPoint: Vector2
         ){
             // box to box
             const boxA = shapeA as ColliderBox
@@ -123,18 +127,19 @@ namespace zlsSpaceInvader {
             if( boxA.isColliderBox && boxB.isColliderBox ){
                 v1.sub( posA, posB ).abs()
                 v2.add(boxA.size, boxB.size)
+                hitPoint.add(posA,posB).multiply(0.5)
                 return v1.x<v2.x/2 && v1.y<v2.y/2
             }
 
             // linesegment to box
             const lineB = shapeB as ColliderLineSegment
             if( boxA.isColliderBox && lineB.isColliderLineSegment ){
-                return isIntersectLineSegmentBox(lineB, posB, boxA, posA)
+                return isIntersectLineSegmentBox(lineB, posB, boxA, posA, hitPoint)
             }
 
             const lineA = shapeA as ColliderLineSegment
             if( lineA.isColliderLineSegment && boxB.isColliderBox ){
-                return isIntersectLineSegmentBox(lineA, posA, boxB, posB)
+                return isIntersectLineSegmentBox(lineA, posA, boxB, posB, hitPoint)
             }
 
             // compound
@@ -146,7 +151,8 @@ namespace zlsSpaceInvader {
                             s.shape,
                             v.add(posA, s.pos), 
                             shapeB,
-                            posB
+                            posB,
+                            hitPoint
                         )
                     )
                         return true
@@ -161,7 +167,8 @@ namespace zlsSpaceInvader {
                             shapeA,
                             posA,
                             s.shape,
-                            v.add(posB, s.pos)
+                            v.add(posB, s.pos),
+                            hitPoint
                         )
                     )
                         return true

@@ -1,8 +1,9 @@
 namespace zlsSpaceInvader {
 
-    const v = new Vector2
+    const v1 = new Vector2
+    const v2 = new Vector2
 
-    const collisioBox = new ColliderBox(v.set(9,9))
+    const collisioBox = new ColliderBox(v1.set(9,9))
 
     export class EnemyFlight extends SpriteObject {
 
@@ -109,9 +110,9 @@ namespace zlsSpaceInvader {
 
         shoot( playerFlight: PlayerFlight, phase: number ){
             if( this.manager ){
-                v.sub( playerFlight.pos, this.pos ).normalize()
-                v.rotateAround( Math.cos(phase*Math.PI*2)*this.bulletShootAngle )
-                const b = this.bulletFactoty( v )
+                v1.sub( playerFlight.pos, this.pos ).normalize()
+                v1.rotateAround( Math.cos(phase*Math.PI*2)*this.bulletShootAngle )
+                const b = this.bulletFactoty( v1 )
                 b.pos.copy(this.pos)
 
                 Audio.play(Audio.sounds.enemyShooting)
@@ -132,11 +133,12 @@ namespace zlsSpaceInvader {
                             this.collisionShape,
                             this.pos,
                             b.collisionShape,
-                            b.pos
+                            b.pos,
+                            v1
                         )
                     ){
                         this.flashTime = 0.1
-                        b.onHitEnemy()
+                        b.onHitEnemy(v1)
                         if( this.hp>0 ){
                             this.hp -= b.damage
                             
@@ -169,7 +171,8 @@ namespace zlsSpaceInvader {
                                         this.collisionShape,
                                         this.pos,
                                         u.collisionShape,
-                                        v.add(playerFlight.pos, u.pos)
+                                        v1.add(playerFlight.pos, u.pos),
+                                        v2
                                     )
                                 ){
                                     this.onHitPlayer(playerFlight,i,this.manager)

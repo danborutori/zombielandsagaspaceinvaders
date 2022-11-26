@@ -59,7 +59,8 @@ namespace zlsSpaceInvader {
             }
         }
 
-        onHitEnemy(): void {
+        onHitEnemy( hitPos: Vector2 ): void {
+            this.spark( hitPos )
             this.isHit = true
         }        
 

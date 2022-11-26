@@ -17,12 +17,12 @@ namespace zlsSpaceInvader {
             super(stage, direction, shooter, speed)
 
             this.shouldCollidePlayerBullet = ()=>true
-            this.onCollidePlayerBullet = b=>{
+            this.onCollidePlayerBullet = (b, hitPos)=>{
                 this.velocity.y *= -1
                 this.color = b.color
                 this.playerBullet = true
                 this.canHitPlayer = false
-                b.onHitEnemy()
+                b.onHitEnemy(hitPos)
                 this.shouldCollidePlayerBullet = ()=>false
                 this.onCollidePlayerBullet = undefined
             }

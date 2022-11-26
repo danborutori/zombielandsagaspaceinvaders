@@ -93,16 +93,16 @@ namespace zlsSpaceInvader {
             this.velocity.set(0, -Constant.bulletSpeed )
         }
 
-        private spark(){
+        protected spark( sparkPos?: Vector2 ){
             if( this.manager ){
                 const s = new PlayerBulletSpark(this.color)
-                s.pos.copy(this.pos)
+                s.pos.copy(sparkPos || this.pos)
                 this.manager.add(s)
             }
         }
 
-        onHitEnemy(){
-            this.spark()                        
+        onHitEnemy( hitPoint: Vector2 ){
+            this.spark()
             this.removeFromManager()
         }
     }
@@ -114,9 +114,9 @@ namespace zlsSpaceInvader {
         protected canHitPlayer = true
 
         shouldCollidePlayerBullet: (b: PlayerBullet )=>boolean = b=>b.cancelEnemyBullet
-        onCollidePlayerBullet?: (b: PlayerBullet )=>void = b=>{
+        onCollidePlayerBullet?: (b: PlayerBullet, hitPos: Vector2 )=>void = (b, hitPos)=>{
             this.onHitPlayer()
-            b.onHitEnemy()
+            b.onHitEnemy(hitPos)
         }
 
         constructor(
@@ -144,9 +144,10 @@ namespace zlsSpaceInvader {
                         this.collisionShape,
                         this.pos,
                         b.collisionShape,
-                        b.pos )
+                        b.pos,
+                        v1 )
                     ){
-                        this.onCollidePlayerBullet(b)
+                        this.onCollidePlayerBullet(b, v1)
                         break
                     }
                 }
@@ -168,7 +169,8 @@ namespace zlsSpaceInvader {
                                     this.collisionShape,
                                     this.pos,
                                     playerFlightBulletCheckShape,
-                                    v1.add(playerFlight.pos, u.pos)    
+                                    v1.add(playerFlight.pos, u.pos),
+                                    v2   
                                 )
                             ){
                                 this.shooter.onHitPlayer(playerFlight, i, this.manager)
