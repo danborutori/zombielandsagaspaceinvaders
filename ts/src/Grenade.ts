@@ -16,6 +16,17 @@ namespace zlsSpaceInvader {
             readonly phase: number = 0
         ){
             super(stage, direction, shooter, speed)
+
+            this.shouldCollidePlayerBullet = ()=>true
+            this.onCollidePlayerBullet = b=>{
+                this.velocity.y *= -1
+                this.color = b.color
+                this.playerBullet = true
+                this.canHitPlayer = false
+                b.onHitEnemy()
+                this.shouldCollidePlayerBullet = ()=>false
+                this.onCollidePlayerBullet = undefined
+            }
         }
 
         update( deltaTime: number ){
@@ -23,19 +34,6 @@ namespace zlsSpaceInvader {
             this.time += deltaTime
 
             if( this.manager ){
-
-                if( !this.playerBullet ){
-                    for( let b of this.manager.playerBullets ){
-                        if( this.pos.distance(b.pos)<4 ){
-                            this.velocity.y *= -1
-                            this.color = b.color
-                            this.playerBullet = true
-                            this.canHitPlayer = false
-                            b.removeFromManager()
-                            break
-                        }
-                    }
-                }
 
                 if( this.time>1 ){
                     for( let i=0; i<8; i++ ){

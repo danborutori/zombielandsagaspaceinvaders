@@ -372,6 +372,7 @@ namespace zlsSpaceInvader {
             )
 
             this.collisionShape = laserEmptyCollisionShape
+            this.shouldCollidePlayerBullet = ()=>false
 
             this.animation = new AnimatedSpriteObject([
                 Sprites.shared.images.laser0,

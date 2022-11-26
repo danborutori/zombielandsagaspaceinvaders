@@ -106,9 +106,7 @@ namespace zlsSpaceInvader {
         }
 
         dot( v: Vector2Like ){
-            const x = this.x*v.x
-            const y = this.y*v.y
-            return x*x+y*y
+            return this.x*v.x+this.y*v.y
         }
 
         angle(): number

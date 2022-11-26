@@ -127,6 +127,7 @@ namespace zlsSpaceInvader {
                 const bs = Array.from(this.manager.playerBullets)
                 for( let b of bs ){
                     if( 
+                        b.canHit &&
                         CollisionChecker.intersect(
                             this.collisionShape,
                             this.pos,
@@ -135,10 +136,10 @@ namespace zlsSpaceInvader {
                         )
                     ){
                         this.flashTime = 0.1
-                        b.spark()
-                        b.removeFromManager()
+                        b.onHitEnemy()
                         if( this.hp>0 ){
-                            this.hp -= 1
+                            this.hp -= b.damage
+                            
                             if( this.hp<=0 ){
                                 this.onDie()
                             }
