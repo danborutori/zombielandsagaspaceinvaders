@@ -1,7 +1,6 @@
 namespace zlsSpaceInvader {
 
     const v1 = new Vector2
-    const v2 = new Vector2
 
     export class Grenade extends EnemyBullet {
         

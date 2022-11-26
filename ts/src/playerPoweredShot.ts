@@ -38,13 +38,15 @@ namespace zlsSpaceInvader {
                         b.pos.copy(player.pos)
                         b.pos.x += u.pos.x
                         b.pos.y -= 6
-                        switch( i ){
-                        case 0:
-                            b.velocity.rotateAround(-10*Math.PI/180)
-                            break
-                        case end-1:
-                            b.velocity.rotateAround(10*Math.PI/180)
-                            break
+                        if( end>=3 ){
+                            switch( i ){
+                            case 0:
+                                b.velocity.rotateAround(-10*Math.PI/180)
+                                break
+                            case end-1:
+                                b.velocity.rotateAround(10*Math.PI/180)
+                                break
+                            }
                         }
                         player.manager.add(b)
                         playSound = true
