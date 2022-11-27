@@ -3,3 +3,4 @@ asset_src/
 tsServer/node_modules/
 tsServer/build/scratch/
 build/node_modules/
+ts/build/
