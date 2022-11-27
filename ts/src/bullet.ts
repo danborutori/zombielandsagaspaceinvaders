@@ -33,7 +33,7 @@ namespace zlsSpaceInvader {
         readonly isBullet = true
         readonly velocity = new Vector2
         collisionShape: ColliderShape = collisioShape
-
+        
         protected constructor(
             readonly stage: Stage,
             public color: string
@@ -41,15 +41,19 @@ namespace zlsSpaceInvader {
             super()
         }
 
-        update(deltaTime: number): void {
-            super.update(deltaTime)
-
-            this.pos.addScaled(this.velocity,deltaTime)
+        protected offscreenCheck(){
             if( this.pos.y<=this.stage.top ||
                 this.pos.y>=this.stage.bottom
             ){
                 this.removeFromManager()
             }
+        }
+
+        update(deltaTime: number): void {
+            super.update(deltaTime)
+
+            this.pos.addScaled(this.velocity,deltaTime)
+            this.offscreenCheck()
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {

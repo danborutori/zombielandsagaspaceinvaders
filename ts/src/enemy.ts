@@ -7,6 +7,8 @@ namespace zlsSpaceInvader {
 
     export class EnemyFlight extends SpriteObject {
 
+        readonly isEnemyFlight = true
+
         private flashTime = 0
         private origSprite: HTMLImageElement
         private flashingSprite: HTMLCanvasElement

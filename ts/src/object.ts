@@ -125,6 +125,7 @@ namespace zlsSpaceInvader {
         readonly gameObjects: GameObject[] = []
         readonly playerBullets: Set<PlayerBullet> = new Set
         readonly playerFlights: Set<PlayerFlight> = new Set
+        readonly enemyFlights: Set<EnemyFlight> = new Set
 
         add( o: GameObject ){
             o.removeFromManager()
@@ -134,6 +135,8 @@ namespace zlsSpaceInvader {
                 this.playerBullets.add(o as PlayerBullet)
             }else if( (o as PlayerFlight).isPlayerFlight ){
                 this.playerFlights.add(o as PlayerFlight)
+            }else if( (o as EnemyFlight).isEnemyFlight ){
+                this.enemyFlights.add(o as EnemyFlight)
             }
         }
 
@@ -144,6 +147,7 @@ namespace zlsSpaceInvader {
                 o.manager = undefined
                 this.playerBullets.delete( o as PlayerBullet )
                 this.playerFlights.delete(o as PlayerFlight)
+                this.enemyFlights.delete(o as EnemyFlight)
             }
         }
 
