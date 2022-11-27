@@ -82,5 +82,6 @@ https://www.classicgaming.cc/classics/space-invaders/sounds
 Sound Effect from Sound FX Center
 http://soundfxcenter.com/sound_effect/search.php?sfx=Galaga
 Capture Beam Sprites from The Sprites Resource
-https://www.spriters-resource.com/arcade/galaga/sheet/26482/Shaun105 Laser sound effect, really good for video games.
+https://www.spriters-resource.com/arcade/galaga/sheet/26482/
+Shaun105 Laser sound effect, really good for video games.
 https://freesound.org/people/Shaun105/sounds/268168/
