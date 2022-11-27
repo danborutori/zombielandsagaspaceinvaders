@@ -3,122 +3,169 @@ namespace zlsSpaceInvader {
     const beamInterval = 2
     const squareBeamInterval = 0.3
 
-    export class PlayerPoweredShot{
+    abstract class Gun {
+        protected cooldown = 0
+        abstract get interval(): number
 
-        private normalBulletCooldown = 0
-        private fingerBeamCooldown = 0
-        private fingerBeamCount = 0
-        private squareBeamCooldown = 0
-        private squareBeamCount = 0
+        constructor(
+            readonly playerFlight: PlayerFlight,
+            readonly unit: FlightUnit
+        ){}
+
+        abstract makeBullet(): void
+
+        shot( deltaTime: number ){
+            if( this.cooldown>0 )
+                this.cooldown -= deltaTime
+            if( this.cooldown<=0 ){
+                this.makeBullet()
+                this.cooldown += this.interval
+            }
+        }
+    }
+
+    class NormalShot extends Gun {
+        constructor(
+            playerFlight: PlayerFlight,
+            unit: FlightUnit,
+            readonly angle: number
+        ){
+            super( playerFlight, unit )
+        }
+
+        readonly interval = Constant.playerFireInterval
+
+        makeBullet(){
+            if( this.playerFlight.manager ){
+                const b = new PlayerBullet(this.playerFlight.stage, this.unit.bulletColor)
+                b.pos.copy(this.playerFlight.pos)
+                b.pos.x += this.unit.pos.x
+                b.pos.y -= 6
+                b.velocity.rotateAround(this.angle)
+                this.playerFlight.manager.add(b)
+                Audio.play( Audio.sounds.shoot )
+            }
+        }
+    }
+
+    class FingerBeamGun extends Gun {
+        private count = 0
+
+        readonly interval = beamInterval
+
+        constructor(
+            playerFlight: PlayerFlight,
+            unit: FlightUnit,
+            readonly clockwise: number
+        ){
+            super( playerFlight, unit )
+        }
+
+        makeBullet(): void {
+            if( this.playerFlight.manager ){
+                const clockwise = (this.count%2==0?1:-1)*this.clockwise
+                const b = new FingerBeam(this.playerFlight, this.unit, clockwise)
+                b.pos.copy(this.playerFlight.pos)
+                b.pos.x += this.unit.pos.x
+                b.pos.y -= 6                        
+                this.playerFlight.manager.add(b)
+
+                this.count++
+                Audio.play( Audio.sounds.fingerLaser )
+            }
+        }
+    }
+
+    class SquareLaserGun extends Gun {
+
+        private count = 0
+
+        readonly interval = squareBeamInterval
+
+        constructor(
+            playerFlight: PlayerFlight,
+            unit: FlightUnit,
+            readonly clockwise: number
+        ){
+            super( playerFlight, unit )
+        }
+
+        makeBullet(): void {
+            if( this.playerFlight.manager ){
+                const clockwise = (this.count%2==0?1:-1)*this.clockwise
+                const b = new SquareBeam(this.playerFlight, this.unit)
+                b.pos.copy(this.playerFlight.pos)
+                b.pos.x += this.unit.pos.x
+                b.pos.y -= 6                        
+                b.velocity.rotateAround(-Math.PI/4*clockwise)
+                this.playerFlight.manager.add(b)
+
+                this.count++
+                Audio.play( Audio.sounds.fingerLaser )
+            }
+        }
+    }
+
+    export class PlayerPoweredShot{
+        private gun: WeakMap<FlightUnit,Gun> = new WeakMap()
 
         update( deltaTime: number, player: PlayerFlight ){
-            if( this.normalBulletCooldown>0 )
-                this.normalBulletCooldown -= deltaTime
-            if( this.fingerBeamCooldown>0 )
-                this.fingerBeamCooldown -= deltaTime
-            if( this.squareBeamCooldown>0 )
-                this.squareBeamCooldown -= deltaTime
-
             if( Input.shared.fire &&
                 player.canShoot
             ){
-                this.normalShot(player)
-                this.fingerBeam(player)
-                this.squareBeam(player)
+                for( let u of player.flightUnits ){
+                    const g = this.gun.get(u)
+                    if( g ) g.shot(deltaTime)
+                }
             }
         }
 
-        private normalShot( player: PlayerFlight ){
-            if(
-                this.normalBulletCooldown<=0 &&
-                player.manager
-            ){
-                let playSound = false
-                for( let i=0, end = player.flightUnits.length; i<end; i++ ){
-                    if( Math.abs(i+0.5-end/2) < 1 || // middle two
-                        i==0 ||                      // left
-                        i==end-1                     //right
-                    ){
-                        const u = player.flightUnits[i]
-                        const b = new PlayerBullet(player.stage, u.bulletColor)
-                        b.pos.copy(player.pos)
-                        b.pos.x += u.pos.x
-                        b.pos.y -= 6
-                        if( end>=3 ){
-                            switch( i ){
-                            case 0:
-                                b.velocity.rotateAround(-10*Math.PI/180)
-                                break
-                            case end-1:
-                                b.velocity.rotateAround(10*Math.PI/180)
-                                break
-                            }
-                        }
-                        player.manager.add(b)
-                        playSound = true
-                    }
-                }
-                this.normalBulletCooldown += Constant.playerFireInterval
-                playSound && Audio.play( Audio.sounds.shoot )
+        assignGun( player: PlayerFlight ){
+            for( let i=0; i<player.flightUnits.length; i++ ){
+                const u = player.flightUnits[i]
+                this.gun.set( u, new NormalShot(player,u,0) )
             }
-        }
 
-        private fingerBeam( player: PlayerFlight ){
-            if( this.fingerBeamCooldown<=0 &&
-                player.manager
-            ){
-                let playSound = false
-                for( let i=0, end = player.flightUnits.length; i<end; i++ ){
-                    const tmp = Math.abs(i+0.5-end/2)
-                    if( tmp>=1 && tmp<2 &&
-                        i>0 && i<end-1
-                    ){
-                        const clockwise =
-                            (this.fingerBeamCount%2==0?1:-1)*
-                            ((i+0.5)>end/2?1:-1)
-                        const u = player.flightUnits[i]
-                        const b = new FingerBeam(player, u, clockwise)
-                        b.pos.copy(player.pos)
-                        b.pos.x += u.pos.x
-                        b.pos.y -= 6                        
-                        player.manager.add(b)
-                        playSound = true
-                    }
+            if( player.flightUnits.length>=3 ){
+                for( let i of [0,player.flightUnits.length-1] ){
+                    const u = player.flightUnits[i]
+                    this.gun.set(
+                        u,
+                        new NormalShot(
+                            player,
+                            u,
+                            i==0?-10*Math.PI/180:10*Math.PI/180
+                        )
+                    )
                 }
-
-                this.fingerBeamCooldown += beamInterval
-                this.fingerBeamCount++
-                playSound && Audio.play( Audio.sounds.fingerLaser )
             }
-        }
 
-        private squareBeam( player: PlayerFlight ){
-            if( this.squareBeamCooldown<=0 &&
-                player.manager
-            ){
-                let playSound = false
-                for( let i=0, end = player.flightUnits.length; i<end; i++ ){
-                    const tmp = Math.abs(i+0.5-end/2)
-                    if( tmp>=2 && tmp<3 &&
-                        i>0 && i<end-1
-                    ){
-                        const clockwise =
-                            (this.squareBeamCount%2==0?1:-1)*
-                            ((i+0.5)>end/2?1:-1)
-                        const u = player.flightUnits[i]
-                        const b = new SquareBeam(player, u)
-                        b.pos.copy(player.pos)
-                        b.pos.x += u.pos.x
-                        b.pos.y -= 6                        
-                        b.velocity.rotateAround(-Math.PI/4*clockwise)
-                        player.manager.add(b)
-                        playSound = true
-                    }
+            if( player.flightUnits.length>=5 ){
+                for( let i of [1,player.flightUnits.length-2] ){
+                    const u = player.flightUnits[i]
+                    this.gun.set(
+                        u,
+                        new FingerBeamGun(
+                            player,
+                            u,
+                            i==1?1:-1
+                        )
+                    )
                 }
+            }
 
-                this.squareBeamCooldown += squareBeamInterval
-                this.squareBeamCount++
-                playSound && Audio.play( Audio.sounds.fingerLaser )
+            if( player.flightUnits.length>=7 ){
+                for( let i of [2,player.flightUnits.length-3] ){
+                    const u = player.flightUnits[i]
+                    this.gun.set(
+                        u,
+                        new SquareLaserGun(
+                            player,
+                            u,
+                            i==1?1:-1
+                        )
+                    )
+                }
             }
         }
     }

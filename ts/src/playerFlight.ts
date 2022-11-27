@@ -97,6 +97,7 @@ namespace zlsSpaceInvader {
             ]
             this.visible = true
             this.pos.set(0,this.stage.bottom)
+            this.poweredShot.assignGun( this )
         }
 
         add( units: FlightUnit[] ){
@@ -108,6 +109,7 @@ namespace zlsSpaceInvader {
                 u.pos.x = (i-(this.flightUnits.length-1)/2)*9
             }
             this.pos.x += leftMostPos-this.flightUnits[0].pos.x
+            this.poweredShot.assignGun( this )
         }
 
         remove( index: number ){
@@ -121,6 +123,8 @@ namespace zlsSpaceInvader {
                 }
                 this.pos.x += leftMostPos-positioningUnit.pos.x
                 this.invincibleTime = 1
+
+                this.poweredShot.assignGun(this)
             }else{
                 this.visible = false
                 this.next = true
