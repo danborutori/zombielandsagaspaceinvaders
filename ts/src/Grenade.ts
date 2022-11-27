@@ -1,6 +1,7 @@
 namespace zlsSpaceInvader {
 
     const v1 = new Vector2
+    const colliderBox = new ColliderBox( new Vector2(6,6))
 
     export class Grenade extends EnemyBullet {
         
@@ -15,6 +16,7 @@ namespace zlsSpaceInvader {
             readonly phase: number = 0
         ){
             super(stage, direction, shooter, speed)
+            this.collisionShape = colliderBox
 
             this.shouldCollidePlayerBullet = ()=>true
             this.onCollidePlayerBullet = (b, hitPos)=>{

@@ -106,6 +106,21 @@ namespace zlsSpaceInvader {
         }
     }
 
+    class BigLaserGun extends Gun {
+        readonly interval = 1
+
+        makeBullet() {
+            if( this.playerFlight.manager ){
+                const b = new BigLaser(this.playerFlight, this.unit)
+                b.pos.copy(this.playerFlight.pos)
+                b.pos.x += this.unit.pos.x          
+                this.playerFlight.manager.add(b)
+
+                Audio.play( Audio.sounds.eyeLaser )
+            }
+        }
+    }
+
     export class PlayerPoweredShot{
         private gun: WeakMap<FlightUnit,Gun> = new WeakMap()
 
@@ -166,6 +181,17 @@ namespace zlsSpaceInvader {
                         )
                     )
                 }
+            }
+
+            if( player.flightUnits.length>=9 ){
+                const u = player.flightUnits[Math.floor(player.flightUnits.length/2)]
+                this.gun.set(
+                    u,
+                    new BigLaserGun(
+                        player,
+                        u
+                    )
+                )
             }
         }
     }

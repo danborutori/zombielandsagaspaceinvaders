@@ -43,6 +43,15 @@ namespace zlsSpaceInvader {
         laser6: "./images/laser6.png",
         laser7: "./images/laser7.png",
         laser8: "./images/laser8.png",
+        blaser0: "./images/blaser0.png",
+        blaser1: "./images/blaser1.png",
+        blaser2: "./images/blaser2.png",
+        blaser3: "./images/blaser3.png",
+        blaser4: "./images/blaser4.png",
+        blaser5: "./images/blaser5.png",
+        blaser6: "./images/blaser6.png",
+        blaser7: "./images/blaser7.png",
+        blaser8: "./images/blaser8.png",
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -99,6 +108,15 @@ namespace zlsSpaceInvader {
             laser6: new Image,
             laser7: new Image,
             laser8: new Image,
+            blaser0: new Image,
+            blaser1: new Image,
+            blaser2: new Image,
+            blaser3: new Image,
+            blaser4: new Image,
+            blaser5: new Image,
+            blaser6: new Image,
+            blaser7: new Image,
+            blaser8: new Image,
         }
 
         load(){
