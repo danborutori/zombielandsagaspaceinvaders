@@ -122,12 +122,6 @@ namespace zlsSpaceInvader {
                     playerFlight.invincibleTime = 9000 // a large enough number
                     this.waveManager.pause = true
 
-                    const onTitleEnd = ()=>{
-                        playerFlight.paused = false
-                        playerFlight.invincibleTime = 0
-                        this.waveManager.pause = false
-                    }
-
                     this.waveManager.showTitle(
                         this.gameObjectManager,
                         this.wave+1
