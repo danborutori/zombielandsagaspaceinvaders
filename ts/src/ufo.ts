@@ -61,19 +61,36 @@ namespace zlsSpaceInvader {
         ){
             const v1 = new Vector2
 
+            const videoNoise = new VideoNoise()
+            videoNoise.renderHalf = false
+            videoNoise.renderOrder = 3
+            videoNoise.strength = 0
+            manager.add( videoNoise )
+
             const ufo = new SpriteObject( Sprites.shared.images.ufo )
             ufo.renderHalf = false
             ufo.renderOrder = 2
             ufo.pos.set(0,this.stage.bottom+200)
             manager.add( ufo )
 
-            await ObjectMotionControl.moveTo(
-                ufo,
-                v1.set(0,this.stage.top-200),
-                50
-            )
+            await Promise.all([
+                ObjectMotionControl.moveTo(
+                    ufo,
+                    v1.set(0,this.stage.top-200),
+                    50
+                ),
+                (async ()=>{
+                    Audio.play(Audio.sounds.alienShip)
+                    const distance = this.stage.bottom+200
+                    while( Math.abs(ufo.pos.y-(this.stage.top-200))>1){
+                        await videoNoise.wait(0)
+                        videoNoise.strength = 1-Math.abs(ufo.pos.y/distance)
+                    }
+                })()
+            ])
 
             ufo.removeFromManager()
+            videoNoise.removeFromManager()
         }
 
         async showTitle(manager: GameObjectManager, wave: number) {
