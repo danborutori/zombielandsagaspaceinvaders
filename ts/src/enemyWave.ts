@@ -2,17 +2,26 @@ namespace zlsSpaceInvader {
 
     export interface IEnemyWave{
         pause: boolean
-        readonly isBoss: boolean
+        showTitle(manager: GameObjectManager, wave: number): Promise<void>
         init( scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight ): void
         clear(): void
     }
 
     export abstract class BaseEnemyWave implements IEnemyWave {
         protected enemies: EnemyFlight[] = []
-        abstract readonly isBoss: boolean
 
         set pause(b: boolean){
             for( let e of this.enemies ) e.paused = b
+        }
+
+        showTitle(manager: GameObjectManager, wave: number){
+            return new Promise<void>( (resolve, reject )=>{
+                const waveScreen = new WaveScreen(
+                    wave,
+                    resolve
+                )    
+                manager.add(waveScreen)
+            })
         }
 
         abstract init( scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight ): void
@@ -20,6 +29,15 @@ namespace zlsSpaceInvader {
         clear(){
             //clear old enemies
             for( let e of this.enemies ) e.removeFromManager()
+        }
+    }
+
+
+    export abstract class BossEnemyWave extends BaseEnemyWave {
+        async showTitle(manager: GameObjectManager, wave: number){
+            const bossTitle = new BossTitle()
+            manager.add(bossTitle)
+            await bossTitle.show()
         }
     }
 

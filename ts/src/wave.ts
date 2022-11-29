@@ -21,8 +21,11 @@ namespace zlsSpaceInvader {
             this.enemyWave && (this.enemyWave.pause = b)
         }
 
-        get isBoss(){
-            return this.enemyWave ? this.enemyWave.isBoss : false
+        async showTitle(
+            manager: GameObjectManager,
+            wave: number
+        ){
+            await (this.enemyWave && this.enemyWave.showTitle(manager,wave))
         }
 
         init(
