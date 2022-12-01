@@ -176,8 +176,18 @@ namespace zlsSpaceInvader {
                                         v1.add(playerFlight.pos, u.pos),
                                         v2
                                     )
-                                ){
-                                    this.onHitPlayer(playerFlight,i,this.manager)
+                                ){            
+                                    if( u.powered ){
+                                        if( this.hp>0 ){
+                                            this.hp -= 1
+                                            
+                                            if( this.hp<=0 ){
+                                                this.onDie()
+                                            }
+                                        }
+                                    }else{
+                                        this.onHitPlayer(playerFlight,i,this.manager)
+                                    }
                                     break
                                 }
                             }

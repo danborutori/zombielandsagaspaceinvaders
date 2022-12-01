@@ -16,6 +16,8 @@ namespace zlsSpaceInvader {
 
         flightUnits: FlightUnit[] = []
 
+        private renderTime = 0
+
         private poweredShot = new PlayerPoweredShot()
 
         constructor(            
@@ -55,6 +57,11 @@ namespace zlsSpaceInvader {
                 this.poweredShot.update( deltaTime, this )
             }
 
+            for( let u of this.flightUnits ){
+                if( u.powered ){
+                    u.pos.rotateAround(Math.PI*2*deltaTime)
+                }
+            }
         }
 
         private async doNextMember(){
@@ -82,7 +89,33 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render(deltaTime,ctx)
 
+            this.renderTime += deltaTime
+
             for( let u of this.flightUnits ){
+                if( u.powered ){
+                    ctx.filter = `brightness(${Math.floor(Math.cos(Math.PI*2*this.renderTime/0.5)*400)}%)`
+                    ctx.drawImage(
+                        u.sprite,
+                        Math.floor(this.pos.x+u.pos.x-u.sprite.width/2)+1,
+                        Math.floor(this.pos.y+u.pos.y-u.sprite.height/2)
+                    )
+                    ctx.drawImage(
+                        u.sprite,
+                        Math.floor(this.pos.x+u.pos.x-u.sprite.width/2)-1,
+                        Math.floor(this.pos.y+u.pos.y-u.sprite.height/2)
+                    )
+                    ctx.drawImage(
+                        u.sprite,
+                        Math.floor(this.pos.x+u.pos.x-u.sprite.width/2),
+                        Math.floor(this.pos.y+u.pos.y-u.sprite.height/2)+1
+                    )
+                    ctx.drawImage(
+                        u.sprite,
+                        Math.floor(this.pos.x+u.pos.x-u.sprite.width/2),
+                        Math.floor(this.pos.y+u.pos.y-u.sprite.height/2)-1
+                    )
+                    ctx.filter = "none"
+                }
                 ctx.drawImage(
                     u.sprite,
                     Math.floor(this.pos.x+u.pos.x-u.sprite.width/2),
@@ -107,6 +140,7 @@ namespace zlsSpaceInvader {
             for( let i=0; i<this.flightUnits.length; i++ ){
                 const u = this.flightUnits[i]
                 u.pos.x = (i-(this.flightUnits.length-1)/2)*9
+                u.pos.y = 0
             }
             this.pos.x += leftMostPos-this.flightUnits[0].pos.x
             this.poweredShot.assignGun( this )
@@ -120,6 +154,7 @@ namespace zlsSpaceInvader {
                 for( let i=0; i<this.flightUnits.length; i++ ){
                     const u = this.flightUnits[i]
                     u.pos.x = (i-(this.flightUnits.length-1)/2)*9
+                    u.pos.y = 0
                 }
                 this.pos.x += leftMostPos-positioningUnit.pos.x
                 this.invincibleTime = 1
@@ -138,6 +173,7 @@ namespace zlsSpaceInvader {
 
         readonly pos = new Vector2
         readonly collisionShape = collisionShape
+        powered = false
 
         constructor(
             readonly sprite: HTMLImageElement,

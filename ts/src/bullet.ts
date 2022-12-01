@@ -158,34 +158,52 @@ namespace zlsSpaceInvader {
             }
         }
 
-        update(deltaTime: number): void {
-            super.update(deltaTime)
-
-            this.collidePlayerBullet()
-
+        private hitPlayer(){
             if( this.manager && this.canHitPlayer ){
                 for( let playerFlight of this.manager.playerFlights ){
                     if( playerFlight.invincibleTime<=0 ){
                         for( let i=0; i<playerFlight.flightUnits.length; i++ ){
                             const u = playerFlight.flightUnits[i]
-                            if(
-                                CollisionChecker.intersect(
-                                    this.collisionShape,
-                                    this.pos,
-                                    playerFlightBulletCheckShape,
-                                    v1.add(playerFlight.pos, u.pos),
-                                    v2   
-                                )
-                            ){
-                                this.shooter.onHitPlayer(playerFlight, i, this.manager)
-                                this.onHitPlayer()
-                                break
+                            if( u.powered ){
+                                if(
+                                    CollisionChecker.intersect(
+                                        this.collisionShape,
+                                        this.pos,
+                                        u.collisionShape,
+                                        v1.add(playerFlight.pos, u.pos),
+                                        v2   
+                                    )
+                                ){
+                                    this.onHitPlayer()
+                                    break
+                                }
+                            }else{
+                                if(
+                                    CollisionChecker.intersect(
+                                        this.collisionShape,
+                                        this.pos,
+                                        playerFlightBulletCheckShape,
+                                        v1.add(playerFlight.pos, u.pos),
+                                        v2   
+                                    )
+                                ){
+                                    this.shooter.onHitPlayer(playerFlight, i, this.manager)
+                                    this.onHitPlayer()
+                                    break
+                                }
                             }
                         }
                     }
                     if(!this.manager)break
                 }
             }
+        }
+
+        update(deltaTime: number): void {
+            super.update(deltaTime)
+
+            this.collidePlayerBullet()
+            this.hitPlayer()            
         }
     }
 }

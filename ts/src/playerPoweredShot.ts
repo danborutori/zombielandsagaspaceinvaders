@@ -138,46 +138,80 @@ namespace zlsSpaceInvader {
         assignGun( player: PlayerFlight ){
             for( let i=0; i<player.flightUnits.length; i++ ){
                 const u = player.flightUnits[i]
+                u.powered = false
                 this.gun.set( u, new NormalShot(player,u,0) )
             }
 
             if( player.flightUnits.length>=3 ){
-                for( let i of [0,player.flightUnits.length-1] ){
+                let index: number[]
+                switch(player.flightUnits.length){
+                case 3:
+                    index = [0,2]
+                    break
+                case 4:
+                    index = [0,3]
+                    break
+                case 5:
+                    index = [0,4]
+                    break
+                case 6:
+                    index = [0,5]
+                    break
+                default:
+                    index = [1,player.flightUnits.length-2]
+                    break
+                }
+                let cnt = 0
+                for( let i of index ){
                     const u = player.flightUnits[i]
                     this.gun.set(
                         u,
                         new NormalShot(
                             player,
                             u,
-                            i==0?-10*Math.PI/180:10*Math.PI/180
+                            cnt++?10*Math.PI/180:-10*Math.PI/180
                         )
                     )
                 }
             }
 
             if( player.flightUnits.length>=5 ){
-                for( let i of [1,player.flightUnits.length-2] ){
+                let index: number[]
+                switch(player.flightUnits.length){
+                case 5:
+                    index = [1,3]
+                    break
+                case 6:
+                    index = [1,4]
+                    break
+                default:
+                    index = [2,player.flightUnits.length-3]
+                    break
+                }
+                let cnt = 0
+                for( let i of index ){
                     const u = player.flightUnits[i]
                     this.gun.set(
                         u,
                         new FingerBeamGun(
                             player,
                             u,
-                            i==1?1:-1
+                            cnt++?-1:1
                         )
                     )
                 }
             }
 
             if( player.flightUnits.length>=7 ){
-                for( let i of [2,player.flightUnits.length-3] ){
+                for( let i of [0,player.flightUnits.length-1] ){
                     const u = player.flightUnits[i]
+                    u.powered = true
                     this.gun.set(
                         u,
                         new SquareLaserGun(
                             player,
                             u,
-                            i==1?1:-1
+                            i==0?1:-1
                         )
                     )
                 }
