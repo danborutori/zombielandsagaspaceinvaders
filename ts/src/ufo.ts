@@ -42,8 +42,109 @@ namespace zlsSpaceInvader {
                 10
             )
 
-            while(true){
-                await this.wait(0)
+            await this.wait(2)
+
+            await Promise.all([
+                this.attackPhase1()
+            ])
+        }
+
+        private async normalShot(
+            shotPos: Vector2
+        ){
+            const shotCtx = FlightShootPatternControl.shoot(
+                this,
+                new IntervalNode(
+                    new ConstantNode(0.4),
+                    new RingNode(
+                        new ConstantNode(5),
+                        new ConstantNode(16),
+                        new EnemyBulletNode(
+                            new ConstantNode(shotPos),
+                            new SineNode(
+                                new ConstantNode(0.5),
+                                new ConstantNode(Math.PI/6)
+                            ),
+                            new ConstantNode(30)
+                        )
+                    )
+                )
+            ) 
+
+            try{
+                await this.wait(3)
+            }catch(e){
+                // do nothing
+            }finally{
+                shotCtx.stop()
+            }
+        }
+
+        private async attackPhase1(){
+            const v1 = new Vector2
+            const v2 = new Vector2
+            const v3 = new Vector2
+
+            await this.normalShot(
+                v1.set(0,150).rotateAround(15*Math.PI/180)
+            )
+            await this.wait(1)
+
+            await this.normalShot(
+                v1.set(0,150).rotateAround(-15*Math.PI/180)
+            )
+            await this.wait(1)
+
+            await this.normalShot(
+                v1.set(0,150)
+            )
+            await this.wait(1)
+
+            for( let i=0; true; i++ ){
+
+                await Promise.all([
+                    this.normalShot(
+                        v1.set(0,150).rotateAround(15*Math.PI/180)
+                    ),
+                    this.normalShot(
+                        v2.set(0,150).rotateAround(-15*Math.PI/180)
+                    )
+                ])
+                await this.wait(1)
+
+                await Promise.all([
+                    this.normalShot(
+                        v1.set(0,150).rotateAround(0)
+                    ),
+                    this.normalShot(
+                        v2.set(0,150).rotateAround(-15*Math.PI/180)
+                    )
+                ])
+                await this.wait(1)
+
+                await Promise.all([
+                    this.normalShot(
+                        v1.set(0,150).rotateAround(0)
+                    ),
+                    this.normalShot(
+                        v2.set(0,150).rotateAround(15*Math.PI/180)
+                    )
+                ])
+                await this.wait(1)
+
+                await Promise.all([
+                    this.normalShot(
+                        v1.set(0,150).rotateAround(0)
+                    ),
+                    this.normalShot(
+                        v2.set(0,150).rotateAround(15*Math.PI/180)
+                    ),
+                    this.normalShot(
+                        v3.set(0,150).rotateAround(-15*Math.PI/180)
+                    )
+                ])
+                await this.wait(1)
+
             }
         }
     }
@@ -94,7 +195,7 @@ namespace zlsSpaceInvader {
         }
 
         async showTitle(manager: GameObjectManager, wave: number) {
-            await this.ufoFlyOver( manager )
+            // await this.ufoFlyOver( manager )
             await super.showTitle( manager, wave )
         }
 
