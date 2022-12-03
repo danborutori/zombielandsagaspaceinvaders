@@ -285,11 +285,14 @@ namespace zlsSpaceInvader {
         }
     }
 
-    export class Zombie3Wave extends BaseEnemyWave {
+    export class Zombie3Wave extends BossEnemyWave {
         readonly isBoss = true
 
-        constructor(readonly onWaveEnd: ()=>void){
-            super()
+        constructor(
+            readonly onWaveEnd: ()=>void,            
+            nextMember: ()=>FlightUnit | null
+        ){
+            super(nextMember)
         }
 
         init(scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight): void {
@@ -302,7 +305,10 @@ namespace zlsSpaceInvader {
             this.enemies.push( boss )
             gameObjectManager.add( boss )
 
+            const powerupCtx = this.dropPowerUp( scoreAndCredit, gameObjectManager )
             boss.playAttackSequence(this.enemies).then(async ()=>{
+
+                powerupCtx.stop()
 
                 await waiter.wait(5)
                 waiter.removeFromManager()

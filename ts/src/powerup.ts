@@ -34,27 +34,29 @@ namespace zlsSpaceInvader {
         private collidePlayer(){
             if( this.manager ){
                 for( let p of this.manager.playerFlights ){
-                    for( let u of p.flightUnits ){
-                        if( CollisionChecker.intersect(
-                            powerupCollider,
-                            this.pos,
-                            u.collisionShape,
-                            v1.add(p.pos,u.pos),
-                            v2
-                         )){
-                            const nextMember = this.nextMember()
-                            if( nextMember ){
-                                p.add([nextMember])
-                            }else{
-                                this.scorer.score += 1000
-                                const text = new FloatingText("1000")
-                                text.pos.copy(v2)
-                                this.manager.add(text)
+                    if( p.visible ){
+                        for( let u of p.flightUnits ){
+                            if( CollisionChecker.intersect(
+                                powerupCollider,
+                                this.pos,
+                                u.collisionShape,
+                                v1.add(p.pos,u.pos),
+                                v2
+                            )){
+                                const nextMember = this.nextMember()
+                                if( nextMember ){
+                                    p.add([nextMember])
+                                }else{
+                                    this.scorer.score += 1000
+                                    const text = new FloatingText("1000")
+                                    text.pos.copy(v2)
+                                    this.manager.add(text)
+                                }
+                                Audio.play(Audio.sounds.bonus)
+                                this.removeFromManager()
+                                break
                             }
-                            Audio.play(Audio.sounds.bonus)
-                            this.removeFromManager()
-                            break
-                         }
+                        }
                     }
                 }
             }
