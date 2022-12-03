@@ -29,7 +29,8 @@ namespace zlsSpaceInvader {
             wave: number,
             scoreAndCredit: ScoreAndCredit,
             gameObjectManager: GameObjectManager,
-            playerFlight: PlayerFlight,
+            playerFlight: PlayerFlight,            
+            nextMember: ()=>FlightUnit | null,
             onWaveEnd: ()=>void
         ){
             //clear old enemies
@@ -40,10 +41,10 @@ namespace zlsSpaceInvader {
             //     this.enemyWave = new EmptyWave( onWaveEnd )
             //     break
             case 14:
-                this.enemyWave = new Zombie3Wave( onWaveEnd )
+                this.enemyWave = new Zombie3Wave( onWaveEnd, nextMember )
                 break
             case 29:
-                this.enemyWave = new KaijinWave( onWaveEnd )
+                this.enemyWave = new KaijinWave( onWaveEnd, nextMember )
                 break
             default:
                 this.enemyWave = new EnemyWave(

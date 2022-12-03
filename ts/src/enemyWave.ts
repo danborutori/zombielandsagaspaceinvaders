@@ -90,4 +90,47 @@ namespace zlsSpaceInvader {
         }
     }
 
+    export abstract class BossEnemyWave extends BaseEnemyWave {
+
+        constructor(
+            readonly nextMember: ()=>FlightUnit | null
+        ){
+            super()
+        }
+
+        protected dropPowerUp(
+            scoreAndCredit: ScoreAndCredit,
+            gameObjectManager: GameObjectManager
+        ){
+            let end = false
+
+            const coroutine = async () => {
+                const waiter = new GameObject
+                gameObjectManager.add( waiter )
+    
+                while(true){
+                    await waiter.wait(20)
+                    const powerup = new PowerUp(
+                        scoreAndCredit,
+                        this.nextMember
+                    )
+                    powerup.pos.set(
+                        mix(scoreAndCredit.stage.left+4.5,scoreAndCredit.stage.right-4.5,Math.random()),
+                        scoreAndCredit.stage.top-4.5
+                    )
+                    gameObjectManager.add(powerup)
+                    if(end)break
+                }
+    
+                waiter.removeFromManager()
+            }
+            coroutine()
+
+            return {
+                stop: ()=>end=true
+            }
+        }
+
+    }    
+
 }

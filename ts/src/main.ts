@@ -81,7 +81,13 @@ namespace zlsSpaceInvader {
             playerFlight.pos.y = this.stage.bottom-35
             this.gameObjectManager.add(playerFlight)
 
-            this.resetEnemies( playerFlight, scoreAndCredit )
+            this.resetEnemies(
+                playerFlight,
+                scoreAndCredit,
+                ()=>{
+                    return franchouchou.nextMember
+                }
+            )
 
             const franchouchou = new Franchouchou( this.stage, this.gameObjectManager)
             this.gameObjectManager.add( franchouchou )
@@ -100,16 +106,18 @@ namespace zlsSpaceInvader {
 
         private resetEnemies(
             playerFlight: PlayerFlight,
-            scoreAndCredit: ScoreAndCredit
+            scoreAndCredit: ScoreAndCredit,
+            nextMember: ()=>FlightUnit | null
         ){
             this.waveManager.init(
                 this.wave,
                 scoreAndCredit,
                 this.gameObjectManager,
                 playerFlight,
+                nextMember,
                 ()=>{
                     this.wave += 1
-                    this.resetEnemies( playerFlight, scoreAndCredit )
+                    this.resetEnemies( playerFlight, scoreAndCredit, nextMember )
                     playerFlight.paused = true
                     playerFlight.invincibleTime = 9000 // a large enough number
                     this.waveManager.pause = true

@@ -428,11 +428,14 @@ namespace zlsSpaceInvader {
         }
     }
 
-    export class KaijinWave extends BaseEnemyWave {
+    export class KaijinWave extends BossEnemyWave {
         readonly isBoss = true
 
-        constructor(readonly onWaveEnd: ()=>void){
-            super()
+        constructor(
+            readonly onWaveEnd: ()=>void,
+            nextMember: ()=>FlightUnit | null
+        ){
+            super(nextMember)
         }
 
         init(scoreAndCredit: ScoreAndCredit, gameObjectManager: GameObjectManager, playerFlight: PlayerFlight): void {
@@ -445,9 +448,11 @@ namespace zlsSpaceInvader {
             this.enemies.push( boss )
             gameObjectManager.add( boss )
 
+            const powerupCtx = this.dropPowerUp( scoreAndCredit, gameObjectManager )
             boss.playAttackSequence(
                 scoreAndCredit.stage
             ).then(async ()=>{
+                powerupCtx.stop()
 
                 await waiter.wait(5)
                 waiter.removeFromManager()
