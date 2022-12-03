@@ -32,15 +32,6 @@ namespace zlsSpaceInvader {
         }
     }
 
-
-    export abstract class BossEnemyWave extends BaseEnemyWave {
-        async showTitle(manager: GameObjectManager, wave: number){
-            const bossTitle = new BossTitle()
-            manager.add(bossTitle)
-            await bossTitle.show()
-        }
-    }
-
     export class EnemyWave extends BaseEnemyWave {
 
         private enemyCooperator: EnemyCooperator
@@ -109,11 +100,16 @@ namespace zlsSpaceInvader {
     }
 
     export abstract class BossEnemyWave extends BaseEnemyWave {
-
         constructor(
             readonly nextMember: ()=>FlightUnit | null
         ){
             super()
+        }
+
+        async showTitle(manager: GameObjectManager, wave: number){
+            const bossTitle = new BossTitle()
+            manager.add(bossTitle)
+            await bossTitle.show()
         }
 
         protected dropPowerUp(

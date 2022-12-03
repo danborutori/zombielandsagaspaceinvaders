@@ -152,9 +152,10 @@ namespace zlsSpaceInvader {
     export class UFOWave extends BossEnemyWave {
         constructor(
             readonly stage: Stage,
-            readonly onWaveEnd: ()=>void
+            readonly onWaveEnd: ()=>void,
+            nextMember: ()=>FlightUnit | null
         ){
-            super()
+            super(nextMember)
         }
 
         private async ufoFlyOver(
@@ -209,6 +210,7 @@ namespace zlsSpaceInvader {
             this.enemies.push( boss )
             gameObjectManager.add( boss )
 
+            const powerupCtx = this.dropPowerUp(scoreAndCredit, gameObjectManager)
             boss.playAttackSequence().then(async ()=>{
 
                 await waiter.wait(5)
