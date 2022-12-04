@@ -1,8 +1,10 @@
 namespace zlsSpaceInvader {
 
     const defalutMaxHp = 1000
+    const epsilon = 0.0001
 
     const collisionShape = new ColliderBox(new Vector2(250,250))
+    const rotateSpeed = Math.PI/16
 
     class UFO extends EnemyFlight{
 
@@ -16,6 +18,17 @@ namespace zlsSpaceInvader {
                 defalutMaxHp
             )
             this.collisionShape = collisionShape
+            this.rotateStep = 0.0001
+        }
+
+        protected resetRotation(deltaTime: number): void {}
+
+        async turn( targetAngle: number, speed: number ){
+            while( Math.abs(this.rotate-targetAngle)>epsilon ){
+                const dt = await this.wait(0)
+                const d = targetAngle-this.rotate
+                this.rotate += Math.sign(d)*Math.min(Math.abs(d), speed*dt)
+            }
         }
 
         protected wrapAround(){
@@ -45,8 +58,49 @@ namespace zlsSpaceInvader {
             await this.wait(2)
 
             await Promise.all([
-                this.attackPhase1()
+                this.startAttack()
             ])
+        }
+
+        private async startAttack(){
+            this.attackPhase1().catch(e=>{
+                // do nothing
+            })
+            while( this.hp>defalutMaxHp*0.8 ){
+                await this.wait(0)
+            }
+            this.terminateAllWaiting()
+            
+            this.attackPhase2().catch(e=>{
+                // do nothing
+            })
+            while( this.hp>defalutMaxHp*0.6 ){
+                await this.wait(0)
+            }
+            this.terminateAllWaiting()
+
+            this.attackPhase3().catch(e=>{
+                // do nothing
+            })
+            while( this.hp>defalutMaxHp*0.4 ){
+                await this.wait(0)
+            }
+            this.terminateAllWaiting()
+
+            this.attackPhase4().catch(e=>{
+                // do nothing
+            })
+            while( this.hp>defalutMaxHp*0.2 ){
+                await this.wait(0)
+            }
+            this.terminateAllWaiting()
+
+            this.attackPhase5().catch(e=>{
+                // do nothing
+            })
+            while( this.hp>0 ){
+                await this.wait(0)
+            }
         }
 
         private async normalShot(
@@ -74,7 +128,7 @@ namespace zlsSpaceInvader {
             try{
                 await this.wait(3)
             }catch(e){
-                // do nothing
+                throw e
             }finally{
                 shotCtx.stop()
             }
@@ -147,6 +201,38 @@ namespace zlsSpaceInvader {
 
             }
         }
+
+        private async attackPhase2(){
+            const v1 = new Vector2
+
+            await this.turn(Math.PI/5,rotateSpeed)
+
+            
+        }
+
+        private async attackPhase3(){
+            const v1 = new Vector2
+
+            await this.turn(Math.PI*2/5,rotateSpeed)
+
+            
+        }
+
+        private async attackPhase4(){
+            const v1 = new Vector2
+
+            await this.turn(Math.PI*3/5,rotateSpeed)
+
+            
+        }
+
+        private async attackPhase5(){
+            const v1 = new Vector2
+
+            await this.turn(Math.PI*4/5,rotateSpeed)
+
+            
+        }
     }
 
     export class UFOWave extends BossEnemyWave {
@@ -212,6 +298,7 @@ namespace zlsSpaceInvader {
 
             const powerupCtx = this.dropPowerUp(scoreAndCredit, gameObjectManager)
             boss.playAttackSequence().then(async ()=>{
+                powerupCtx.stop()
 
                 await waiter.wait(5)
                 waiter.removeFromManager()

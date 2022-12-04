@@ -14,6 +14,7 @@ namespace zlsSpaceInvader {
         private flashingSprite: HTMLCanvasElement
         readonly vel = new Vector2
         protected flyOff?: EnemyFlyOff<EnemyFlight>
+        rotateStep = Math.PI/8
         rotate = 0
         invincible = false
         bulletCountDelta = 0
@@ -154,6 +155,10 @@ namespace zlsSpaceInvader {
             }
         }
 
+        protected resetRotation( deltaTime: number ){
+            this.rotate -= Math.sign(this.rotate)*Math.min(Math.abs(this.rotate),deltaTime*Math.PI*2)
+        }
+
         private collidePlayerFlight( deltaTime: number ){
             if( this.manager ){
                 for( let playerFlight of Array.from(this.manager.playerFlights)){
@@ -162,7 +167,7 @@ namespace zlsSpaceInvader {
                         if( this.flyOff ){
                             this.flyOff.update( deltaTime, playerFlight )
                         }else{
-                            this.rotate -= Math.sign(this.rotate)*Math.min(Math.abs(this.rotate),deltaTime*Math.PI*2)
+                            this.resetRotation( deltaTime )
                         }
 
                         if( playerFlight.invincibleTime<=0 ){
@@ -225,8 +230,7 @@ namespace zlsSpaceInvader {
             const x = Math.floor(this.pos.x)
             const y = Math.floor(this.pos.y)
             ctx.translate(x, y)
-            const rotateStep = Math.PI/8
-            ctx.rotate(Math.round(this.rotate/rotateStep)*rotateStep)
+            ctx.rotate(Math.round(this.rotate/this.rotateStep)*this.rotateStep)
             ctx.translate(-x, -y)
             super.render(deltaTime,ctx)
             ctx.restore()
