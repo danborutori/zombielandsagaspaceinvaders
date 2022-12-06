@@ -68,7 +68,7 @@ namespace zlsSpaceInvader {
             this.attackPhase1().catch(e=>{
                 // do nothing
             })
-            while( this.hp>defalutMaxHp*0.8 ){
+            while( this.hp>defalutMaxHp*3/4 ){
                 await this.wait(0)
             }
             this.terminateAllWaiting()
@@ -76,7 +76,7 @@ namespace zlsSpaceInvader {
             this.attackPhase2().catch(e=>{
                 // do nothing
             })
-            while( this.hp>defalutMaxHp*0.6 ){
+            while( this.hp>defalutMaxHp*2/4 ){
                 await this.wait(0)
             }
             this.terminateAllWaiting()
@@ -84,20 +84,12 @@ namespace zlsSpaceInvader {
             this.attackPhase3().catch(e=>{
                 // do nothing
             })
-            while( this.hp>defalutMaxHp*0.4 ){
+            while( this.hp>defalutMaxHp/4 ){
                 await this.wait(0)
             }
             this.terminateAllWaiting()
 
             this.attackPhase4().catch(e=>{
-                // do nothing
-            })
-            while( this.hp>defalutMaxHp*0.2 ){
-                await this.wait(0)
-            }
-            this.terminateAllWaiting()
-
-            this.attackPhase5().catch(e=>{
                 // do nothing
             })
             while( this.hp>0 ){
@@ -106,29 +98,33 @@ namespace zlsSpaceInvader {
         }
 
         private async normalShot(
-            shotPos: Vector2
+            shotPos: Vector2,
+            sinPeroid: number = 0.5,
+            bulletSpeed: number = 30,
+            duration: number = 3,
+            interval: number = 0.4
         ){
             const shotCtx = FlightShootPatternControl.shoot(
                 this,
                 new IntervalNode(
-                    new ConstantNode(0.4),
+                    new ConstantNode(interval),
                     new RingNode(
                         new ConstantNode(5),
                         new ConstantNode(16),
                         new EnemyBulletNode(
                             new ConstantNode(shotPos),
                             new SineNode(
-                                new ConstantNode(0.5),
+                                new ConstantNode(sinPeroid),
                                 new ConstantNode(Math.PI/6)
                             ),
-                            new ConstantNode(30)
+                            new ConstantNode(bulletSpeed)
                         )
                     )
                 )
             ) 
 
             try{
-                await this.wait(3)
+                await this.wait(duration)
             }catch(e){
                 throw e
             }finally{
@@ -147,6 +143,26 @@ namespace zlsSpaceInvader {
                 this.manager.add(laser)
                 Audio.play(Audio.sounds.eyeLaser)
             }
+        }
+
+        private async rotatingShootLaser(
+            clockwise: number
+        ){
+            await Promise.all([
+                this.turn(
+                    this.rotate+Math.PI/2*clockwise,
+                    Math.PI/5
+                ),
+                (async ()=>{
+                    for( let i=0; i<6; i++ ){
+                        if( i%2==0 )
+                            this.shootLaser(-10*Math.PI/180*clockwise)
+                        else
+                            this.shootLaser(-40*Math.PI/180*clockwise)
+                        await this.wait(0.3)
+                    }
+                })()
+            ])
         }
 
         private async attackPhase1(){
@@ -218,18 +234,16 @@ namespace zlsSpaceInvader {
         }
 
         private async attackPhase2(){
-            const v1 = new Vector2
-
             await this.turn(Math.PI/5,rotateSpeed)
 
-                this.shootLaser(0)
-                await this.wait(2)
+            this.shootLaser(0)
+            await this.wait(2)
 
-                this.shootLaser(15*Math.PI/180)
-                await this.wait(2)
+            this.shootLaser(15*Math.PI/180)
+            await this.wait(2)
 
-                this.shootLaser(-15*Math.PI/180)
-                await this.wait(2)
+            this.shootLaser(-15*Math.PI/180)
+            await this.wait(2)
 
             while(true){
                 for( let i=0; i<2; i++){
@@ -263,24 +277,51 @@ namespace zlsSpaceInvader {
 
         private async attackPhase3(){
             const v1 = new Vector2
+            const v2 = new Vector2
+            const v3 = new Vector2
 
             await this.turn(Math.PI*2/5,rotateSpeed)
 
-            
+            for( let j=0; ; j++ ){
+
+                for( let i=0; i<2; i++){
+                    await this.rotatingShootLaser((i+j)%2==0?1:-1)
+                    await this.wait(1)
+                }
+
+                await Promise.all([
+                    this.normalShot(
+                        v1.set(0,150).rotateAround(0),
+                        10,
+                        60,
+                        6,
+                        0.2
+                    ),
+                    this.normalShot(
+                        v2.set(0,150).rotateAround(15*Math.PI/180),
+                        10,
+                        60,
+                        6,
+                        0.2
+                    ),
+                    this.normalShot(
+                        v3.set(0,150).rotateAround(-15*Math.PI/180),
+                        10,
+                        60,
+                        6,
+                        0.2
+                    )
+                ])
+                
+                await this.wait(1)
+                
+            }
         }
 
         private async attackPhase4(){
             const v1 = new Vector2
 
             await this.turn(Math.PI*3/5,rotateSpeed)
-
-            
-        }
-
-        private async attackPhase5(){
-            const v1 = new Vector2
-
-            await this.turn(Math.PI*4/5,rotateSpeed)
 
             
         }
