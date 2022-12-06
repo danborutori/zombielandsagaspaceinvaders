@@ -1,5 +1,7 @@
 namespace zlsSpaceInvader {
 
+    const v1 = new Vector2
+
     const defalutMaxHp = 1000
     const epsilon = 0.0001
 
@@ -133,6 +135,19 @@ namespace zlsSpaceInvader {
                 shotCtx.stop()
             }
         }
+        
+        private shootLaser(
+            angle: number
+        ){
+            if( this.manager ){
+                const laser = new UFOLaser(
+                    this,
+                    -this.rotate+angle
+                )
+                this.manager.add(laser)
+                Audio.play(Audio.sounds.eyeLaser)
+            }
+        }
 
         private async attackPhase1(){
             const v1 = new Vector2
@@ -207,7 +222,43 @@ namespace zlsSpaceInvader {
 
             await this.turn(Math.PI/5,rotateSpeed)
 
-            
+                this.shootLaser(0)
+                await this.wait(2)
+
+                this.shootLaser(15*Math.PI/180)
+                await this.wait(2)
+
+                this.shootLaser(-15*Math.PI/180)
+                await this.wait(2)
+
+            while(true){
+                for( let i=0; i<2; i++){
+                    const sign = i%2==0?1:-1
+
+                    for( let j=0; j<6; j++ ){
+                        this.shootLaser(
+                            mix(
+                                -30*Math.PI/180,
+                                30*Math.PI/180,
+                                j/6
+                            )*sign)
+                        await this.wait(0.5)
+                    }
+                    await this.wait(2)
+                }
+
+                for( let i=0; i<8; i++ ){
+                    const sign = i%2==0?1:-1
+                    this.shootLaser(
+                        mix(
+                            30*Math.PI/180,
+                            0/180,
+                            i/8
+                        )*sign)
+                    await this.wait(0.5)
+                }
+                await this.wait(2)
+            }
         }
 
         private async attackPhase3(){
@@ -232,6 +283,88 @@ namespace zlsSpaceInvader {
             await this.turn(Math.PI*4/5,rotateSpeed)
 
             
+        }
+    }
+
+    const laserEmptyCollisionShape = new ColliderCompoundShape()
+    const laserCollisionShape = new ColliderBox( new Vector2(6,223) )
+
+    class UFOLaser extends EnemyBullet {
+
+        private animation: AnimatedSpriteObject
+        private cooldown = 0
+
+        constructor(
+            shooter: UFO,
+            readonly angle: number
+        ){
+            super(shooter.scorer.stage,v1.set(0,1),shooter,0)
+            this.collisionShape = laserEmptyCollisionShape
+
+            this.anchorPos()
+
+            this.animation = new AnimatedSpriteObject([
+                Sprites.shared.images.blaser0,
+                Sprites.shared.images.blaser1,
+                Sprites.shared.images.blaser2,
+                Sprites.shared.images.blaser3,
+                Sprites.shared.images.blaser4,
+                Sprites.shared.images.blaser5,
+                Sprites.shared.images.blaser6,
+                Sprites.shared.images.blaser5,
+                Sprites.shared.images.blaser6,
+                Sprites.shared.images.blaser5,
+                Sprites.shared.images.blaser6,
+                Sprites.shared.images.blaser5,
+                Sprites.shared.images.blaser6,
+                Sprites.shared.images.blaser5,
+                Sprites.shared.images.blaser6,
+                Sprites.shared.images.blaser5,
+                Sprites.shared.images.blaser6,
+                Sprites.shared.images.blaser7,
+                Sprites.shared.images.blaser8,
+            ], 0.05)
+            ;(this.animation as any).pos = this.pos
+            this.animation.removeFromManager = ()=>{
+                this.removeFromManager()
+            }
+        }
+
+        private anchorPos(){
+            this.pos.set( 0, 180 ).rotateAround( this.angle+this.shooter.rotate ).add( this.shooter.pos)
+        }
+
+        protected offscreenCheck(): void {}
+
+        protected onHitPlayer(): void {}
+
+        update(deltaTime: number): void {
+            super.update(deltaTime)
+            this.animation.update( deltaTime )
+            this.anchorPos()
+            this.cooldown -= deltaTime
+
+            if( this.animation.frame>=5 && this.animation.frame<17 && this.cooldown<=0 ){
+                this.collisionShape = laserCollisionShape
+            }else{
+                this.collisionShape = laserEmptyCollisionShape
+            }
+        }
+
+        render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
+            ctx.save()
+            ctx.translate(-4,0)
+            ctx.translate(
+                Math.floor(this.pos.x),
+                Math.floor(this.pos.y)
+            )
+            ctx.rotate(Math.PI)
+            ctx.translate(
+                Math.floor(-this.pos.x),
+                Math.floor(-this.pos.y)
+            )
+            this.animation.render( deltaTime, ctx )
+            ctx.restore()
         }
     }
 
