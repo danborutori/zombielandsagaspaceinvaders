@@ -293,23 +293,23 @@ namespace zlsSpaceInvader {
                     this.normalShot(
                         v1.set(0,150).rotateAround(0),
                         10,
-                        60,
+                        50,
                         6,
-                        0.2
+                        0.3
                     ),
                     this.normalShot(
                         v2.set(0,150).rotateAround(15*Math.PI/180),
                         10,
-                        60,
+                        50,
                         6,
-                        0.2
+                        0.3
                     ),
                     this.normalShot(
                         v3.set(0,150).rotateAround(-15*Math.PI/180),
                         10,
-                        60,
+                        50,
                         6,
-                        0.2
+                        0.3
                     )
                 ])
                 
