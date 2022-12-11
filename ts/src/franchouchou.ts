@@ -71,20 +71,6 @@ namespace zlsSpaceInvader {
             this.reset(foundMembers)
         }
 
-        update( deltaTime: number ){
-            super.update( deltaTime )
-
-            if(
-                Input.shared.maimai &&
-                special
-            ){
-                this.units.push(
-                    special
-                )
-                special = undefined
-            }
-        }
-
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
@@ -96,6 +82,15 @@ namespace zlsSpaceInvader {
                     Math.floor(this.stage.left+15+i*11-spr.width/2),
                     Math.floor(this.stage.bottom-9-spr.height/2)
                 )
+            }
+        }
+
+        onBeforeContinue(){
+            if( knockdownMembers.length==0 &&
+                special
+            ){
+                knockdownMembers.push( special )
+                special = undefined
             }
         }
 

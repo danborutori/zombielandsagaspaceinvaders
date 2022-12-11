@@ -139,6 +139,7 @@ namespace zlsSpaceInvader {
             playerFlight: PlayerFlight,
             franchouchou: Franchouchou
         ){
+            franchouchou.onBeforeContinue()
             if( knockdownMembers.length>0 ){
                 if( scoreAndCredit.credit>0 ){
 

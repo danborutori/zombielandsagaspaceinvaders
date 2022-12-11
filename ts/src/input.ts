@@ -1,18 +1,5 @@
 namespace zlsSpaceInvader {
 
-    const maimaiKeySequence = [
-        "ArrowUp",
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "ArrowLeft",
-        "ArrowRight",
-        "ArrowUp",
-        "ArrowDown"
-    ]
-
     export class Input {
         static shared = new Input()
 
@@ -20,8 +7,6 @@ namespace zlsSpaceInvader {
         right: boolean = false
         fire: boolean = false
         pressAnyKey: boolean = false
-        private maimaiIndex = 0
-        maimai: boolean = false
 
         constructor(){
             addEventListener("keydown", e=>{
@@ -41,15 +26,6 @@ namespace zlsSpaceInvader {
                     this.fire = true
                     this.pressAnyKey = true
                     break
-                }
-                if( e.code==maimaiKeySequence[this.maimaiIndex] ){
-                    this.maimaiIndex++
-                    if( this.maimaiIndex==maimaiKeySequence.length ){
-                        this.maimai = true
-                        this.maimaiIndex = 0
-                    }
-                }else{
-                    this.maimaiIndex = 0
                 }
             })
             addEventListener("keyup", e=>{
@@ -174,7 +150,6 @@ namespace zlsSpaceInvader {
 
         update(){
             this.pressAnyKey = false
-            this.maimai = false
         }
     }
 
