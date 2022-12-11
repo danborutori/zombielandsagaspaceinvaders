@@ -14,9 +14,12 @@ namespace zlsSpaceInvader {
 
         abstract makeBullet(): void
 
-        shot( deltaTime: number ){
+        update( deltaTime: number ){
             if( this.cooldown>0 )
                 this.cooldown -= deltaTime
+        }
+
+        shot(){
             if( this.cooldown<=0 ){
                 this.makeBullet()
                 this.cooldown += this.interval
@@ -125,13 +128,16 @@ namespace zlsSpaceInvader {
         private gun: WeakMap<FlightUnit,Gun> = new WeakMap()
 
         update( deltaTime: number, player: PlayerFlight ){
-            if( Input.shared.fire &&
-                player.canShoot
-            ){
-                for( let u of player.flightUnits ){
-                    const g = this.gun.get(u)
-                    if( g ) g.shot(deltaTime)
-                }
+            
+            for( let u of player.flightUnits ){
+                const g = this.gun.get(u)
+                if( g ){
+                    g.update( deltaTime )
+                    if( Input.shared.fire &&
+                        player.canShoot
+                    )
+                        g.shot()
+                } 
             }
         }
 
