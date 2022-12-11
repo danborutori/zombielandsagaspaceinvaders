@@ -42,7 +42,7 @@ namespace zlsSpaceInvader {
                 const bs = new BloodStainOverAnyWhere()
                 bs.pos.copy(this.pos)
                 this.manager.add(bs)
-                bs.drop(80)
+                bs.drop(180, 4)
             }
         }
 
