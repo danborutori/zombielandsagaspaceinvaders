@@ -32,7 +32,8 @@ namespace zlsSpaceInvader {
 
     export class BloodStainOverAnyWhere extends GameObject {
         async drop(
-            radius: number
+            radius: number,
+            density: number = 1
         ){
             const interval = 0.0125
             let time = 0
@@ -41,11 +42,13 @@ namespace zlsSpaceInvader {
                 time += await this.wait(0)
 
                 while( time>=interval ){
-                    const bs = new BloodStain( Math.floor(Math.random()*sprites.length) )
-                    bs.pos.copy( this.pos ).add(
-                        v1.random().multiply(2).add(-1).normalize().multiply(Math.random()*radius)
-                    )
-                    this.manager && this.manager.add(bs)
+                    for( let j=0; j<density; j++ ){
+                        const bs = new BloodStain( Math.floor(Math.random()*sprites.length) )
+                        bs.pos.copy( this.pos ).add(
+                            v1.random().multiply(2).add(-1).normalize().multiply(Math.random()*radius)
+                        )
+                        this.manager && this.manager.add(bs)
+                    }
                     time -= interval
                 }
             }

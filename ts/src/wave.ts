@@ -21,8 +21,11 @@ namespace zlsSpaceInvader {
             this.enemyWave && (this.enemyWave.pause = b)
         }
 
-        get isBoss(){
-            return this.enemyWave ? this.enemyWave.isBoss : false
+        async showTitle(
+            manager: GameObjectManager,
+            wave: number
+        ){
+            await (this.enemyWave && this.enemyWave.showTitle(manager,wave))
         }
 
         init(
@@ -45,6 +48,9 @@ namespace zlsSpaceInvader {
                 break
             case 29:
                 this.enemyWave = new KaijinWave( onWaveEnd, nextMember )
+                break
+            case 44:
+                this.enemyWave = new UFOWave( scoreAndCredit.stage, onWaveEnd, nextMember )
                 break
             default:
                 this.enemyWave = new EnemyWave(

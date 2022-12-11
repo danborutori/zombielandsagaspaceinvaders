@@ -429,8 +429,6 @@ namespace zlsSpaceInvader {
     }
 
     export class KaijinWave extends BossEnemyWave {
-        readonly isBoss = true
-
         constructor(
             readonly onWaveEnd: ()=>void,
             nextMember: ()=>FlightUnit | null

@@ -31,6 +31,7 @@ namespace zlsSpaceInvader {
             enemyShooting: "./sound/8d82b5_Galaga_Firing_Sound_Effect.mp3",
             eyeLaser: "./sound/8-bit-cannon-fire-96505.mp3",
             fingerLaser: "./sound/268168__shaun105__laser.wav",
+            alienShip: "./sound/257219__javierzumer__8bit-wc.wav"
         }
 
         static preload(){
@@ -44,9 +45,11 @@ namespace zlsSpaceInvader {
         }
 
         static play(
-            sound: string
+            sound: string,
+            volume: number = Constant.volume
         ){
             soundAudios[sound].currentTime = 0
+            soundAudios[sound].volume = volume
             soundAudios[sound].play()
         }
 
