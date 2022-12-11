@@ -508,7 +508,7 @@ namespace zlsSpaceInvader {
         }
 
         async showTitle(manager: GameObjectManager, wave: number) {
-            // await this.ufoFlyOver( manager )
+            await this.ufoFlyOver( manager )
             await super.showTitle( manager, wave )
         }
 
