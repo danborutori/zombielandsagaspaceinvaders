@@ -320,10 +320,62 @@ namespace zlsSpaceInvader {
 
         private async attackPhase4(){
             const v1 = new Vector2
+            const v2 = new Vector2
 
-            await this.turn(Math.PI*3/5,rotateSpeed)
+            await this.turn(this.rotate+Math.PI/5,rotateSpeed)
 
-            
+            await this.wait(2)
+
+            for( let j=0; ; j++){
+
+                for( let i=0; i<2; i++){
+                    const sign = i%2==0?1:-1
+
+                    await Promise.all([
+                        (async ()=>{
+                            for( let j=0; j<6; j++ ){
+                                this.shootLaser(
+                                    mix(
+                                        -30*Math.PI/180,
+                                        30*Math.PI/180,
+                                        j/6
+                                    )*sign)
+                                await this.wait(0.5)
+                            }
+                        })(),
+                        this.normalShot(
+                            v1.set(0,150).rotateAround(0)
+                        ),
+                        this.normalShot(
+                            v2.set(0,150).rotateAround(sign*15*Math.PI/180)
+                        )
+                    ])
+                    await this.wait(2)
+                }
+
+                await Promise.all( [
+                    (async ()=>{
+                        for( let i=0; i<8; i++ ){
+                            const sign = i%2==0?1:-1
+                            this.shootLaser(
+                                mix(
+                                    30*Math.PI/180,
+                                    0/180,
+                                    j%2==0?i/8:1-i/8
+                                )*sign)
+                            await this.wait(0.5)
+                        }
+                    })(),
+                    this.normalShot(
+                        v1.set(0,150).rotateAround(15*Math.PI/180)
+                    ),
+                    this.normalShot(
+                        v2.set(0,150).rotateAround(-15*Math.PI/180)
+                    )
+                ])
+
+                await this.wait(2)
+            }
         }
     }
 
