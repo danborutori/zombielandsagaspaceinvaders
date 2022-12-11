@@ -49,6 +49,9 @@ namespace zlsSpaceInvader {
             case 29:
                 this.enemyWave = new KaijinWave( onWaveEnd, nextMember )
                 break
+            case 44:
+                this.enemyWave = new UFOWave( scoreAndCredit.stage, onWaveEnd, nextMember )
+                break
             default:
                 this.enemyWave = new EnemyWave(
                     scoreAndCredit.stage,
