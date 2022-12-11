@@ -43,13 +43,13 @@ namespace zlsSpaceInvader {
             // case 0:
             //     this.enemyWave = new EmptyWave( onWaveEnd )
             //     break
-            case 14:
+            case 9:
                 this.enemyWave = new Zombie3Wave( onWaveEnd, nextMember )
                 break
-            case 29:
+            case 19:
                 this.enemyWave = new KaijinWave( onWaveEnd, nextMember )
                 break
-            case 44:
+            case 29:
                 this.enemyWave = new UFOWave( scoreAndCredit.stage, onWaveEnd, nextMember )
                 break
             default:

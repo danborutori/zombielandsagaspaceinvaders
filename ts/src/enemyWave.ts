@@ -85,7 +85,7 @@ namespace zlsSpaceInvader {
             )
             gameObjectManager.add( this.enemyCooperator )
 
-            if( missingMembers.length>0 && (this.wave%5)==3 )
+            if( missingMembers.length>0 && (this.wave%3)==2 )
                 (this.enemies[enemyRows.length*4] as Zombie1).setCapture(
                     playerFlight,
                     missingMembers.splice(0,1)[0],
