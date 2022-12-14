@@ -34,7 +34,8 @@ namespace zlsSpaceInvader {
             gameObjectManager: GameObjectManager,
             playerFlight: PlayerFlight,            
             nextMember: ()=>FlightUnit | null,
-            onWaveEnd: ()=>void
+            onWaveEnd: ()=>void,
+            showHighestScore: ()=>void
         ){
             //clear old enemies
             this.enemyWave && this.enemyWave.clear()
@@ -51,6 +52,9 @@ namespace zlsSpaceInvader {
                 break
             case 29:
                 this.enemyWave = new UFOWave( scoreAndCredit.stage, onWaveEnd, nextMember )
+                break
+            case 30:
+                this.enemyWave = new EndingWave(showHighestScore)
                 break
             default:
                 this.enemyWave = new EnemyWave(

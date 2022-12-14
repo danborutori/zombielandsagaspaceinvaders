@@ -31,7 +31,7 @@ namespace zlsSpaceInvader {
             return this._hiScore
         }
         credit = 0
-        private nextCredit = 10000
+        nextCredit = 10000
 
         constructor( 
             readonly stage: Stage,

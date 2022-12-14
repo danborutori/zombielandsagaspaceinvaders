@@ -6,7 +6,8 @@ namespace zlsSpaceInvader {
 
         constructor(
             readonly text: string,
-            readonly onRemove?: ()=>void
+            readonly onRemove?: ()=>void,
+            readonly duration: number = 3
         ){
             super()
             this.renderHalf = false
@@ -17,7 +18,7 @@ namespace zlsSpaceInvader {
 
             this.time += deltaTime
 
-            if( this.time>3 ){
+            if( this.time>this.duration ){
                 this.onRemove && this.onRemove()
                 this.removeFromManager()
             }

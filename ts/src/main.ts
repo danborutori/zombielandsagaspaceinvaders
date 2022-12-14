@@ -130,6 +130,9 @@ namespace zlsSpaceInvader {
                         playerFlight.invincibleTime = 0
                         this.waveManager.pause = false
                     })
+                },
+                ()=>{
+                    this.showHighestScore(scoreAndCredit)
                 }
             )
         }
@@ -236,7 +239,7 @@ namespace zlsSpaceInvader {
         }
 
         private render( deltaTime: number ){
-            this.allowUpdate = false
+            this.allowUpdate = false 
             requestAnimationFrame(()=>{
                 if(  this.halfRenderContext){
                     const w = this.halfRenderContext.canvas.width

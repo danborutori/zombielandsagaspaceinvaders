@@ -31,6 +31,11 @@ namespace zlsSpaceInvader {
         }
     }
 
+    characters["."] = {
+        x: 26+14*w,
+        y: 46-10
+    }
+
     characters["_"] = {
         x: 98,
         y: 28
