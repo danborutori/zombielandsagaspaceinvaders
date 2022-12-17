@@ -45,6 +45,10 @@ namespace zlsSpaceInvader {
             stage: Stage
         ) {
             if(!this.manager)return
+            const starNight = this.manager.gameObjects.find( ((o: StarNight)=>o.isStarNight) as (o:GameObject)=>boolean ) as StarNight
+
+            starNight.state = "starSky"
+
             const startY = stage.bottom+11
             const endY = stage.top-11
             const speed = 10
