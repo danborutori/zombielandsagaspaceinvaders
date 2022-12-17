@@ -1,6 +1,11 @@
 namespace zlsSpaceInvader {
 
     const creditTexts = [
+        "INSPIRED BY",
+        "ZOMBIELAND SAGE THE BEST REVENGE",
+        "",
+        "",
+        "",
         "-GAME DESIGNER-",
         "ANMC",
         "",
