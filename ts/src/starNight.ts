@@ -2,7 +2,7 @@ namespace zlsSpaceInvader {
 
     const starDensity = 0.0025
 
-    type SkyState = "battle" | "starSky"
+    type SkyState = "battle" | "starSky" | "burning"
 
     function wait( duration: number ){
         return new Promise(resolve=>{
@@ -25,9 +25,16 @@ namespace zlsSpaceInvader {
             duration: number
         ){
             const seq = ++this.setSeq
-            const srcH = this.h
+            let srcH = this.h
             const srcS = this.s
             const srcL = this.l
+
+            const dh = h-srcH
+            if( dh>180 ){
+                h -= 360
+            }else if( dh<-180 ){
+                srcH -= 360
+            }
 
             const timeStep = 0.1
             let time = 0
@@ -39,13 +46,14 @@ namespace zlsSpaceInvader {
                 const a = Math.min(1,time/duration)
 
                 this.h = mix( srcH, h, a )
+                if( this.h<0 ) this.h += 360
                 this.s = mix( srcS, s, a )
                 this.l = mix( srcL, l, a )
             }
         }
 
         get style() {
-            return `hsl(${this.h},${this.s}%,${this.l}%)`
+            return `hsl(${Math.floor(this.h)},${Math.floor(this.s)}%,${Math.floor(this.l)}%)`
         }
     }
 
@@ -60,7 +68,7 @@ namespace zlsSpaceInvader {
             this.onStateChanged()
         }
 
-        private bgColor = new Color( 346, 30, 17 )
+        private bgColor = new Color( 346, 30, 8 )
         // private targetBgColor
 
         private stars: {
@@ -81,7 +89,7 @@ namespace zlsSpaceInvader {
             this.stars = new Array( Math.floor(w*h*starDensity) )
             for( let i=0; i<this.stars.length; i++ ){
                 this.stars[i] = {
-                    color: new Color( 343, 67, 55),
+                    color: new Color( 343, 67, 27),
                     pos: new Vector2(
                         stage.left+Math.random()*w,
                         stage.top+Math.random()*h
@@ -124,17 +132,34 @@ namespace zlsSpaceInvader {
                     this.bgColor.h,
                     this.bgColor.s,
                     0,
-                    3
+                    5
                 )
                 for( let s of this.stars ){
                     s.color.set(
                         Math.floor(Math.random()*360),
                         s.color.s,
-                        Math.floor(55+Math.random()*46),
-                        3
+                        Math.floor(27+Math.random()*73),
+                        5
                     )
                 }
                 break
+            case "burning":
+                this.bgColor.set(
+                    4,
+                    89,
+                    46,
+                    2
+                )
+                for( let s of this.stars ){
+                    s.color.set(
+                        55,
+                        73,
+                        50,
+                        2
+                    )
+                    s.speed *= 20
+                }
+                break                
             }
         }
     }
