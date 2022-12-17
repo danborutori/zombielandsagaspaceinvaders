@@ -2,7 +2,7 @@ namespace zlsSpaceInvader {
 
     const starDensity = 0.0025
 
-    type SkyState = "battle" | "starSky" | "burning"
+    type SkyState = "battle" | "starSky" | "burning" | "whiteout" | "bluesky"
 
     function wait( duration: number ){
         return new Promise(resolve=>{
@@ -57,6 +57,36 @@ namespace zlsSpaceInvader {
         }
     }
 
+    const cloudSprites = [
+        Sprites.shared.images.cloud0,
+        Sprites.shared.images.cloud1,
+        Sprites.shared.images.cloud2,
+        Sprites.shared.images.cloud3,
+    ]
+
+    class Cloud extends SpriteObject {
+
+        private velocity = new Vector2()
+        private time = 0
+
+        constructor(){
+            super( cloudSprites[Math.floor(Math.random()*4)] )
+            this.velocity.set(0, 100+Math.random()*200)
+        }
+
+        update(deltaTime: number): void {
+            super.update(deltaTime)
+
+            this.time += deltaTime
+
+            this.pos.addScaled( this.velocity, deltaTime )
+
+            if( this.time>=5 ){
+                this.removeFromManager()
+            }
+        }
+    }
+
     export class StarNight extends GameObject {
 
         readonly isStarNight = true
@@ -75,6 +105,7 @@ namespace zlsSpaceInvader {
             color: Color
             pos: Vector2
             speed: number
+            height: number
         }[]
 
         constructor(
@@ -94,7 +125,8 @@ namespace zlsSpaceInvader {
                         stage.left+Math.random()*w,
                         stage.top+Math.random()*h
                     ),
-                    speed: (10+Math.random()*10)*0.6
+                    speed: (10+Math.random()*10)*0.6,
+                    height: 1
                 }
             }
         }
@@ -121,7 +153,7 @@ namespace zlsSpaceInvader {
 
             for( let s of this.stars ){
                 ctx.fillStyle = s.color.style
-                ctx.fillRect(Math.floor(s.pos.x), Math.floor(s.pos.y), 1, 1)
+                ctx.fillRect(Math.floor(s.pos.x), Math.floor(s.pos.y), 1, s.height)
             }
         }
 
@@ -159,7 +191,50 @@ namespace zlsSpaceInvader {
                     )
                     s.speed *= 20
                 }
-                break                
+                break
+            case "whiteout":
+                this.bgColor.set(
+                    4,
+                    89,
+                    100,
+                    0.3
+                )
+                for( let s of this.stars ){
+                    s.color.set(
+                        55,
+                        73,
+                        100,
+                        0.3
+                    )
+                }
+                break
+            case "bluesky":
+                this.bgColor.set(
+                    214,
+                    67,
+                    42,
+                    2
+                )
+                for( let s of this.stars ){
+                    s.color.set(
+                        211,
+                        72,
+                        48,
+                        2
+                    )
+                    s.height = 3
+                }
+                if( this.manager ){
+                    for( let i=0; i<50; i++ ){
+                        const cloud = new Cloud()
+                        cloud.pos.set(
+                            this.stage.left+Math.random()*(this.stage.right-this.stage.left),
+                            this.stage.bottom-Math.random()*(this.stage.bottom-this.stage.top+100)
+                        )
+                        this.manager.add(cloud)
+                    }
+                }
+                break
             }
         }
     }

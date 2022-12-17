@@ -53,6 +53,10 @@ namespace zlsSpaceInvader {
         blaser8: "./images/blaser8.png",
         powerup: "./images/powerup.png",
         ufo: "./images/ufo.png",
+        cloud0: "./images/cloud0.png",
+        cloud1: "./images/cloud1.png",
+        cloud2: "./images/cloud2.png",
+        cloud3: "./images/cloud3.png",
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -119,6 +123,10 @@ namespace zlsSpaceInvader {
             blaser8: new Image,
             powerup: new Image,
             ufo: new Image,
+            cloud0: new Image,
+            cloud1: new Image,
+            cloud2: new Image,
+            cloud3: new Image,
         }
 
         load(){
