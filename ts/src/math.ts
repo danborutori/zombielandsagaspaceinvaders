@@ -153,7 +153,6 @@ namespace zlsSpaceInvader {
     }
 
     const zero2 = new Vector2(0,0)
-    const v1 = new Vector2
 
     export class Transform {
         readonly translation = new Vector2
@@ -179,7 +178,7 @@ namespace zlsSpaceInvader {
             this.translation.copy(t.translation)
         }
     }
-
+    
     export function mix( a: number, b: number, alpha: number ){
         return a*(1-alpha)+b*alpha
     }

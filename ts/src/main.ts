@@ -245,9 +245,6 @@ namespace zlsSpaceInvader {
                     const w = this.halfRenderContext.canvas.width
                     const h = this.halfRenderContext.canvas.height
 
-                    this.halfRenderContext.fillStyle = Palette.bgColor
-                    this.halfRenderContext.fillRect(0,0,w,h)
-
                     this.halfRenderContext.save()
                     this.halfRenderContext.translate(w/2, h/2)
 

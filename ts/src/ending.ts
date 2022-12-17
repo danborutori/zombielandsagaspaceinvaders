@@ -45,12 +45,29 @@ namespace zlsSpaceInvader {
             stage: Stage
         ) {
             if(!this.manager)return
+            const starNight = this.manager.gameObjects.find( ((o: StarNight)=>o.isStarNight) as (o:GameObject)=>boolean ) as StarNight
+
             const startY = stage.bottom+11
             const endY = stage.top-11
             const speed = 10
             const duration = (startY-endY)/speed
             for( let i=0; i<creditTexts.length; i++ ){
                 const s = creditTexts[i]
+
+                switch(i){
+                case 5:
+                    starNight.state = "starSky"
+                    break
+                case 14:
+                    starNight.state = "burning"
+                    break
+                case 20:
+                    starNight.state = "whiteout"
+                    break
+                case 21:
+                    starNight.state = "bluesky"
+                    break
+                }
 
                 const text = new FloatingText(s, undefined, duration )
                 text.pos.set(0, startY)

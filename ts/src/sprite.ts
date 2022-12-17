@@ -16,7 +16,6 @@ namespace zlsSpaceInvader {
         zombie1: "./images/zombie1.png",
         zombie2: "./images/zombie2.png",
         bullet: "./images/bullet.png",
-        star: "./images/star.png",
         font: "./images/font.png",
         captureWave0: "./images/capture_wave0.png",
         captureWave1: "./images/capture_wave1.png",
@@ -54,6 +53,10 @@ namespace zlsSpaceInvader {
         blaser8: "./images/blaser8.png",
         powerup: "./images/powerup.png",
         ufo: "./images/ufo.png",
+        cloud0: "./images/cloud0.png",
+        cloud1: "./images/cloud1.png",
+        cloud2: "./images/cloud2.png",
+        cloud3: "./images/cloud3.png",
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -83,7 +86,6 @@ namespace zlsSpaceInvader {
             zombie1: new Image,
             zombie2: new Image,
             bullet: new Image,
-            star: new Image,
             font: new Image,
             captureWave0: new Image,
             captureWave1: new Image,
@@ -121,6 +123,10 @@ namespace zlsSpaceInvader {
             blaser8: new Image,
             powerup: new Image,
             ufo: new Image,
+            cloud0: new Image,
+            cloud1: new Image,
+            cloud2: new Image,
+            cloud3: new Image,
         }
 
         load(){
