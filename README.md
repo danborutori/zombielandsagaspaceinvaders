@@ -51,6 +51,15 @@ ANMC
 
 ## Version History
 
+* 2.0
+    * enemy shoot bullet
+    * leaderboard updated
+    * enhance overall animations
+    * bosses added
+    * add ending
+    * add bgm
+    * enhance player flight upgrade
+    * other updates
 * 1.3
     * add leaderboard
     * add member capture
