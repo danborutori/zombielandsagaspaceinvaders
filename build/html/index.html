@@ -32,10 +32,11 @@
                 <tr id="onScreenController">
                     <td colspan="3" style="color: white; font-family: Trebuchet MS; text-align: center;">
                         <br/>
-                        <input id="leftButton" type="button" value="-LEFT-" style="font-size: 70; padding-top: 20; padding-bottom: 20;"/>
-                        <input id="rightButton" type="button" value="-RIGHT-" style="font-size: 70; padding-top: 20; padding-bottom: 20;"/>
+                        <input id="leftButton" type="image"/>
                         &nbsp;&nbsp;&nbsp;&nbsp;
-                        <input id="fireButton" type="button" value="FIRE" style="font-size: 70; padding-top: 20; padding-bottom: 20;"/>
+                        <input id="rightButton" type="image"/>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input id="fireButton" type="image"/>
                     </td>
                 </tr>
                 <tr>
@@ -88,6 +89,9 @@
         if(!mobileCheck){
             onScreenController.remove()
         }else{
+            new zlsSpaceInvader.ImageButton(leftButton,"./images/but_left_up.png","./images/but_left_down.png")
+            new zlsSpaceInvader.ImageButton(rightButton,"./images/but_right_up.png","./images/but_right_down.png")
+            new zlsSpaceInvader.ImageButton(fireButton,"./images/but_fire_up.png","./images/but_fire_down.png")
             zlsSpaceInvader.Input.shared.init(leftButton, rightButton, fireButton)
             document.body.style.zoom = window.innerWidth/728
             console.log(document.body.style.zoom)
