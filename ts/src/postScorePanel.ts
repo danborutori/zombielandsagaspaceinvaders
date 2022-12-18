@@ -1,8 +1,5 @@
 namespace zlsSpaceInvader {
 
-    const v1 = new Vector2
-    const v2 = new Vector2
-
     function generateUUID() { // Public Domain/MIT
         var d = new Date().getTime();//Timestamp
         var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
@@ -30,6 +27,13 @@ namespace zlsSpaceInvader {
 
         private initial = ["_","_","_"]
         private inputIndex = 0
+        private selectedIndex = 0
+        private pressed = {
+            left: false,
+            right: false,
+            fire: false
+        }
+
 
         private time = 0
 
@@ -42,6 +46,53 @@ namespace zlsSpaceInvader {
             super.update( deltaTime )
 
             this.time += deltaTime
+
+            const totalChar = keys.reduce((a,b)=>a+b.length,0)
+            if( Input.shared.left ){
+                if( !this.pressed.left ){
+                    this.pressed.left = true
+                    this.selectedIndex = (this.selectedIndex+totalChar-1)%totalChar
+                    if( this.selectedIndex==totalChar-2 )
+                        this.selectedIndex--
+                }
+            }else{
+                this.pressed.left = false
+            }
+            if( Input.shared.right ){
+                if( !this.pressed.right ){
+                    this.pressed.right = true
+                    this.selectedIndex = (this.selectedIndex+1)%totalChar
+                    if( this.selectedIndex==totalChar-2 )
+                        this.selectedIndex++
+                }
+            }else{
+                this.pressed.right = false
+            }
+            if( Input.shared.fire ){
+                if( !this.pressed.fire ){
+                    this.pressed.fire = true
+                    const pressedCharacter = keys.join("")[this.selectedIndex]
+                    if( pressedCharacter ){
+                        switch( pressedCharacter ){
+                        case undefined:
+                        case " ":
+                            break
+                        case "←":
+                            if( this.inputIndex>0 && this.inputIndex<this.initial.length )
+                                this.inputIndex -= 1
+                            break
+                        default:
+                            if( this.inputIndex<this.initial.length ){
+                                this.initial[this.inputIndex] = pressedCharacter
+                                this.inputIndex++
+                            }
+                            break
+                        }
+                    }
+                }
+            }else{
+                this.pressed.fire = false
+            }
         }
 
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
@@ -49,7 +100,7 @@ namespace zlsSpaceInvader {
 
             ctx.save()
             ctx.translate(0,-50)
-            TextDrawer.shared.drawTextCenteredOutline("TAP TO ENTER YOU INITIAL:", 0, 0, ctx)
+            TextDrawer.shared.drawTextCenteredOutline("ENTER YOU INITIAL:", 0, 0, ctx)
             ctx.scale(2,2)
             const displayInitial = Array.from(this.initial)
             if( Math.floor(this.time/0.1)%2==0 &&
@@ -57,66 +108,20 @@ namespace zlsSpaceInvader {
             )
                 displayInitial[this.inputIndex] = " "
             TextDrawer.shared.drawTextCenteredOutline(displayInitial.join(), 0, 7, ctx)
+            ctx.translate(-29,0)
+            let cnt = 0
             for( let i=0; i<keys.length; i++ ){
-                TextDrawer.shared.drawTextCenteredOutline(keys[i].split("").join(" "), 0, 21+i*7, ctx)    
+                const s = keys[i]
+                for( let j=0; j<s.length; j++ ){
+                    if( this.selectedIndex!=cnt ||
+                        Math.floor(this.time/0.1)%2==0
+                    ){
+                        TextDrawer.shared.drawTextCenteredOutline(s[j], j*10, 21+i*7, ctx)    
+                    }
+                    cnt++
+                }
             }
             ctx.restore()
-        }
-
-        private registerPointerEvent(
-            canvas: HTMLCanvasElement
-        ){
-            const listener = (x: number, y: number)=>{
-                let pressedCharacter: string | undefined
-                v1.set(
-                    x - 117,
-                    y - 347
-                ).divide(
-                    v2.set(80, 56)
-                ).add(0.5).floor()
-                const s = keys[v1.y] 
-                if( s ){
-                    pressedCharacter = s[v1.x]
-                }
-
-                if( pressedCharacter ){
-                    switch( pressedCharacter ){
-                    case undefined:
-                    case " ":
-                        break
-                    case "←":
-                        if( this.inputIndex>0 && this.inputIndex<this.initial.length )
-                            this.inputIndex -= 1
-                        break
-                    default:
-                        if( this.inputIndex<this.initial.length ){
-                            this.initial[this.inputIndex] = pressedCharacter
-                            this.inputIndex++
-                        }
-                        break
-                    }
-                }
-            }
-            const pointerListener = (e: PointerEvent)=>{
-                listener( e.offsetX, e.offsetY )
-            }
-            const touchListener = (e: TouchEvent)=>{
-                const b = canvas.getBoundingClientRect()
-                const scale = 1/(document.body.style as any).zoom
-                listener(
-                    (e.touches[0].pageX-b.left)*scale,
-                    (e.touches[0].pageY-b.top)*scale
-                )
-            }
-            canvas.addEventListener("pointerdown", pointerListener)
-            canvas.addEventListener("touchstart", touchListener)
-
-            return {
-                unregister: ()=>{
-                    canvas.removeEventListener("pointerdown", pointerListener)
-                    canvas.removeEventListener("touchstart", touchListener)
-                }
-            }
         }
 
         async postScore(
@@ -134,12 +139,10 @@ namespace zlsSpaceInvader {
 
             if( canPostScore ){
 
-                const eventCtx = this.registerPointerEvent(canvas)
                 while( this.inputIndex<this.initial.length ){
                     await this.wait(0)
                 }
-                eventCtx.unregister()
-
+                
                 try{
 
                     const int = this.initial.join("")
