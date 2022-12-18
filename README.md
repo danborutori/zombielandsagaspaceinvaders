@@ -85,3 +85,10 @@ Capture Beam Sprites from The Sprites Resource
 https://www.spriters-resource.com/arcade/galaga/sheet/26482/
 Shaun105 Laser sound effect, really good for video games.
 https://freesound.org/people/Shaun105/sounds/268168/
+Background Musics 
+* 徒花ネクロマンシー ファミコン風
+* REVENGE ファミコン風
+* ヨミガエレ ファミコン風
+* 大河よ共に泣いてくれ ファミコン風
+by オオノ👾COLON 8BIT MUSIC
+https://twitter.com/colon_8bit

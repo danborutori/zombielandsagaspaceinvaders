@@ -45,15 +45,19 @@ namespace zlsSpaceInvader {
             //     this.enemyWave = new EmptyWave( onWaveEnd )
             //     break
             case 9:
+                Audio.playBgm( "./bgm/Zombieland Saga OP 8bit cover.mp3" )
                 this.enemyWave = new Zombie3Wave( onWaveEnd, nextMember )
                 break
             case 19:
+                Audio.playBgm( "./bgm/ゾンビランドサガ リベンジ  REVENGEファミコン風 Zombieland Saga Revenge 8bit.mp3" )
                 this.enemyWave = new KaijinWave( onWaveEnd, nextMember )
                 break
             case 29:
+                Audio.playBgm( "./bgm/ヨミガエレファミコン風　Yomigaere 8bitゾンビランドサガ.mp3" )
                 this.enemyWave = new UFOWave( scoreAndCredit.stage, onWaveEnd, nextMember )
                 break
             case 30:
+                Audio.playBgm( "./bgm/Zombieland Saga Revenge OP  Taiga yo Tomo ni Naite Kure 8bitNES style.mp3" )
                 this.enemyWave = new EndingWave(showHighestScore)
                 break
             default:

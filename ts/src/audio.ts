@@ -1,6 +1,8 @@
 namespace zlsSpaceInvader {
 
     const soundAudios: {[name:string]: HTMLAudioElement} = {}
+    const bgmAudio = document.createElement("audio")
+    bgmAudio.volume = Constant.volume
 
     function loadAudio( url: string ){
         return new Promise<void>( (resolve, reject)=>{
@@ -44,12 +46,19 @@ namespace zlsSpaceInvader {
             )
         }
 
+        static playBgm(
+            url: string
+        ){
+            bgmAudio.currentTime = 0
+            bgmAudio.autoplay = true
+            bgmAudio.loop = true
+            bgmAudio.src = url
+        }
+
         static play(
-            sound: string,
-            volume: number = Constant.volume
+            sound: string
         ){
             soundAudios[sound].currentTime = 0
-            soundAudios[sound].volume = volume
             soundAudios[sound].play()
         }
 
@@ -67,6 +76,7 @@ namespace zlsSpaceInvader {
             for( let name in soundAudios ){
                 soundAudios[name].volume = n
             }
+            bgmAudio.volume = n
         }
     }
 

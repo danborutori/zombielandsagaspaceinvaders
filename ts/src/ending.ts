@@ -17,6 +17,20 @@ namespace zlsSpaceInvader {
         "",
         "ACKNOWLEDGEMENT",
         "",
+        "-BG MUSIC-",
+        "ADABANA NECROMANCY 8-BIT VERSION",
+        "OHNO COLON 8BIT MUSIC",
+        "",
+        "REVENGE 8-BIT VERSION",
+        "OHNO COLON 8BIT MUSIC",
+        "",
+        "YOMIGAERE 8-BIT VERSION",
+        "OHNO COLON 8BIT MUSIC",
+        "",
+        "TAIGAYOTOMONINAITEKURE 8-BIT VERSION",
+        "OHNO COLON 8BIT MUSIC",
+        "",
+        "",
         "-SOUND EFFECT-",
         "CLASSIC GAMING.CC",
         "SOUND FX CENTER",
@@ -61,10 +75,10 @@ namespace zlsSpaceInvader {
                 case 14:
                     starNight.state = "burning"
                     break
-                case 20:
+                case 33:
                     starNight.state = "whiteout"
                     break
-                case 21:
+                case 34:
                     starNight.state = "bluesky"
                     break
                 }
