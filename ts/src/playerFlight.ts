@@ -128,6 +128,7 @@ namespace zlsSpaceInvader {
             this.flightUnits = [
                 flightUnit
             ]
+            flightUnit.pos.set(0,0)
             this.visible = true
             this.pos.set(0,this.stage.bottom)
             this.poweredShot.assignGun( this )
