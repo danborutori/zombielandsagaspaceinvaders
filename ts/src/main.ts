@@ -132,7 +132,7 @@ namespace zlsSpaceInvader {
                     })
                 },
                 ()=>{
-                    this.showHighestScore(scoreAndCredit)
+                    this.showHighestScore(scoreAndCredit, playerFlight)
                 }
             )
         }
@@ -161,7 +161,7 @@ namespace zlsSpaceInvader {
                             knockdownMembers.length = 0
                             playerFlight.invincibleTime = 1
                         }else{
-                            this.showHighestScore(scoreAndCredit)
+                            this.showHighestScore(scoreAndCredit, playerFlight)
                         }
                     })
                     this.gameObjectManager.add( continueScreen)
@@ -170,7 +170,7 @@ namespace zlsSpaceInvader {
                     playerFlight.paused = true
                     this.waveManager.pause = true
                     
-                    this.showHighestScore(scoreAndCredit)
+                    this.showHighestScore(scoreAndCredit, playerFlight)
                 }
             }else{
                 playerFlight.paused = true
@@ -179,25 +179,26 @@ namespace zlsSpaceInvader {
                 const t = new FloatingText(
                     "ALL MEMBERS CAPTURED",
                     ()=>{
-                        this.showHighestScore(scoreAndCredit)
+                        this.showHighestScore(scoreAndCredit, playerFlight)
                     }
                 )
                 this.gameObjectManager.add(t)
             }
         }
 
-        private async showHighestScore(scorer: ScoreAndCredit){
+        private async showHighestScore(
+            scorer: ScoreAndCredit,
+            playerFlight: PlayerFlight
+        ){
             try{
                 const panel = new PostScorePanel()
                 this.gameObjectManager.add(panel)
 
-                if( this.ctx ){
                 await panel.postScore(
                     scorer,
-                        this.wave+1,
-                        this.ctx.canvas
+                    this.wave+1,
+                    playerFlight
                 )
-                }
             }catch(e){
                 console.error(e)
             }

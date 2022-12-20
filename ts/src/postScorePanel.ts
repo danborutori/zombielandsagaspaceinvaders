@@ -127,7 +127,7 @@ namespace zlsSpaceInvader {
         async postScore(
             scorer: ScoreAndCredit,
             wave: number,
-            canvas: HTMLCanvasElement
+            playerFlight: PlayerFlight
         ){
             let canPostScore = false
             try{
@@ -139,9 +139,13 @@ namespace zlsSpaceInvader {
 
             if( canPostScore ){
 
+                playerFlight.paused = true
+
                 while( this.inputIndex<this.initial.length ){
                     await this.wait(0)
                 }
+
+                playerFlight.paused = false
                 
                 try{
 
@@ -154,6 +158,8 @@ namespace zlsSpaceInvader {
                     this.removeFromManager()
                 }
 
+            }else{
+                this.removeFromManager()
             }
 
         }
