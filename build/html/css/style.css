@@ -2,9 +2,3 @@ a {
     color: white;
     text-decoration: none;
 }
-
-@font-face {
-    font-family: minecraft;
-    src: url("./font/Minecraft.ttf");
-    font-weight: medium;
-}
