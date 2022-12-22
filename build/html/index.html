@@ -98,10 +98,14 @@
         if(!mobileCheck){
             onScreenController.remove()
         }else{
-            new zlsSpaceInvader.ImageButton(leftButton,"./images/but_left_up.png","./images/but_left_down.png")
-            new zlsSpaceInvader.ImageButton(rightButton,"./images/but_right_up.png","./images/but_right_down.png")
-            new zlsSpaceInvader.ImageButton(fireButton,"./images/but_fire_up.png","./images/but_fire_down.png")
-            zlsSpaceInvader.Input.shared.init(leftButton, rightButton, fireButton)
+            
+            
+            
+            zlsSpaceInvader.Input.shared.init(
+                new zlsSpaceInvader.ImageButton(leftButton,"./images/but_left_up.png","./images/but_left_down.png"),
+                new zlsSpaceInvader.ImageButton(rightButton,"./images/but_right_up.png","./images/but_right_down.png"), 
+                new zlsSpaceInvader.ImageButton(fireButton,"./images/but_fire_up.png","./images/but_fire_down.png")
+            )
             document.body.style.zoom = window.innerWidth/728
             console.log(document.body.style.zoom)
         }

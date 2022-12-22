@@ -47,105 +47,49 @@ namespace zlsSpaceInvader {
         }
 
         init(
-            leftButton: HTMLInputElement,
-            rightButton: HTMLInputElement,
-            fireButton: HTMLInputElement
+            leftButton: ImageButton,
+            rightButton: ImageButton,
+            fireButton: ImageButton
         ){
             const updateButton = ()=>{
-                this.left = (leftTouch || leftPointer)
-                this.right = (rightTouch || rightPointer)
-                this.fire = (fireTouch || firePointer)
+                this.left = leftTouch
+                this.right = rightTouch
+                this.fire = fireTouch
             }
 
             let leftTouch = false
-            let leftPointer = false
             let rightTouch = false
-            let rightPointer = false
             let fireTouch = false
-            let firePointer = false
-            leftButton.addEventListener("touchstart", e=>{
+
+            leftButton.onStart = ()=>{
                 leftTouch = true
-                this.pressAnyKey = true
+                this.pressAnyKey = true                
                 updateButton()
-            })
-            leftButton.addEventListener("pointerdown", e=>{
-                leftPointer = true
-                this.pressAnyKey = true
+            }
+            leftButton.onEnd = ()=>{
+                leftTouch = false
                 updateButton()
-            })
+            }
 
-            rightButton.addEventListener("touchstart", e=>{
+            rightButton.onStart = ()=>{
                 rightTouch = true
-                this.pressAnyKey = true
+                this.pressAnyKey = true                
                 updateButton()
-            })
-            rightButton.addEventListener("pointerdown", e=>{
-                rightPointer = true
-                this.pressAnyKey = true
-                updateButton()
-            })
-
-            fireButton.addEventListener("touchstart", e=>{
-                fireTouch = true                
-                this.pressAnyKey = true
-                updateButton()
-            })
-            fireButton.addEventListener("pointerdown", e=>{
-                firePointer = true
-                this.pressAnyKey = true
-                updateButton()
-            })
-
-            leftButton.addEventListener("touchend", e=>{
-                leftTouch = false
-                updateButton()
-            })
-            leftButton.addEventListener("touchcancel", e=>{
-                leftTouch = false
-                updateButton()
-            })
-            leftButton.addEventListener("pointerup", e=>{
-                leftPointer = false
-                updateButton()
-            })
-            leftButton.addEventListener("pointerout", e=>{
-                leftPointer = false
-                updateButton()
-            })
-
-            rightButton.addEventListener("touchend", e=>{
+            }
+            rightButton.onEnd = ()=>{
                 rightTouch = false
                 updateButton()
-            })
-            rightButton.addEventListener("touchcancel", e=>{
-                rightTouch = false
-                updateButton()
-            })
-            rightButton.addEventListener("pointerup", e=>{
-                rightPointer = false
-                updateButton()
-            })
-            rightButton.addEventListener("pointerout", e=>{
-                rightPointer = false
-                updateButton()
-            })
+            }
 
-            fireButton.addEventListener("touchend", e=>{
+            fireButton.onStart = ()=>{
+                fireTouch = true
+                this.pressAnyKey = true                
+                updateButton()
+            }
+            fireButton.onEnd = ()=>{
                 fireTouch = false
                 updateButton()
-            })
-            fireButton.addEventListener("touchcancel", e=>{
-                fireTouch = false
-                updateButton()
-            })
-            fireButton.addEventListener("pointerup", e=>{
-                firePointer = false
-                updateButton()
-            })
-            fireButton.addEventListener("pointerout", e=>{
-                firePointer = false
-                updateButton()
-            })
+            }
         }
 
         update(){
