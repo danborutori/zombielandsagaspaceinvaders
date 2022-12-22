@@ -47,104 +47,64 @@ namespace zlsSpaceInvader {
         }
 
         init(
-            leftButton: HTMLInputElement,
-            rightButton: HTMLInputElement,
-            fireButton: HTMLInputElement
+            controllerRoot: HTMLElement,
+            leftButton: ImageButton,
+            rightButton: ImageButton,
+            fireButton: ImageButton
         ){
             const updateButton = ()=>{
-                this.left = (leftTouch || leftPointer)
-                this.right = (rightTouch || rightPointer)
-                this.fire = (fireTouch || firePointer)
+                if( touches ){
+                    const zoom: number = parseFloat((document.body.style as any).zoom || "1")
+                    for( let b of [
+                        leftButton,
+                        rightButton,
+                        fireButton
+                    ]){
+                        const rect = b.input.getBoundingClientRect()
+                        let down = false
+                        for( let i=0; i<touches.length; i++  ){
+                            const t = touches.item(i)!
+                            if(
+                                t.clientX/zoom>rect.left &&
+                                t.clientX/zoom<rect.right &&
+                                t.clientY/zoom<rect.bottom &&
+                                t.clientY/zoom>rect.top
+                            ){
+                                down = true
+                            }
+                        }
+
+                        if(down && !b.down)
+                            this.pressAnyKey = true
+                        b.down = down
+                    }
+                }
+
+                this.left = leftButton.down
+                this.right = rightButton.down
+                this.fire = fireButton.down
             }
+            let touches: TouchList | undefined
 
-            let leftTouch = false
-            let leftPointer = false
-            let rightTouch = false
-            let rightPointer = false
-            let fireTouch = false
-            let firePointer = false
-            leftButton.addEventListener("touchstart", e=>{
-                leftTouch = true
-                this.pressAnyKey = true
+            controllerRoot.addEventListener( "touchstart", e=>{
+                touches = e.touches
                 updateButton()
+                e.preventDefault()                
             })
-            leftButton.addEventListener("pointerdown", e=>{
-                leftPointer = true
-                this.pressAnyKey = true
+            controllerRoot.addEventListener( "touchmove", e=>{
+                touches = e.touches
                 updateButton()
+                e.preventDefault()                
             })
-
-            rightButton.addEventListener("touchstart", e=>{
-                rightTouch = true
-                this.pressAnyKey = true
+            controllerRoot.addEventListener( "touchend", e=>{
+                touches = e.touches
                 updateButton()
+                e.preventDefault()                
             })
-            rightButton.addEventListener("pointerdown", e=>{
-                rightPointer = true
-                this.pressAnyKey = true
+            controllerRoot.addEventListener( "touchcancel", e=>{
+                touches = e.touches
                 updateButton()
-            })
-
-            fireButton.addEventListener("touchstart", e=>{
-                fireTouch = true                
-                this.pressAnyKey = true
-                updateButton()
-            })
-            fireButton.addEventListener("pointerdown", e=>{
-                firePointer = true
-                this.pressAnyKey = true
-                updateButton()
-            })
-
-            leftButton.addEventListener("touchend", e=>{
-                leftTouch = false
-                updateButton()
-            })
-            leftButton.addEventListener("touchcancel", e=>{
-                leftTouch = false
-                updateButton()
-            })
-            leftButton.addEventListener("pointerup", e=>{
-                leftPointer = false
-                updateButton()
-            })
-            leftButton.addEventListener("pointerout", e=>{
-                leftPointer = false
-                updateButton()
-            })
-
-            rightButton.addEventListener("touchend", e=>{
-                rightTouch = false
-                updateButton()
-            })
-            rightButton.addEventListener("touchcancel", e=>{
-                rightTouch = false
-                updateButton()
-            })
-            rightButton.addEventListener("pointerup", e=>{
-                rightPointer = false
-                updateButton()
-            })
-            rightButton.addEventListener("pointerout", e=>{
-                rightPointer = false
-                updateButton()
-            })
-
-            fireButton.addEventListener("touchend", e=>{
-                fireTouch = false
-                updateButton()
-            })
-            fireButton.addEventListener("touchcancel", e=>{
-                fireTouch = false
-                updateButton()
-            })
-            fireButton.addEventListener("pointerup", e=>{
-                firePointer = false
-                updateButton()
-            })
-            fireButton.addEventListener("pointerout", e=>{
-                firePointer = false
-                updateButton()
+                e.preventDefault()
             })
         }
 

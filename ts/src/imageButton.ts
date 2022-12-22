@@ -2,26 +2,22 @@ namespace zlsSpaceInvader {
 
     export class ImageButton{
 
+        private _down = false
+        get down(){ return this._down }
+        set down( b: boolean ){
+            this._down = b
+            if( b )
+                this.input.src = this.downSrc
+            else
+                this.input.src = this.upSrc
+        }
+
         constructor(
-            input: HTMLInputElement,
-            upSrc: string,
-            downSrc: string
+            readonly input: HTMLInputElement,
+            readonly upSrc: string,
+            readonly downSrc: string
         ){
             input.src = upSrc
-
-            input.addEventListener( "touchstart", e=>{
-                input.src = downSrc
-                e.preventDefault()
-            } )
-            input.addEventListener( "touchmove", e=>e.preventDefault() )
-            input.addEventListener( "touchend", e=>{
-                input.src = upSrc
-                e.preventDefault()
-            } )
-            input.addEventListener( "touchcancel", e=>{
-                input.src = upSrc
-                e.preventDefault()
-            } )
         }
 
     }
