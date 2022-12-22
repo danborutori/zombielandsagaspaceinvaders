@@ -47,49 +47,65 @@ namespace zlsSpaceInvader {
         }
 
         init(
+            controllerRoot: HTMLElement,
             leftButton: ImageButton,
             rightButton: ImageButton,
             fireButton: ImageButton
         ){
             const updateButton = ()=>{
-                this.left = leftTouch
-                this.right = rightTouch
-                this.fire = fireTouch
-            }
+                if( touches ){
+                    const zoom: number = parseFloat((document.body.style as any).zoom || "1")
+                    for( let b of [
+                        leftButton,
+                        rightButton,
+                        fireButton
+                    ]){
+                        const rect = b.input.getBoundingClientRect()
+                        let down = false
+                        for( let i=0; i<touches.length; i++  ){
+                            const t = touches.item(i)!
+                            if(
+                                t.clientX/zoom>rect.left &&
+                                t.clientX/zoom<rect.right &&
+                                t.clientY/zoom<rect.bottom &&
+                                t.clientY/zoom>rect.top
+                            ){
+                                down = true
+                            }
+                        }
 
-            let leftTouch = false
-            let rightTouch = false
-            let fireTouch = false
+                        if(down && !b.down)
+                            this.pressAnyKey = true
+                        b.down = down
+                    }
+                }
 
-            leftButton.onStart = ()=>{
-                leftTouch = true
-                this.pressAnyKey = true                
-                updateButton()
+                this.left = leftButton.down
+                this.right = rightButton.down
+                this.fire = fireButton.down
             }
-            leftButton.onEnd = ()=>{
-                leftTouch = false
-                updateButton()
-            }
+            let touches: TouchList | undefined
 
-            rightButton.onStart = ()=>{
-                rightTouch = true
-                this.pressAnyKey = true                
+            controllerRoot.addEventListener( "touchstart", e=>{
+                touches = e.touches
                 updateButton()
-            }
-            rightButton.onEnd = ()=>{
-                rightTouch = false
+                e.preventDefault()                
+            })
+            controllerRoot.addEventListener( "touchmove", e=>{
+                touches = e.touches
                 updateButton()
-            }
-
-            fireButton.onStart = ()=>{
-                fireTouch = true
-                this.pressAnyKey = true                
+                e.preventDefault()                
+            })
+            controllerRoot.addEventListener( "touchend", e=>{
+                touches = e.touches
                 updateButton()
-            }
-            fireButton.onEnd = ()=>{
-                fireTouch = false
+                e.preventDefault()                
+            })
+            controllerRoot.addEventListener( "touchcancel", e=>{
+                touches = e.touches
                 updateButton()
-            }
+                e.preventDefault()
+            })
         }
 
         update(){

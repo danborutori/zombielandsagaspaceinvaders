@@ -98,10 +98,8 @@
         if(!mobileCheck){
             onScreenController.remove()
         }else{
-            
-            
-            
             zlsSpaceInvader.Input.shared.init(
+                onScreenController,
                 new zlsSpaceInvader.ImageButton(leftButton,"./images/but_left_up.png","./images/but_left_down.png"),
                 new zlsSpaceInvader.ImageButton(rightButton,"./images/but_right_up.png","./images/but_right_down.png"), 
                 new zlsSpaceInvader.ImageButton(fireButton,"./images/but_fire_up.png","./images/but_fire_down.png")
