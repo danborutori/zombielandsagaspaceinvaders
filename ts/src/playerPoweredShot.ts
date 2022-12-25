@@ -40,7 +40,7 @@ namespace zlsSpaceInvader {
 
         makeBullet(){
             if( this.playerFlight.manager ){
-                const b = new PlayerBullet(this.playerFlight.stage, this.unit.bulletColor)
+                const b = new PlayerBullet(this.playerFlight, this.unit.bulletColor)
                 b.pos.copy(this.playerFlight.pos)
                 b.pos.x += this.unit.pos.x
                 b.pos.y -= 6

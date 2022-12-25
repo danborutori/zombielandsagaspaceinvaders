@@ -23,7 +23,7 @@ namespace zlsSpaceInvader {
             readonly clockwise: number
         ){
             super(
-                shooter.stage,
+                shooter,
                 unit.bulletColor
             )
             this.collisionShape = new ColliderLineSegment()

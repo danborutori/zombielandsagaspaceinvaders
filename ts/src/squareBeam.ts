@@ -19,7 +19,7 @@ namespace zlsSpaceInvader {
             shooter: PlayerFlight,
             unit: FlightUnit
         ){
-            super( shooter.stage, unit.bulletColor )
+            super( shooter, unit.bulletColor )
             this.velocity.normalize().multiply(laserSpeed)
             if( shooter.manager ){
                 const es = Array.from(shooter.manager.enemyFlights)

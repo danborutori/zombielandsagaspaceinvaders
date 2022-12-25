@@ -85,15 +85,15 @@ namespace zlsSpaceInvader {
         readonly isPlayerBullet = true
         cancelEnemyBullet = false
         get canHit(){
-            return true
+            return this.shooter.visible
         }
         damage = 1
 
         constructor(
-            stage: Stage,
+            readonly shooter: PlayerFlight,
             color: string
         ){
-            super( stage, color )
+            super( shooter.stage, color )
             this.velocity.set(0, -Constant.bulletSpeed )
         }
 

@@ -6,7 +6,7 @@ namespace zlsSpaceInvader {
     export class Grenade extends EnemyBullet {
         
         private time = 0
-        private playerBullet = false
+        private ntdPlayer?: PlayerFlight
 
         constructor(
             stage: Stage,
@@ -22,7 +22,7 @@ namespace zlsSpaceInvader {
             this.onCollidePlayerBullet = (b, hitPos)=>{
                 this.velocity.y *= -1
                 this.color = b.color
-                this.playerBullet = true
+                this.ntdPlayer = b.shooter
                 this.canHitPlayer = false
                 b.onHitEnemy(hitPos)
                 this.shouldCollidePlayerBullet = ()=>false
@@ -40,9 +40,9 @@ namespace zlsSpaceInvader {
                     for( let i=0; i<8; i++ ){
                         const a = i*Math.PI*2/8+this.phase
                         let b: Bullet
-                        if(this.playerBullet){
+                        if(this.ntdPlayer){
                             b = new PlayerBullet(
-                                this.stage,
+                                this.ntdPlayer,
                                 this.color
                             )
                             b.velocity.set(

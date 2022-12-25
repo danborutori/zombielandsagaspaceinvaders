@@ -11,10 +11,10 @@ namespace zlsSpaceInvader {
         private cooldown = 0
 
         constructor(
-            readonly player: PlayerFlight,
+            player: PlayerFlight,
             readonly unit: FlightUnit
         ){
-            super(player.stage, "#0042FF")
+            super(player, "#0042FF")
             this.damage = 1.5
             this.cancelEnemyBullet = true
 
@@ -53,7 +53,7 @@ namespace zlsSpaceInvader {
         update(deltaTime: number): void {
             super.update(deltaTime)
             this.animation.update( deltaTime )
-            this.pos.add( this.player.pos, this.unit.pos ).sub(laserSpriteCenter)
+            this.pos.add( this.shooter.pos, this.unit.pos ).sub(laserSpriteCenter)
             this.pos.y -= 10
             this.cooldown -= deltaTime
 
