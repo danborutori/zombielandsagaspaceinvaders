@@ -135,7 +135,8 @@ namespace zlsSpaceInvader {
         }
 
         add( units: FlightUnit[] ){
-            const leftMostPos = this.flightUnits.length>0?this.flightUnits[0].pos.x:0
+            const positioningIndex = Math.floor(this.flightUnits.length/2)                
+            const leftMostPos = this.flightUnits[positioningIndex].pos.x
             for( let u of units )
                 this.flightUnits.push( u )
             for( let i=0; i<this.flightUnits.length; i++ ){
@@ -143,7 +144,7 @@ namespace zlsSpaceInvader {
                 u.pos.x = (i-(this.flightUnits.length-1)/2)*9
                 u.pos.y = 0
             }
-            this.pos.x += leftMostPos-this.flightUnits[0].pos.x
+            this.pos.x += leftMostPos-this.flightUnits[positioningIndex].pos.x
             this.poweredShot.assignGun( this )
         }
 
