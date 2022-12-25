@@ -9,6 +9,7 @@ namespace zlsSpaceInvader {
     const rotateSpeed = Math.PI/16
 
     class UFO extends EnemyFlight{
+        hp!: number
 
         constructor(
             scorer: ScoreAndCredit,
@@ -522,6 +523,14 @@ namespace zlsSpaceInvader {
             this.enemies.push( boss )
             gameObjectManager.add( boss )
 
+            const bossHp = new BossProgressMeter(
+                "YU-FO-",
+                ()=>{
+                    return 1-boss.hp/defalutMaxHp
+                }
+            )
+            gameObjectManager.add(bossHp)
+
             const powerupCtx = this.dropPowerUp(scoreAndCredit, gameObjectManager)
             boss.playAttackSequence().then(async ()=>{
                 powerupCtx.stop()
@@ -529,6 +538,7 @@ namespace zlsSpaceInvader {
                 await waiter.wait(5)
                 waiter.removeFromManager()
 
+                bossHp.removeFromManager()
                 this.onWaveEnd()
             })
         }
