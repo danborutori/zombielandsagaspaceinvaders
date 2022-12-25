@@ -149,7 +149,14 @@ namespace zlsSpaceInvader {
 
         remove( index: number ){
             if( this.flightUnits.length>1 ){
-                const positioningUnit = this.flightUnits[index==0?1:0]
+                let positioningIndex = Math.floor(this.flightUnits.length/2)
+                if( positioningIndex==index ){
+                    if( positioningIndex+1<this.flightUnits.length)
+                        positioningIndex++
+                    else
+                        positioningIndex--
+                }
+                const positioningUnit = this.flightUnits[positioningIndex]
                 const leftMostPos = positioningUnit.pos.x
                 knockdownMembers.push( this.flightUnits.splice(index, 1)[0] )
                 for( let i=0; i<this.flightUnits.length; i++ ){
