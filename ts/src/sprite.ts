@@ -57,6 +57,9 @@ namespace zlsSpaceInvader {
         cloud1: "./images/cloud1.png",
         cloud2: "./images/cloud2.png",
         cloud3: "./images/cloud3.png",
+        bossHp: "./images/boss_hp.png",
+        bossHpYellow: "./images/boss_hp_yellow.png",
+        bossHpBorder: "./images/boss_hp_border.png",
     }
 
     function loadImage( img: HTMLImageElement, url: string ){
@@ -127,6 +130,9 @@ namespace zlsSpaceInvader {
             cloud1: new Image,
             cloud2: new Image,
             cloud3: new Image,
+            bossHp: new Image,
+            bossHpYellow: new Image,
+            bossHpBorder: new Image,
         }
 
         load(){

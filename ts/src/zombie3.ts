@@ -22,7 +22,46 @@ namespace zlsSpaceInvader {
     const phase2HpRatio = 0.2
     const totalScore = 10000
 
+    class ProgressCounter extends GameObject {
+
+        progress = 0
+        private semiProgress = 0
+
+        private zombies: {
+            zombie3: Zombie3,
+            defaultHp: number
+        }[] = []
+        
+
+        add( zombie3: Zombie3 ){
+            this.zombies.push({
+                zombie3: zombie3,
+                defaultHp: zombie3.hp
+            })
+            for(let z of this.zombies)z.defaultHp = z.zombie3.hp
+            this.semiProgress = this.progress
+        }
+
+        update( deltaTime: number ){
+            super.update( deltaTime )
+            let p = 0
+            for( let z of this.zombies ){
+                p += 1-z.zombie3.hp/z.defaultHp
+            }
+            p /= this.zombies.length
+            this.progress = this.semiProgress+(1-this.semiProgress)*p
+            console.log( {
+                p: p,
+                semiProgress: this.semiProgress,
+                progress: this.progress
+            })
+        }
+    }
+
     class Zombie3 extends EnemyFlight {
+
+        hp!: number
+
         constructor(
             scorer: ScoreAndCredit,
             maxHp: number = defalutMaxHp,
@@ -55,7 +94,7 @@ namespace zlsSpaceInvader {
         //     super.update(deltaTime*10)
         // }
 
-        async playAttackSequence(enemies: EnemyFlight[]){
+        async playAttackSequence(enemies: EnemyFlight[], progressCounter: ProgressCounter){
             const v = new Vector2
             
             try{
@@ -73,7 +112,7 @@ namespace zlsSpaceInvader {
 
                 await Promise.all([
                     this.phase1(),
-                    this.phase2(enemies)
+                    this.phase2(enemies, progressCounter)
                 ])
 
             }catch(e){
@@ -177,7 +216,7 @@ namespace zlsSpaceInvader {
             }
         }
 
-        async phase2(enemies: EnemyFlight[]){
+        async phase2(enemies: EnemyFlight[], progressCounter: ProgressCounter){
             const v = new Vector2
             
             while( this.hp>defalutMaxHp*phase2HpRatio ){
@@ -201,6 +240,7 @@ namespace zlsSpaceInvader {
                 newZombie3.pos.copy( this.pos )
                 this.manager && this.manager.add( newZombie3 )
                 enemies.push(newZombie3)
+                progressCounter.add( newZombie3 )
 
                 try{
                     await ObjectMotionControl.moveTo(
@@ -303,14 +343,28 @@ namespace zlsSpaceInvader {
             this.enemies.push( boss )
             gameObjectManager.add( boss )
 
+            const progressCounter = new ProgressCounter()
+            progressCounter.add( boss )
+            gameObjectManager.add( progressCounter )
+
+            const bossHp = new BossProgressMeter(
+                "DANCER",
+                ()=>{
+                    return progressCounter.progress
+                }
+            )
+            gameObjectManager.add(bossHp)
+
             const powerupCtx = this.dropPowerUp( scoreAndCredit, gameObjectManager )
-            boss.playAttackSequence(this.enemies).then(async ()=>{
+            boss.playAttackSequence(this.enemies, progressCounter).then(async ()=>{
 
                 powerupCtx.stop()
 
                 await waiter.wait(5)
                 waiter.removeFromManager()
 
+                bossHp.removeFromManager()
+                progressCounter.removeFromManager()
                 this.onWaveEnd()
             })
         }
