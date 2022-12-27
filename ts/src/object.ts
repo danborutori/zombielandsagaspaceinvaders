@@ -104,6 +104,10 @@ namespace zlsSpaceInvader {
             super(sprites[0])
         }
 
+        protected onAnimationEnd(){
+            this.removeFromManager()
+        }
+
         update(deltaTime: number): void {
             super.update(deltaTime)
 
@@ -113,10 +117,10 @@ namespace zlsSpaceInvader {
             if( i<this.sprites.length ){
                 this.sprite = this.sprites[i]
             }else if( this.duration===undefined){
-                this.removeFromManager()
+                this.onAnimationEnd()
             }
             if( this.duration!==undefined && this.time>=this.duration ){
-                this.removeFromManager()
+                this.onAnimationEnd()
             }
         }
     }

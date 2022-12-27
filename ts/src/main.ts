@@ -39,6 +39,8 @@ namespace zlsSpaceInvader {
                 Sprites.shared.load(),
                 Audio.preload()
             ])
+            
+            PlayerBulletSpark.preallocate("white",500)
             this.initGame()
 
             return this
