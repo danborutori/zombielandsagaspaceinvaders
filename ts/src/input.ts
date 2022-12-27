@@ -91,24 +91,32 @@ namespace zlsSpaceInvader {
                 updateButton()
                 e.preventDefault() 
                 e.stopPropagation()               
+            }, {
+                passive: false
             })
             controllerRoot.addEventListener( "touchmove", e=>{
                 touches = e.touches
                 updateButton()
                 e.preventDefault() 
                 e.stopPropagation()               
+            }, {
+                passive: false
             })
             controllerRoot.addEventListener( "touchend", e=>{
                 touches = e.touches
                 updateButton()
                 e.preventDefault()                
                 e.stopPropagation()
+            }, {
+                passive: false
             })
             controllerRoot.addEventListener( "touchcancel", e=>{
                 touches = e.touches
                 updateButton()
                 e.preventDefault()
                 e.stopPropagation()
+            }, {
+                passive: false
             })
         }
 
