@@ -70,14 +70,34 @@ namespace zlsSpaceInvader {
     }
 
     class PlayerBulletSpark extends AnimatedSpriteObject {
-        constructor(
-            color: string
+        private static cache = new Map<string, PlayerBulletSpark[]>()
+
+
+        static create( color: string ){
+            const arr = this.cache.get( color )
+            const s = arr && arr.pop()
+            if( s ){
+                s.time = 0
+                return s
+            }
+            return new PlayerBulletSpark( color )
+        }
+
+        private constructor(
+            readonly color: string
         ){
             super([
                 ColoredSprite.shared.get(color, Sprites.shared.images.heart0),
                 ColoredSprite.shared.get(color, Sprites.shared.images.heart1)
             ],
             0.15)
+        }
+
+        protected onAnimationEnd(): void {
+            super.onAnimationEnd()
+            const arr = PlayerBulletSpark.cache.get(this.color) || []
+            arr.push(this)
+            PlayerBulletSpark.cache.set(this.color, arr)
         }
     }
 
@@ -99,7 +119,7 @@ namespace zlsSpaceInvader {
 
         protected spark( sparkPos?: Vector2 ){
             if( this.manager ){
-                const s = new PlayerBulletSpark(this.color)
+                const s = PlayerBulletSpark.create(this.color)
                 s.pos.copy(sparkPos || this.pos)
                 this.manager.add(s)
             }
@@ -201,7 +221,7 @@ namespace zlsSpaceInvader {
 
         protected onShooterDie(){
             if(this.manager){
-                const s = new PlayerBulletSpark(this.color)
+                const s = PlayerBulletSpark.create(this.color)
                 s.pos.copy(this.pos)
                 this.manager.add(s)
 
