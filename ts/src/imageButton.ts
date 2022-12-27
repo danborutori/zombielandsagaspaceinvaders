@@ -1,18 +1,8 @@
 namespace zlsSpaceInvader {
 
-    function getUrl( src: string ){
-        return new Promise<string>(resolve=>{
-            const img = new Image()
-            img.src = src
-            img.onload = ()=>{
-                const canvas = document.createElement("canvas")
-                canvas.width = img.width
-                canvas.height = img.height
-                const ctx = canvas.getContext("2d")!
-                ctx.drawImage(img,0,0)
-                resolve( canvas.toDataURL("png") )
-            }
-        })
+    async function getUrl( src: string ){
+        const blob = await (await fetch(src)).blob()
+        return URL.createObjectURL(blob)
     }
 
     export class ImageButton{
