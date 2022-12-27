@@ -69,9 +69,16 @@ namespace zlsSpaceInvader {
         }
     }
 
-    class PlayerBulletSpark extends AnimatedSpriteObject {
+    export class PlayerBulletSpark extends AnimatedSpriteObject {
         private static cache = new Map<string, PlayerBulletSpark[]>()
-
+        
+        static preallocate( color: string, count: number ){
+            const arr = PlayerBulletSpark.cache.get( color ) || []
+            for( let i=0; i<count; i++ ){
+                arr.push( new PlayerBulletSpark(color))
+            }
+            PlayerBulletSpark.cache.set( color, arr )
+        }
 
         static create( color: string ){
             const arr = this.cache.get( color )
