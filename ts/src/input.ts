@@ -26,7 +26,12 @@ namespace zlsSpaceInvader {
                     this.fire = true
                     this.pressAnyKey = true
                     break
+                case "ArrowDown":
+                    e.preventDefault()
+                    break
                 }
+            }, {
+                passive: false
             })
             addEventListener("keyup", e=>{
                 switch( e.code ){
