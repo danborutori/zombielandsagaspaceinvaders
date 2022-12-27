@@ -199,11 +199,25 @@ namespace zlsSpaceInvader {
             }
         }
 
+        protected onShooterDie(){
+            if(this.manager){
+                const s = new PlayerBulletSpark(this.color)
+                s.pos.copy(this.pos)
+                this.manager.add(s)
+
+                this.removeFromManager()
+            }
+        }
+
         update(deltaTime: number): void {
             super.update(deltaTime)
 
-            this.collidePlayerBullet()
-            this.hitPlayer()            
+            if( !this.shooter.manager ){
+                this.onShooterDie()
+            }else{
+                this.collidePlayerBullet()
+                this.hitPlayer()            
+            }
         }
     }
 }
