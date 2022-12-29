@@ -91,18 +91,18 @@ In addition, all right of assets borrowed from other creators are belong to thei
 
 ## Acknowledgement
 
-Sound Effect from Classic Gaming.cc
-https://www.classicgaming.cc/classics/space-invaders/sounds
-Sound Effect from Sound FX Center
-http://soundfxcenter.com/sound_effect/search.php?sfx=Galaga
-Capture Beam Sprites from The Sprites Resource
-https://www.spriters-resource.com/arcade/galaga/sheet/26482/
-Shaun105 Laser sound effect, really good for video games.
-https://freesound.org/people/Shaun105/sounds/268168/
-Background Musics 
-* 徒花ネクロマンシー ファミコン風
-* REVENGE ファミコン風
-* ヨミガエレ ファミコン風
-* 大河よ共に泣いてくれ ファミコン風
-by オオノ👾COLON 8BIT MUSIC
+Sound Effect from Classic Gaming.cc<br />
+https://www.classicgaming.cc/classics/space-invaders/sounds<br />
+Sound Effect from Sound FX Center<br />
+http://soundfxcenter.com/sound_effect/search.php?sfx=Galaga<br />
+Capture Beam Sprites from The Sprites Resource<br />
+https://www.spriters-resource.com/arcade/galaga/sheet/26482/<br />
+Shaun105 Laser sound effect, really good for video games.<br />
+https://freesound.org/people/Shaun105/sounds/268168/<br />
+Background Musics<br />
+* 徒花ネクロマンシー ファミコン風<br />
+* REVENGE ファミコン風<br />
+* ヨミガエレ ファミコン風<br />
+* 大河よ共に泣いてくれ ファミコン風<br />
+by オオノ👾COLON 8BIT MUSIC<br />
 https://twitter.com/colon_8bit
