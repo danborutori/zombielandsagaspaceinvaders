@@ -36,6 +36,7 @@ namespace zlsSpaceInvader {
 
 
         private time = 0
+        private canPostScore = false
 
         constructor(){
             super()
@@ -98,30 +99,32 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
-            ctx.save()
-            ctx.translate(0,-50)
-            TextDrawer.shared.drawTextCenteredOutline("ENTER YOU INITIAL:", 0, 0, ctx)
-            ctx.scale(2,2)
-            const displayInitial = Array.from(this.initial)
-            if( Math.floor(this.time/0.1)%2==0 &&
-                this.inputIndex<displayInitial.length
-            )
-                displayInitial[this.inputIndex] = " "
-            TextDrawer.shared.drawTextCenteredOutline(displayInitial.join(), 0, 7, ctx)
-            ctx.translate(-29,0)
-            let cnt = 0
-            for( let i=0; i<keys.length; i++ ){
-                const s = keys[i]
-                for( let j=0; j<s.length; j++ ){
-                    if( this.selectedIndex!=cnt ||
-                        Math.floor(this.time/0.1)%2==0
-                    ){
-                        TextDrawer.shared.drawTextCenteredOutline(s[j], j*10, 21+i*7, ctx)    
+            if( this.canPostScore ){
+                ctx.save()
+                ctx.translate(0,-50)
+                TextDrawer.shared.drawTextCenteredOutline("ENTER YOU INITIAL:", 0, 0, ctx)
+                ctx.scale(2,2)
+                const displayInitial = Array.from(this.initial)
+                if( Math.floor(this.time/0.1)%2==0 &&
+                    this.inputIndex<displayInitial.length
+                )
+                    displayInitial[this.inputIndex] = " "
+                TextDrawer.shared.drawTextCenteredOutline(displayInitial.join(), 0, 7, ctx)
+                ctx.translate(-29,0)
+                let cnt = 0
+                for( let i=0; i<keys.length; i++ ){
+                    const s = keys[i]
+                    for( let j=0; j<s.length; j++ ){
+                        if( this.selectedIndex!=cnt ||
+                            Math.floor(this.time/0.1)%2==0
+                        ){
+                            TextDrawer.shared.drawTextCenteredOutline(s[j], j*10, 21+i*7, ctx)    
+                        }
+                        cnt++
                     }
-                    cnt++
                 }
+                ctx.restore()
             }
-            ctx.restore()
         }
 
         async postScore(
@@ -129,15 +132,15 @@ namespace zlsSpaceInvader {
             wave: number,
             playerFlight: PlayerFlight
         ){
-            let canPostScore = false
+            this.canPostScore = false
             try{
                 const records = await Leaderboard.shared.getRecords()
-                canPostScore = records.length<8 || scorer.score>=records[7].score
+                this.canPostScore = records.length<8 || scorer.score>=records[7].score
             }catch(e){
                 ErrorHandler.handle(e)
             }
 
-            if( canPostScore ){
+            if( this.canPostScore ){
 
                 playerFlight.paused = true
 
