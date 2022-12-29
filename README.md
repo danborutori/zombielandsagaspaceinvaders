@@ -51,6 +51,11 @@ ANMC
 
 ## Version History
 
+* 2.1
+    * add Boss HP Gauge
+    * enemy bullet is cancelled when enemy die
+    * disable page scroll down when down arrow is pushed
+    * other bug fix
 * 2.0
     * enemy shoot bullet
     * leaderboard updated
