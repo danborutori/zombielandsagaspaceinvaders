@@ -51,6 +51,8 @@ ANMC
 
 ## Version History
 
+* 2.2
+    * add add to home screen button
 * 2.1
     * add Boss HP Gauge
     * enemy bullet is cancelled when enemy die

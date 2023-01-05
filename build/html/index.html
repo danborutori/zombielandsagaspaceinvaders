@@ -1,5 +1,5 @@
 <html>
-    <header>
+    <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <meta charset="UTF-8" />
 
@@ -13,6 +13,7 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <link rel="stylesheet" href="./css/style.css">
+        <link rel="manifest" href="./manifest.webmanifest" />
 
         <style>
             @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
@@ -20,7 +21,7 @@
 
         <title>ゾンビランドサガスペースインベーダーズ</title>
         <script src="script/main.js"></script>
-    </header>
+    </head>
     <body style="background-color: black; user-select: none;">
         <center>
             <table>
@@ -82,7 +83,7 @@
                                     <a href="https://twitter.com/lamylanmc" target="_new">@lamylanmc</a><br/>
                                     <a href="https://twitter.com/danborutori" target="_new">@danborutori</a><br/>
                                     <br/>
-                                    v2.1<br/>
+                                    v2.2<br/>
                                 </td>
                             </tr>
                         </table>
@@ -116,6 +117,12 @@
 
         audioButton.onclick = e=>{
             main.onMute(audioButton)
+        }
+
+        try{
+            navigator.serviceWorker.register("./script/serviceworker.js")
+        }catch(_){
+            // do nothing
         }
     </script>
 </html>
