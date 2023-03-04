@@ -51,6 +51,8 @@ ANMC
 
 ## Version History
 
+* 2.3
+    * add easy mode
 * 2.2
     * add add to home screen button
 * 2.1

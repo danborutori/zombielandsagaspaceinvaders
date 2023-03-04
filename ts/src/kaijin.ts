@@ -19,7 +19,33 @@ namespace zlsSpaceInvader {
         pos: new Vector2(-28,-6)
     })
 
-    const defalutMaxHp = 500
+    function getDefaultMaxHp(){
+        switch(DifficultyManager.shared.difficulty){
+        case "normal":
+            return 500
+        case "easy":
+            return 400
+        }
+    }
+
+    function getBulletIntervalScale(){
+        switch(DifficultyManager.shared.difficulty){
+        case "normal":
+            return 1
+        case "easy":
+            return 1.5
+        }
+    }
+
+    function getBulletSegmentScale(){
+        switch(DifficultyManager.shared.difficulty){
+        case "normal":
+            return 1
+        case "easy":
+            return 0.5
+        }
+    }
+
     const phase2HpRatio = 0.2
     const totalScore = 10000
 
@@ -29,7 +55,7 @@ namespace zlsSpaceInvader {
 
         constructor(
             scorer: ScoreAndCredit,
-            maxHp: number = defalutMaxHp,
+            maxHp: number = getDefaultMaxHp(),
             score: number = totalScore/2
         ){
             super(
@@ -146,7 +172,7 @@ namespace zlsSpaceInvader {
             const v1 = new Vector2
 
             try{
-                while( this.hp>=defalutMaxHp*phase2HpRatio){
+                while( this.hp>=getDefaultMaxHp()*phase2HpRatio){
                     await this.wait(0, 1)
                 }
 
@@ -221,10 +247,10 @@ namespace zlsSpaceInvader {
             const shotCtx = FlightShootPatternControl.shoot(
                 this,
                 new IntervalNode(
-                    new ConstantNode(0.05),
+                    new ConstantNode(0.05*getBulletIntervalScale()),
                     new RingNode(
                         new ConstantNode(3),
-                        new ConstantNode(12),
+                        new ConstantNode(12*getBulletSegmentScale()),
                         new EnemyBulletNode(
                             new ConstantNode(new Vector2(0,-20)),
                             undefined,
@@ -242,10 +268,10 @@ namespace zlsSpaceInvader {
                 FlightShootPatternControl.shoot(
                     this,
                     new IntervalNode(
-                        new ConstantNode(0.06),
+                        new ConstantNode(0.06*getBulletIntervalScale()),
                         new RingNode(
                             new ConstantNode(10),
-                            new ConstantNode(6),
+                            new ConstantNode(6*getBulletSegmentScale()),
                             new GrendaeNode(
                                 new ConstantNode(new Vector2(-28,-21)),
                                 undefined,
@@ -262,10 +288,10 @@ namespace zlsSpaceInvader {
                 FlightShootPatternControl.shoot(
                     this,
                     new IntervalNode(
-                        new ConstantNode(0.06),
+                        new ConstantNode(0.06*getBulletIntervalScale()),
                         new RingNode(
                             new ConstantNode(10),
-                            new ConstantNode(6),
+                            new ConstantNode(6*getBulletSegmentScale()),
                             new GrendaeNode(
                                 new ConstantNode(new Vector2(33,8)),
                                 undefined,
@@ -452,7 +478,7 @@ namespace zlsSpaceInvader {
             const bossHp = new BossProgressMeter(
                 "KAIJIN",
                 ()=>{
-                    return 1-boss.hp/defalutMaxHp
+                    return 1-boss.hp/getDefaultMaxHp()
                 }
             )
             gameObjectManager.add(bossHp)

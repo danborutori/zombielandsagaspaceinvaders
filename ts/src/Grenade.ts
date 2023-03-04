@@ -37,8 +37,14 @@ namespace zlsSpaceInvader {
             if( this.manager ){
 
                 if( this.time>1 ){
-                    for( let i=0; i<8; i++ ){
-                        const a = i*Math.PI*2/8+this.phase
+                    let segment = 8
+                    switch(DifficultyManager.shared.difficulty){
+                    case "easy":
+                        segment = 5
+                        break
+                    }
+                    for( let i=0; i<segment; i++ ){
+                        const a = i*Math.PI*2/segment+this.phase
                         let b: Bullet
                         if(this.ntdPlayer){
                             b = new PlayerBullet(

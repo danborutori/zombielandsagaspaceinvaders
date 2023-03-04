@@ -84,11 +84,20 @@ interface LeaderboardRecord {
 
 class Leaderboard{
     static readonly maxRecord = 500
-    static recordsKey = "Leaderboard.records"
+    static recordsKey = {
+        easy: "Leaderboard.records.easy",
+        normal: "Leaderboard.records"
+    }
 
     static shared = new Leaderboard()
 
-    private records:LeaderboardRecord[] = JSON.parse( _localStorage.getItem(Leaderboard.recordsKey) || "[]" )
+    private records:{
+        normal: LeaderboardRecord[]
+        easy: LeaderboardRecord[]
+     } = {
+        easy: JSON.parse( _localStorage.getItem(Leaderboard.recordsKey.easy) || "[]" ),
+        normal: JSON.parse( _localStorage.getItem(Leaderboard.recordsKey.normal) || "[]" )
+     }
 
     handle( request: any, response: any ){
         switch(request.method.toUpperCase()){
@@ -107,11 +116,13 @@ class Leaderboard{
 
             const body = await API.getBody(json)
 
+            const difficulty = body.difficulty || "normal"
             const name = body.name
             const score = body.score
             const wave = body.wave
             const uuid = body.uuid
-            if( typeof(name) == "string" &&
+            if( (difficulty=="easy" || difficulty=="normal") &&
+                typeof(name) == "string" &&
                 typeof(score) == "number" &&
                 typeof(uuid) == "string" &&
                 name.match(/[A-Z]{3}/i) &&
@@ -123,7 +134,7 @@ class Leaderboard{
                     wave: wave,
                     uuid: uuid,
                     time: Date.now()
-                })
+                }, difficulty)
                 response.writeHead(200)
                 response.end(JSON.stringify({state:"OK"}))
             }else{
@@ -133,15 +144,16 @@ class Leaderboard{
         })
     }
 
-    private postRecord( record: LeaderboardRecord ){
-        if( this.records.findIndex( r=>r.uuid==record.uuid )<0 ){ // resubmission check
+    private postRecord( record: LeaderboardRecord, difficulty: "easy" | "normal" ){
+        const records = this.records[difficulty]
+        if( records.findIndex( r=>r.uuid==record.uuid )<0 ){ // resubmission check
 
-            this.records.push( record )
-            this.records.sort((a,b)=>b.score-a.score)
-            if( this.records.length>Leaderboard.maxRecord )
-                this.records.length = Leaderboard.maxRecord
+            records.push( record )
+            records.sort((a,b)=>b.score-a.score)
+            if( records.length>Leaderboard.maxRecord )
+                records.length = Leaderboard.maxRecord
 
-            _localStorage.setItem(Leaderboard.recordsKey, JSON.stringify(this.records))
+            _localStorage.setItem(Leaderboard.recordsKey[difficulty], JSON.stringify(this.records[difficulty]))
         }
     }
 }

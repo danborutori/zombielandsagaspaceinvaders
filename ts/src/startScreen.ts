@@ -1,9 +1,13 @@
 namespace zlsSpaceInvader {
 
+    const difficultyTitle = {
+        normal: "NORMAL",
+        easy: "EASY"
+    }
+
     export class StartScreen extends GameObject {
 
         private time = 0
-
         readonly leaderboard: LeaderboardScreen
 
         constructor(
@@ -21,7 +25,18 @@ namespace zlsSpaceInvader {
             
             this.time += deltaTime
 
-            if( Input.shared.pressAnyKey && this.time>=1 ){
+            if( Input.shared.leftPressed || Input.shared.rightPressed ){
+                switch( DifficultyManager.shared.difficulty ){
+                case "normal":
+                    DifficultyManager.shared.difficulty = "easy"
+                    break
+                case "easy":
+                    DifficultyManager.shared.difficulty = "normal"
+                    break
+                }
+            }
+
+            if( Input.shared.fire && this.time>=1 ){
                 this.onStart()
                 this.removeFromManager()                
                 this.leaderboard.removeFromManager()
@@ -31,8 +46,10 @@ namespace zlsSpaceInvader {
         render(deltaTime: number, ctx: CanvasRenderingContext2D): void {
             super.render( deltaTime, ctx )
 
-            const txt = `PRESS ANY KEY TO START`
-            TextDrawer.shared.drawText( txt, Math.floor(-TextDrawer.shared.measure(txt)/2), 30, ctx)
+            if( DifficultyManager.shared.difficulty!="normal" || Math.floor(this.time/0.2)%2==0)
+                TextDrawer.shared.drawText( difficultyTitle.normal, Math.floor(-TextDrawer.shared.measure(difficultyTitle.normal))-7, 30, ctx)
+            if( DifficultyManager.shared.difficulty!="easy" || Math.floor(this.time/0.2)%2==0)
+                TextDrawer.shared.drawText( difficultyTitle.easy, 7, 30, ctx)
         }
     }
 

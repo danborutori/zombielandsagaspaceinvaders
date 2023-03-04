@@ -1,5 +1,10 @@
 namespace zlsSpaceInvader {
 
+    const difficultyTitle: {[name in Difficulty]: string} = {
+        easy: "EASY",
+        normal: "NORMAL"
+    }
+
     export function addLeadingZero( n: number, length: number ){
         let s = `${n}`
         while( s.length<length ){
@@ -8,7 +13,10 @@ namespace zlsSpaceInvader {
         return s
     }
 
-    const hiScoreItemKey = "hiscore"
+    const hiScoreItemKey = {
+        easy: "hiscore.easy",
+        normal: "hiscore"
+    }
     export const highestScoreDisplay = 999999
 
     export class ScoreAndCredit extends GameObject {
@@ -19,15 +27,18 @@ namespace zlsSpaceInvader {
         }
         set score( n: number ){
             this._score = n
-            this.updateHiScore(n)
+            this.updateHiScore(n, DifficultyManager.shared.difficulty)
             if( this._score>this.nextCredit ){
                 this.credit += 1
                 Audio.play(Audio.sounds.credit)
                 this.nextCredit += 10000
             }
         }
-        private _hiScore = parseInt(localStorage.getItem(hiScoreItemKey) || "0")
-        get hiScore(){
+        private _hiScore = {
+            easy: parseInt(localStorage.getItem(hiScoreItemKey.easy) || "0"),
+            normal: parseInt(localStorage.getItem(hiScoreItemKey.normal) || "0")
+        }
+        private get hiScore(){
             return this._hiScore
         }
         credit = 0
@@ -44,10 +55,10 @@ namespace zlsSpaceInvader {
             this.renderHalf = false
         }
 
-        updateHiScore( score: number ){
-            if( score>this.hiScore ){                    
-                this._hiScore = score
-                localStorage.setItem(hiScoreItemKey,`${this._hiScore}`)
+        updateHiScore( score: number, difficulty: Difficulty ){
+            if( score>this.hiScore[difficulty] ){
+                this._hiScore[difficulty] = score
+                localStorage.setItem(hiScoreItemKey[difficulty],`${this._hiScore[difficulty]}`)
             }
         }
 
@@ -59,8 +70,11 @@ namespace zlsSpaceInvader {
 
             TextDrawer.shared.drawText(`SCORE ${addLeadingZero(Math.min(highestScoreDisplay,this.score),6)}`, Math.floor(-w/2+4), Math.floor(-h/2+9), ctx )
 
-            const hiScoreTxt = `HI-SCORE ${addLeadingZero(Math.min(highestScoreDisplay,this.hiScore),6)}`
+            const hiScoreTxt = `HI-SCORE ${addLeadingZero(Math.min(highestScoreDisplay,this.hiScore[DifficultyManager.shared.difficulty]),6)}`
             TextDrawer.shared.drawText(hiScoreTxt,Math.floor(w/2-2-TextDrawer.shared.measure(hiScoreTxt)), Math.floor(-h/2+9),ctx)
+
+            const diffTxt = difficultyTitle[DifficultyManager.shared.difficulty]
+            TextDrawer.shared.drawText(diffTxt,Math.floor(w/2-2-TextDrawer.shared.measure(diffTxt)), Math.floor(-h/2+2),ctx)
 
             const creditTxt = `CREDIT ${addLeadingZero(Math.min(this.credit,99),2)}`
             TextDrawer.shared.drawText(creditTxt, Math.floor(w/2-2-TextDrawer.shared.measure(creditTxt)), Math.floor(h/2-10), ctx )
