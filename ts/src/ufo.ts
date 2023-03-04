@@ -2,7 +2,32 @@ namespace zlsSpaceInvader {
 
     const v1 = new Vector2
 
-    const defalutMaxHp = 1000
+    function getDefaultMaxHp(){
+        switch(DifficultyManager.shared.difficulty){
+        case "normal":
+            return 1000
+        case "easy":
+            return 900
+        }
+    }
+
+    function getBulletIntervalScale(){
+        switch(DifficultyManager.shared.difficulty){
+        case "normal":
+            return 1
+        case "easy":
+            return 1.5
+        }
+    }
+
+    function getBulletSegmentScale(){
+        switch(DifficultyManager.shared.difficulty){
+        case "normal":
+            return 1
+        case "easy":
+            return 0.5
+        }
+    }
     const epsilon = 0.0001
 
     const collisionShape = new ColliderBox(new Vector2(250,250))
@@ -18,7 +43,7 @@ namespace zlsSpaceInvader {
                 Sprites.shared.images.ufo,
                 scorer,
                 10000,
-                defalutMaxHp
+                getDefaultMaxHp()
             )
             this.collisionShape = collisionShape
             this.rotateStep = 0.0001
@@ -69,7 +94,7 @@ namespace zlsSpaceInvader {
             this.attackPhase1().catch(e=>{
                 // do nothing
             })
-            while( this.hp>defalutMaxHp*3/4 ){
+            while( this.hp>getDefaultMaxHp()*3/4 ){
                 await this.wait(0)
             }
             this.terminateAllWaiting()
@@ -77,7 +102,7 @@ namespace zlsSpaceInvader {
             this.attackPhase2().catch(e=>{
                 // do nothing
             })
-            while( this.hp>defalutMaxHp*2/4 ){
+            while( this.hp>getDefaultMaxHp()*2/4 ){
                 await this.wait(0)
             }
             this.terminateAllWaiting()
@@ -85,7 +110,7 @@ namespace zlsSpaceInvader {
             this.attackPhase3().catch(e=>{
                 // do nothing
             })
-            while( this.hp>defalutMaxHp/4 ){
+            while( this.hp>getDefaultMaxHp()/4 ){
                 await this.wait(0)
             }
             this.terminateAllWaiting()
@@ -108,10 +133,10 @@ namespace zlsSpaceInvader {
             const shotCtx = FlightShootPatternControl.shoot(
                 this,
                 new IntervalNode(
-                    new ConstantNode(interval),
+                    new ConstantNode(interval*getBulletIntervalScale()),
                     new RingNode(
                         new ConstantNode(5),
-                        new ConstantNode(16),
+                        new ConstantNode(16*getBulletSegmentScale()),
                         new EnemyBulletNode(
                             new ConstantNode(shotPos),
                             new SineNode(
@@ -526,7 +551,7 @@ namespace zlsSpaceInvader {
             const bossHp = new BossProgressMeter(
                 "YU-FO-",
                 ()=>{
-                    return 1-boss.hp/defalutMaxHp
+                    return 1-boss.hp/getDefaultMaxHp()
                 }
             )
             gameObjectManager.add(bossHp)
