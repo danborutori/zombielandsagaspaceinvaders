@@ -120,7 +120,10 @@ https.createServer({
 }).listen(portNumber);
 var Leaderboard = /** @class */ (function () {
     function Leaderboard() {
-        this.records = JSON.parse(_localStorage.getItem(Leaderboard.recordsKey) || "[]");
+        this.records = {
+            easy: JSON.parse(_localStorage.getItem(Leaderboard.recordsKey.easy) || "[]"),
+            normal: JSON.parse(_localStorage.getItem(Leaderboard.recordsKey.normal) || "[]")
+        };
     }
     Leaderboard.prototype.handle = function (request, response) {
         switch (request.method.toUpperCase()) {
@@ -136,17 +139,19 @@ var Leaderboard = /** @class */ (function () {
     Leaderboard.prototype.handlePostRecord = function (request, response) {
         var _this = this;
         readJSON(request).then(function (json) { return __awaiter(_this, void 0, void 0, function () {
-            var body, name, score, wave, uuid;
+            var body, difficulty, name, score, wave, uuid;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, API.getBody(json)];
                     case 1:
                         body = _a.sent();
+                        difficulty = body.difficulty || "normal";
                         name = body.name;
                         score = body.score;
                         wave = body.wave;
                         uuid = body.uuid;
-                        if (typeof (name) == "string" &&
+                        if ((difficulty == "easy" || difficulty == "normal") &&
+                            typeof (name) == "string" &&
                             typeof (score) == "number" &&
                             typeof (uuid) == "string" &&
                             name.match(/[A-Z]{3}/i) &&
@@ -157,7 +162,7 @@ var Leaderboard = /** @class */ (function () {
                                 wave: wave,
                                 uuid: uuid,
                                 time: Date.now()
-                            });
+                            }, difficulty);
                             response.writeHead(200);
                             response.end(JSON.stringify({ state: "OK" }));
                         }
@@ -170,17 +175,21 @@ var Leaderboard = /** @class */ (function () {
             });
         }); });
     };
-    Leaderboard.prototype.postRecord = function (record) {
-        if (this.records.findIndex(function (r) { return r.uuid == record.uuid; }) < 0) { // resubmission check
-            this.records.push(record);
-            this.records.sort(function (a, b) { return b.score - a.score; });
-            if (this.records.length > Leaderboard.maxRecord)
-                this.records.length = Leaderboard.maxRecord;
-            _localStorage.setItem(Leaderboard.recordsKey, JSON.stringify(this.records));
+    Leaderboard.prototype.postRecord = function (record, difficulty) {
+        var records = this.records[difficulty];
+        if (records.findIndex(function (r) { return r.uuid == record.uuid; }) < 0) { // resubmission check
+            records.push(record);
+            records.sort(function (a, b) { return b.score - a.score; });
+            if (records.length > Leaderboard.maxRecord)
+                records.length = Leaderboard.maxRecord;
+            _localStorage.setItem(Leaderboard.recordsKey[difficulty], JSON.stringify(this.records[difficulty]));
         }
     };
     Leaderboard.maxRecord = 500;
-    Leaderboard.recordsKey = "Leaderboard.records";
+    Leaderboard.recordsKey = {
+        easy: "Leaderboard.records.easy",
+        normal: "Leaderboard.records"
+    };
     Leaderboard.shared = new Leaderboard();
     return Leaderboard;
 }());
