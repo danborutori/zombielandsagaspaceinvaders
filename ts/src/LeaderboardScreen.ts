@@ -5,7 +5,10 @@ namespace zlsSpaceInvader {
 
     export class LeaderboardScreen extends GameObject {
 
-        private records: LeaderboardRecord[] = []
+        private records: {[name in Difficulty]: LeaderboardRecord[]} = {
+            easy: [],
+            normal: []
+        }
         private time = 0
 
         constructor(
@@ -18,8 +21,10 @@ namespace zlsSpaceInvader {
 
             Leaderboard.shared.getRecords().then(records=>{
                 this.records = records
-                if( this.records.length>0 )
-                    scorer.updateHiScore(this.records[0].score)
+                for( let d in this.records ){
+                    if( this.records[d as Difficulty].length>0 )
+                        scorer.updateHiScore(this.records[d as Difficulty][0].score, d as Difficulty)
+                }
             }).catch(e=>{
                 ErrorHandler.handle(e)
             })
@@ -43,8 +48,9 @@ namespace zlsSpaceInvader {
             TextDrawer.shared.drawTextOutline(headline, -TextDrawer.shared.measure(headline)/2, 0, ctx)
             TextDrawer.shared.drawTextOutline(columns, -TextDrawer.shared.measure(columns)/2, 7, ctx)
             ctx.translate(0,14)
-            for( let i=0, end=Math.min(8,this.records.length); i<end; i++ ){
-                const r = this.records[i]
+            const records = this.records[DifficultyManager.shared.difficulty]
+            for( let i=0, end=Math.min(8,records.length); i<end; i++ ){
+                const r = records[i]
                 const rank = i==0?"1ST":i==1?"2ND":i==2?"3RD":`${i+1}TH`
                 const txt = ` ${rank} ${addLeadingZero(Math.min(highestScoreDisplay,r.score), 6)}  ${addLeadingZero(r.wave || 0, 3)} ${r.name}`
 

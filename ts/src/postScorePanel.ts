@@ -134,7 +134,7 @@ namespace zlsSpaceInvader {
         ){
             this.canPostScore = false
             try{
-                const records = await Leaderboard.shared.getRecords()
+                const records = (await Leaderboard.shared.getRecords())[DifficultyManager.shared.difficulty]
                 this.canPostScore = records.length<8 || scorer.score>=records[7].score
             }catch(e){
                 ErrorHandler.handle(e)
@@ -153,7 +153,7 @@ namespace zlsSpaceInvader {
                 try{
 
                     const int = this.initial.join("")
-                    await Leaderboard.shared.post(int,scorer.score,wave,generateUUID())
+                    await Leaderboard.shared.post(int,scorer.score,wave,generateUUID(), DifficultyManager.shared.difficulty)
 
                 }catch(e){
                     ErrorHandler.handle(e)
